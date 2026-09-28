@@ -9,6 +9,7 @@ import { mailSink, memberships, organizations, users, wallets } from "@/server/d
 import {
   createSession,
   destroySession,
+  getSessionUser,
   hashPassword,
   verifyPassword,
 } from "@/server/auth/session";
@@ -188,8 +189,19 @@ export async function signupAction(_prev: ActionState, formData: FormData): Prom
   redirect("/verify-email?sent=1");
 }
 
+/** Ends the session server-side — the row is deleted, not just the cookie. */
 export async function logoutAction(): Promise<void> {
+  const user = await getSessionUser();
   await destroySession();
+  if (user) {
+    await recordAudit({
+      action: "auth.logout",
+      actorUserId: user.id,
+      actorKind: user.isPlatformAdmin ? "PLATFORM_ADMIN" : "USER",
+      objectType: "user",
+      objectId: user.id,
+    });
+  }
   redirect("/login");
 }
 

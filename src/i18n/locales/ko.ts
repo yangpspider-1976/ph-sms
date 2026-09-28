@@ -70,6 +70,7 @@ export const ko: Dictionary = {
     terms: "이용약관",
     help: "도움말",
     signedInAs: (name: string) => `${name} 님으로 로그인함`,
+    logOut: "로그아웃",
     sidebarPromoTitle: "고객과 계속 연결하세요",
     sidebarPromoBody: "간편하고 안정적인 필리핀 기업용 SMS.",
   },

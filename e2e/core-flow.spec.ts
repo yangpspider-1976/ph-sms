@@ -25,8 +25,8 @@ async function login(page: Page, email: string, password = DEMO_PASSWORD) {
 }
 
 async function logout(page: Page) {
-  // No logout control is built yet; clearing the cookie is equivalent.
-  await page.context().clearCookies();
+  await page.getByRole("button", { name: "Log out" }).click();
+  await expect(page).toHaveURL(/\/login/);
 }
 
 test.describe("core journey", () => {

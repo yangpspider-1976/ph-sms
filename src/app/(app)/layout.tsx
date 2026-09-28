@@ -22,6 +22,7 @@ import { env } from "@/server/env";
 import { getI18n } from "@/i18n/server";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { LogoutButton } from "@/components/logout-button";
 
 function navFor(t: Dictionary): NavItem[] {
   return [
@@ -107,6 +108,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               >
                 <IconUser size={16} />
               </Link>
+
+              <LogoutButton label={t.nav.logOut} />
             </div>
           </div>
         </header>

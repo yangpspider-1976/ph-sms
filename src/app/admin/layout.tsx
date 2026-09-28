@@ -23,6 +23,7 @@ import { requirePlatformAdmin } from "@/server/auth/context";
 import { env } from "@/server/env";
 import { getDictionary } from "@/i18n/server";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { LogoutButton } from "@/components/logout-button";
 
 const NAV: NavItem[] = [
   { href: "/admin", label: "Overview", icon: <IconHome size={18} /> },
@@ -67,7 +68,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               <Wordmark href="/admin" size={26} />
             </div>
 
-            <div className="ml-auto flex items-center gap-3">
+            <div className="ml-auto flex items-center gap-2 sm:gap-3">
               <span className="hidden text-[13px] font-medium text-body sm:block">
                 {formatManilaDate(new Date())}
               </span>
@@ -92,6 +93,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                 <span className="hidden sm:inline">{admin.fullName.split(" ")[0] ?? "Admin"}</span>
                 <IconChevronDown size={13} className="text-muted" />
               </Link>
+
+              <LogoutButton label={t.nav.logOut} />
             </div>
           </div>
         </header>

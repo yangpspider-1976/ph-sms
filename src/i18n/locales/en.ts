@@ -72,6 +72,7 @@ export const en = {
     terms: "Terms",
     help: "Help",
     signedInAs: (name: string) => `Signed in as ${name}`,
+    logOut: "Log out",
     sidebarPromoTitle: "Keep your customers connected",
     sidebarPromoBody: "Simple. Reliable. Business SMS for the Philippines.",
   },
