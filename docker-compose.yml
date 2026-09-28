@@ -1,0 +1,22 @@
+# Primary supported way to run PostgreSQL for this project.
+# On a machine without Docker use `npm run db:dev` instead (see README).
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ph_sms
+      POSTGRES_PASSWORD: ph_sms_dev
+      POSTGRES_DB: ph_sms
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ph_sms -d ph_sms"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  db_data:

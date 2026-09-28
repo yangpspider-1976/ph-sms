@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1789968904266,
+      "tag": "0000_nasty_miss_america",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790145610128,
+      "tag": "0001_loving_whistler",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790231611334,
+      "tag": "0002_many_mattie_franklin",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790231722471,
+      "tag": "0003_wonderful_stryfe",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790231990846,
+      "tag": "0004_rare_dorian_gray",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790232507540,
+      "tag": "0005_fancy_kingpin",
+      "breakpoints": true
+    }
+  ]
+}

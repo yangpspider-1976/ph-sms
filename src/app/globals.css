@@ -1,0 +1,181 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens.
+ *
+ * Clean B2B surface: light background, navy text, blue primary action, with a
+ * teal/green reserved for confirmed states (verified, delivered). Status
+ * colours are never the only signal — every pill carries a text label too.
+ */
+@theme {
+  --color-brand-50: #eef5ff;
+  --color-brand-100: #e0ecfe;
+  --color-brand-200: #c6dbfd;
+  --color-brand-300: #9cc2fb;
+  --color-brand-400: #6aa1f7;
+  --color-brand-500: #3d81f0;
+  --color-brand-600: #1668e3;
+  --color-brand-700: #0f53c0;
+  --color-brand-800: #11459b;
+  --color-brand-900: #133c7b;
+
+  --color-navy-50: #f4f7fb;
+  --color-navy-100: #e6ecf5;
+  --color-navy-200: #cbd8e8;
+  --color-navy-300: #9cb0cc;
+  --color-navy-400: #6a82a6;
+  --color-navy-500: #47618a;
+  --color-navy-600: #2f4970;
+  --color-navy-700: #1d3559;
+  --color-navy-800: #142a4a;
+  --color-navy-900: #0d1f3a;
+  --color-navy-950: #0a1830;
+
+  --color-ink: #0f2244;
+  --color-body: #4a5d78;
+  /* Darkened from #7d8ea6, which measured 3.34:1 on white and failed WCAG AA.
+     This is 5.07:1 on white and 4.81:1 on the canvas background. */
+  --color-muted: #5f7085;
+  --color-line: #e5eaf1;
+  --color-canvas: #f7f9fc;
+
+  --color-teal-100: #d6f5ea;
+  --color-teal-600: #0d9276;
+  --color-teal-700: #0a7a62;
+
+  --color-success-bg: #e4f6ea;
+  --color-success-fg: #15764a;
+  --color-warning-bg: #fdf1de;
+  --color-warning-fg: #9a5a11;
+  --color-danger-bg: #fdeaea;
+  --color-danger-fg: #b02a2a;
+  --color-info-bg: #e8f0fe;
+  --color-info-fg: #1b4fc4;
+  --color-violet-bg: #f0e9fe;
+  --color-violet-fg: #6b3fd4;
+  --color-neutral-bg: #eef1f6;
+  --color-neutral-fg: #55657d;
+
+  --font-sans: Inter, "Segoe UI", ui-sans-serif, system-ui, -apple-system,
+    "Helvetica Neue", Arial, sans-serif;
+
+  --radius-card: 12px;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-body);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: var(--color-ink);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  /* Focus is always visible: keyboard operation is a requirement, not a nicety. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::placeholder {
+    color: var(--color-muted);
+  }
+}
+
+@layer components {
+  .card {
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+    /* Grid and flex children default to min-width:auto, so a card holding a
+       wide table refuses to shrink and pushes the page sideways — the inner
+       scroll container never gets the chance to work. */
+    min-width: 0;
+  }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+
+  /* Data tables: thin rules, tinted header, generous row height. */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+
+  .data-table thead th {
+    background: #f8fafc;
+    color: var(--color-muted);
+    font-weight: 600;
+    text-align: left;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--color-line);
+    border-top: 1px solid var(--color-line);
+    white-space: nowrap;
+  }
+
+  .data-table tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-line);
+    color: var(--color-body);
+    vertical-align: middle;
+  }
+
+  .data-table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .data-table tbody td:first-child {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+
+  .field {
+    width: 100%;
+    border: 1px solid var(--color-line);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 14px;
+    color: var(--color-ink);
+    background: #fff;
+  }
+
+  .field:focus {
+    border-color: var(--color-brand-500);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--color-brand-100);
+  }
+
+  .field-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-ink);
+    margin-bottom: 6px;
+  }
+}
+
+/* The demo banner must stay legible when printed or in high contrast. */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
