@@ -240,7 +240,8 @@ request.
   consumes it)
 - **Security/privacy checklist and dependency inventory**
 - **UAT checklist and final defect report**
-- Staging and production **deployment guide** (README covers local only)
+- Staging and production **deployment guide**: Vercel (Hobby, mock mode) is covered in
+  [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). No staging environment is defined
 
 ### What this does not change
 

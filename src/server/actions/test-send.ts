@@ -7,6 +7,7 @@ import { listTestRecipients, sendTest, TestSendError } from "@/server/domain/tes
 import { checkRateLimit } from "@/server/security/rate-limit";
 import { formatCentavos, MOCK_DEFAULTS } from "@/server/config";
 import { recordAudit } from "@/server/audit";
+import { dispatchAfterResponse } from "@/server/jobs/dispatch-after-response";
 
 /** Test send (MSG-04). A real, charged send to a verified number. */
 
@@ -55,6 +56,7 @@ export async function sendTestAction(raw: unknown): Promise<TestSendActionResult
     });
 
     revalidatePath("/app/campaigns");
+    dispatchAfterResponse();
 
     return {
       ok: true,

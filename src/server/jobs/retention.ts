@@ -1,6 +1,5 @@
-import "@/server/load-env";
 import { and, eq, isNotNull, lt, sql } from "drizzle-orm";
-import { db, client } from "@/server/db";
+import { db } from "@/server/db";
 import {
   auditEvents,
   campaigns,
@@ -136,14 +135,4 @@ export async function redactedCampaignCount(config: AppConfig = MOCK_DEFAULTS): 
     .from(campaigns)
     .where(lt(campaigns.createdAt, cutoff));
   return rows[0]?.n ?? 0;
-}
-
-// Allow running this file directly: `npm run retention`
-if (process.argv[1]?.includes("retention")) {
-  const summary = await runRetention();
-  console.log("retention run complete:");
-  for (const [key, value] of Object.entries(summary)) {
-    console.log(`  ${key}: ${value}`);
-  }
-  await client.end({ timeout: 5 });
 }

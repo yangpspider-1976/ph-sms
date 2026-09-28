@@ -1,0 +1,11 @@
+# Kept out of `vercel deploy` uploads. Git deployments only see committed files,
+# but a CLI deploy from this folder would otherwise send the local database.
+.pgdata/
+.env
+.env.local
+.env.*.local
+test-results/
+playwright-report/
+coverage/
+e2e-run.log
+*.tsbuildinfo

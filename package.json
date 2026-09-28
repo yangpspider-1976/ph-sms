@@ -9,6 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "vercel-build": "node scripts/vercel-build.mjs",
     "worker": "node --conditions=react-server --import tsx src/server/jobs/worker.ts",
     "db:dev": "node scripts/dev-db.mjs start",
     "db:reset": "node scripts/dev-db.mjs reset",
@@ -18,7 +19,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "retention": "node --conditions=react-server --import tsx src/server/jobs/retention.ts",
+    "retention": "node --conditions=react-server --import tsx src/server/jobs/run-retention.ts",
     "e2e": "playwright test",
     "e2e:headed": "playwright test --headed",
     "rotate-keys": "node --conditions=react-server --import tsx src/server/jobs/rotate-keys.ts",
@@ -31,6 +32,9 @@
   "author": "",
   "license": "ISC",
   "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.2",

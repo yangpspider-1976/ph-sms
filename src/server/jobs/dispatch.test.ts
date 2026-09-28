@@ -16,7 +16,13 @@ import { getWallet } from "@/server/domain/wallet";
 import { addSuppression } from "@/server/domain/suppression";
 import { quotaUsage, limitsFor } from "@/server/domain/quota";
 import { MockSmsProvider, type SmsProvider, type SubmissionOutcome } from "@/server/providers/sms";
-import { claimJob, dispatchCampaign, reconcileUnknown, stopCampaign } from "./dispatch";
+import {
+  claimJob,
+  dispatchCampaign,
+  drainDueJobs,
+  reconcileUnknown,
+  stopCampaign,
+} from "./dispatch";
 
 const BODY = "Your order is ready for pickup until 8pm today.";
 
@@ -342,5 +348,48 @@ describe("worker job claiming", () => {
     });
 
     expect(await claimJob("worker-future")).toBeNull();
+  });
+});
+
+describe("draining without a worker process", () => {
+  it("stops between messages at the deadline and leaves the rest for the next claim", async () => {
+    const result = await submit([NUMBERS.ok(1), NUMBERS.ok(2)], "t1");
+
+    const cut = await dispatchCampaign(result.campaignId, { provider, deadline: Date.now() - 1 });
+    expect(cut.attempted).toBe(0);
+
+    // Nothing stranded in SUBMITTING, and the campaign is still open.
+    let items = await itemsOf(result.campaignId);
+    expect(items.every((i) => i.submissionStatus === "PENDING")).toBe(true);
+    const [open] = await db.select().from(campaigns).where(eq(campaigns.id, result.campaignId));
+    expect(open!.status).not.toBe("FINISHED");
+
+    const resumed = await dispatchCampaign(result.campaignId, { provider });
+    expect(resumed.accepted).toBe(2);
+    items = await itemsOf(result.campaignId);
+    expect(items.every((i) => i.submissionStatus === "ACCEPTED")).toBe(true);
+    expect(await chargeCount(result.campaignId)).toBe(2);
+  });
+
+  it("runs every due job and finishes each campaign", async () => {
+    const a = await submit([NUMBERS.ok(1)], "t2");
+    const b = await submit([NUMBERS.ok(2)], "t3");
+
+    expect(await drainDueJobs("drain-test", 30_000)).toBe(2);
+
+    const jobs = await db.select().from(dispatchJobs);
+    expect(jobs.every((j) => j.status === "DONE")).toBe(true);
+    for (const id of [a.campaignId, b.campaignId]) {
+      const [row] = await db.select().from(campaigns).where(eq(campaigns.id, id));
+      expect(row!.status).toBe("FINISHED");
+    }
+  });
+
+  it("claims nothing once its budget is spent", async () => {
+    await submit([NUMBERS.ok(1)], "t4");
+
+    expect(await drainDueJobs("drain-test", 0)).toBe(0);
+    const [job] = await db.select().from(dispatchJobs);
+    expect(job!.status).toBe("PENDING");
   });
 });

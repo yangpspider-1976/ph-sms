@@ -24,6 +24,30 @@ by application code, and only launches a server — the application talks to an 
 concurrency tests untestable. Those tests are a specification requirement, so a real
 multi-connection server won.
 
+## Hosting on Vercel
+
+**Dispatch runs where requests run, not in a worker.** Vercel cannot keep `npm run worker` alive.
+On the Hobby plan its cron runs at most once a day. So dispatch happens in three places, all
+through the worker's own claim, `runNextJob`: right after a send or approval responds (`after()`),
+from `/api/cron/dispatch` every five minutes by GitHub Actions, and from a daily Vercel Cron.
+The lease and `SKIP LOCKED` already made concurrent workers safe, so none of this needed new
+coordination.
+
+**A serverless run stops between messages, not during one.** A function killed after
+`PENDING → SUBMITTING` but before the outcome is written strands that message for an operator.
+`dispatchCampaign` takes a deadline and stops before starting the next message. The rest stay
+`PENDING`, and the job is claimed again when its lease lapses.
+
+**The after-response dispatch is off unless running on Vercel.** Locally, and in the browser
+tests, dispatch is still a separate process. Tests that let the web process send would stop
+showing that the worker works.
+
+**Production builds migrate. Previews do not, unless told their database is their own.** A
+preview built from an unmerged branch must not change the production schema.
+
+**Singapore (`sin1`).** It is the closest Vercel region to Manila with a matching Neon region,
+and the database has to be near the functions more than near the users.
+
 ## Authentication
 
 Password hashing uses `bcryptjs`; sessions are opaque 32-byte random tokens with only their

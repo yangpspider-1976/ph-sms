@@ -14,6 +14,7 @@ Business SMS to Philippine mobile numbers, for verified businesses.
 | [docs/RBAC.md](docs/RBAC.md) | Roles and the permission matrix |
 | [docs/ADAPTER-CONTRACT.md](docs/ADAPTER-CONTRACT.md) | What the SMS partner and payment provider must supply |
 | [docs/RUNBOOK.md](docs/RUNBOOK.md) | Daily checks, reconciliation, incidents, restore |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Deploying to Vercel, and what the Hobby plan costs |
 | [docs/TEST-REPORT.md](docs/TEST-REPORT.md) | What is tested, and what is not |
 | [docs/LIVE-READINESS.md](docs/LIVE-READINESS.md) | What must be true before going live |
 
@@ -203,6 +204,12 @@ Two things the job cannot do, both found by rehearsing the restore:
 That is what `npm run export-suppressions` is for: a journal held outside the
 database, re-applied with `npm run import-suppressions` after a restore. The
 full procedure is in [docs/RUNBOOK.md](docs/RUNBOOK.md).
+
+## Deploying
+
+Vercel, step by step: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Vercel cannot keep `npm run worker`
+running, so there dispatch runs right after a send and from `/api/cron/dispatch` on a schedule.
+Retention runs from `/api/cron/retention`. Production builds apply migrations first.
 
 ## Before going live
 

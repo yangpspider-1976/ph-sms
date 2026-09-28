@@ -6,6 +6,7 @@ import { authorize } from "@/server/auth/context";
 import { issueQuote, QuoteError } from "@/server/domain/quote";
 import { submitCampaign, SubmitError } from "@/server/domain/submit";
 import { stopCampaign } from "@/server/jobs/dispatch";
+import { dispatchAfterResponse } from "@/server/jobs/dispatch-after-response";
 import { getWallet } from "@/server/domain/wallet";
 import { maskNormalized } from "@/server/domain/phone";
 import { formatCentavos } from "@/server/config";
@@ -169,6 +170,7 @@ export async function confirmSendAction(raw: unknown): Promise<ConfirmResult> {
 
     revalidatePath("/app/campaigns");
     revalidatePath("/app/dashboard");
+    dispatchAfterResponse();
 
     return {
       ok: true,

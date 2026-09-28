@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { authorize } from "@/server/auth/context";
 import { approveCampaign, rejectCampaign, ApprovalError } from "@/server/domain/approval";
+import { dispatchAfterResponse } from "@/server/jobs/dispatch-after-response";
 
 export type ApprovalResult = { ok: boolean; message: string };
 
@@ -31,6 +32,7 @@ export async function approveCampaignAction(campaignId: string): Promise<Approva
 
     revalidatePath("/app/campaigns");
     revalidatePath("/app/approvals");
+    dispatchAfterResponse();
 
     return {
       ok: true,

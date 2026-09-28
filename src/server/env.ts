@@ -54,6 +54,24 @@ const schema = z.object({
   SMTP_FROM: z.string().default(""),
   /** Used to turn a relative link into an absolute one in outgoing mail. */
   APP_BASE_URL: z.string().default("http://localhost:3000"),
+
+  /**
+   * Bearer secret the scheduler must present to `/api/cron/*`. Vercel Cron
+   * sends it automatically once set. Unset means those endpoints refuse
+   * everything.
+   */
+  CRON_SECRET: z.string().default(""),
+  /**
+   * Dispatch due jobs from the web process after a send's response has gone,
+   * for hosts that cannot run `npm run worker`. Unset, it is on under Vercel
+   * and off elsewhere, so a local run still exercises the worker as its own
+   * process.
+   */
+  DISPATCH_AFTER_RESPONSE: z.preprocess(
+    (v) =>
+      typeof v === "string" && v.trim() !== "" ? v.trim() : process.env.VERCEL ? "true" : "false",
+    z.enum(["true", "false"]).transform((v) => v === "true"),
+  ),
 });
 
 const parsed = schema.safeParse(process.env);

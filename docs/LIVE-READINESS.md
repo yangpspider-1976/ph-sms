@@ -39,6 +39,9 @@ handful of failed attempts lock out every user.
 strips any value the client sent, so the address cannot be spoofed to evade or to frame another
 client. The per-account limits work regardless and are unaffected by this.
 
+On Vercel this is met without configuration: Vercel overwrites `x-forwarded-for` with the client
+address rather than appending to what the client sent. Verify it once in the deployed environment.
+
 
 ## Blocking — commercial
 
@@ -72,7 +75,10 @@ with plausible text.
       development tool only and is not a production database
 - [ ] **Durable worker hosting, separate from the web process.** Without a
       running worker, campaigns are accepted and funds are held but nothing is
-      ever sent
+      ever sent. The Vercel Hobby setup in [DEPLOYMENT.md](DEPLOYMENT.md)
+      covers a demo only, because its scheduled sends depend on a best-effort
+      GitHub schedule. Live needs Vercel Pro's per-minute cron or a real worker
+      process
 - [ ] `SUPPRESSION_HMAC_KEY` and `DATA_ENCRYPTION_KEY` generated and stored in a
       secret manager, never in the repository
 - [ ] `PAYMENT_MERCHANT_ID` set to the real merchant, not the demo placeholder

@@ -87,6 +87,60 @@ export async function claimJob(
 }
 
 /**
+ * Claims one due job and dispatches it. Returns false when nothing was due.
+ *
+ * Shared by the long-running worker and the serverless drain, so a failed
+ * dispatch releases its lease the same way whichever of them picked it up.
+ */
+export async function runNextJob(
+  workerId: string,
+  options: { deadline?: number } = {},
+): Promise<boolean> {
+  const job = await claimJob(workerId, MOCK_DEFAULTS);
+  if (!job) return false;
+
+  try {
+    const summary = await dispatchCampaign(job.campaignId, { deadline: options.deadline });
+    console.log(
+      `[worker ${workerId}] campaign=${job.campaignId} attempted=${summary.attempted} ` +
+        `accepted=${summary.accepted} rejected=${summary.rejected} unknown=${summary.unknown} ` +
+        `excluded=${summary.excluded}${summary.paused ? ` paused=${summary.pauseReason}` : ""}`,
+    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`[worker ${workerId}] campaign=${job.campaignId} failed: ${message}`);
+
+    // Release the lease so another attempt can pick it up, up to the limit.
+    await db
+      .update(dispatchJobs)
+      .set({
+        status: job.attempts >= MOCK_DEFAULTS.maxDispatchAttempts ? "FAILED" : "PENDING",
+        leaseOwner: null,
+        leaseExpiresAt: null,
+        lastError: message.slice(0, 500),
+        updatedAt: new Date(),
+      })
+      .where(eq(dispatchJobs.id, job.id));
+  }
+  return true;
+}
+
+/**
+ * Runs due jobs until none are left or `budgetMs` has passed, and returns how
+ * many it ran.
+ *
+ * For hosts that cannot keep `npm run worker` running. The budget is checked
+ * between jobs and between messages, so a run with a platform time limit stops
+ * cleanly inside it instead of being killed partway through a submission.
+ */
+export async function drainDueJobs(workerId: string, budgetMs: number): Promise<number> {
+  const deadline = Date.now() + budgetMs;
+  let ran = 0;
+  while (Date.now() < deadline && (await runNextJob(workerId, { deadline }))) ran += 1;
+  return ran;
+}
+
+/**
  * Runs one campaign's dispatch.
  *
  * Each message is its own transaction: one bad recipient cannot roll back the
@@ -95,7 +149,7 @@ export async function claimJob(
  */
 export async function dispatchCampaign(
   campaignId: string,
-  options: { provider?: SmsProvider; config?: AppConfig } = {},
+  options: { provider?: SmsProvider; config?: AppConfig; deadline?: number } = {},
 ): Promise<DispatchSummary> {
   const config = options.config ?? MOCK_DEFAULTS;
   const provider = options.provider ?? getSmsProvider();
@@ -158,6 +212,11 @@ export async function dispatchCampaign(
   )[0];
 
   for (const item of pending) {
+    // Out of time: stop between messages, never inside one. A run killed after
+    // PENDING -> SUBMITTING strands that message for an operator; stopping here
+    // leaves the rest PENDING, and the job is claimed again once its lease lapses.
+    if (options.deadline !== undefined && Date.now() >= options.deadline) break;
+
     // A stop issued while we were working takes effect from here on.
     const current = (
       await db

@@ -36,6 +36,11 @@ npm run retention  # scheduled, daily
 Several workers can run at once. They claim jobs with `FOR UPDATE SKIP LOCKED`,
 so they take different work rather than colliding.
 
+**On Vercel** neither process exists. Dispatch runs right after a send, and
+from `/api/cron/dispatch` on a schedule. Retention runs from
+`/api/cron/retention`. See [DEPLOYMENT.md](DEPLOYMENT.md), including how late
+scheduled sends run on the Hobby plan.
+
 ## Reconciling UNKNOWN submissions
 
 An `UNKNOWN` submission means the connection dropped after the request left us.
@@ -184,7 +189,9 @@ is configured.
 ## Incident response
 
 1. **Contain.** To stop all sending immediately, stop the worker processes.
-   Campaigns stay queued and holds stay in place; nothing is lost.
+   Campaigns stay queued and holds stay in place; nothing is lost. On Vercel
+   there is no process to stop: follow *Stopping all sending* in
+   [DEPLOYMENT.md](DEPLOYMENT.md), which needs a redeploy.
 2. **Assess.** `/admin/audit` and `/admin/activity`. The audit log records
    approvals, sends, stops, wallet movements, exports, suppression and policy
    changes.

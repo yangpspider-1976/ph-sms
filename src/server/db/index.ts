@@ -1,6 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
+import { forPostgresJs } from "./url";
 
 /**
  * One pooled client per process. Next.js dev reloads modules, so the client is
@@ -13,7 +14,7 @@ const globalForDb = globalThis as unknown as {
 function connectionString(): string {
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error("DATABASE_URL is not set");
-  return url;
+  return forPostgresJs(url);
 }
 
 export const client =
