@@ -68,6 +68,7 @@ export function TestSendPanel({
 
   return (
     <div className="rounded-[10px] border border-line bg-navy-50 px-4 py-3.5">
+      <p className="mb-2 text-[13px] font-semibold text-ink">{t.send.testSendTitle}</p>
       <div className="flex flex-wrap items-end gap-3">
         <div className="min-w-0 flex-1">
           <label className="field-label" htmlFor="test-recipient">

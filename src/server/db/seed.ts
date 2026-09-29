@@ -81,6 +81,9 @@ async function main() {
         "mail_sink",
         "inquiries",
         "idempotency_keys",
+        // Otherwise a reseed keeps old counters, and a few browser-suite runs in
+        // an hour use up the signup limit and lock the next run out.
+        "rate_limit_hits",
         "verification_tokens",
         "sessions",
         "memberships",

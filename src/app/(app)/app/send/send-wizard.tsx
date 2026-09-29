@@ -752,6 +752,18 @@ function ReviewPanel({
         </p>
       )}
 
+      {/* Said before confirming, not discovered afterwards on the campaign page. */}
+      {quote.requiresApproval ? (
+        <div className="mt-4">
+          <Notice tone="warning" title={t.send.approvalNeededTitle}>
+            {t.send.approvalNeededBody}
+            {quote.approvalReason ? (
+              <span className="mt-1 block">{quote.approvalReason}</span>
+            ) : null}
+          </Notice>
+        </div>
+      ) : null}
+
       {quote.sufficientFunds ? null : (
         <div className="mt-4">
           <Notice tone="danger" title={t.send.notEnoughCredit}>

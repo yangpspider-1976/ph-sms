@@ -236,6 +236,11 @@ export const en = {
       `${sender} · ${recipients} recipients · ${reserved} reserved · submitted ${submitted}`,
     scheduledNote: (when: string) =>
       `Scheduled for ${when} (Asia/Manila). Approving keeps that time.`,
+    approvedNotice: (name: string) => `${name}: approved. It has been queued for sending.`,
+    approvedScheduledNotice: (name: string, when: string) =>
+      `${name}: approved. It will send at the scheduled time, ${when} (Asia/Manila).`,
+    rejectedNotice: (name: string) =>
+      `${name}: rejected. Nothing was sent and the reserved credit has been returned.`,
   },
 
   contacts: {
@@ -329,7 +334,7 @@ export const en = {
       colReason: "Reason",
       columnMappingTitle: "How your columns were read",
       ignoredNote: "Columns marked ignored are left out of the import. Nothing in them is stored.",
-      importButton: (n: number) => `Import ${n} contacts`,
+      importButton: (n: number) => `Import ${n} contact${n === 1 ? "" : "s"}`,
       importing: "Importing\u2026",
       downloadExcluded: (n: number) => `Download the ${n} excluded row${n === 1 ? "" : "s"}`,
       recheckNote:
@@ -390,7 +395,10 @@ export const en = {
   contactsExtra: {
     csvNote: "CSV only, UTF-8, with a",
     csvNoteColumn: "column.",
-    fileLimits: "Up to 5 MiB and 10,000 rows. Numbers are validated for format only.",
+    fileLimits: (mib: number, rows: string) =>
+      `Up to ${mib} MiB and ${rows} rows. Numbers are validated for format only.`,
+    fileTooLarge: (mib: number) => `That file is larger than the ${mib} MiB limit.`,
+    uploadFailed: "The file could not be uploaded. Check your connection and try again.",
     colRow: "Row",
     countEligible: (n: number) => `${n} eligible`,
     countDuplicate: (n: number) => `${n} duplicate`,
@@ -426,9 +434,9 @@ export const en = {
     templateHint: "Use our CSV template to ensure the correct format.",
     fileUnreadable: "That file could not be read",
     removeFile: "Remove file",
-    rowsReadPreview: (n: number) => `${n} rows read \u2022 preview only`,
+    rowsReadPreview: (n: number) => `${n} row${n === 1 ? "" : "s"} read \u2022 preview only`,
     validCount: (n: number) => `${n} valid`,
-    duplicatesRemoved: (n: number) => `${n} duplicates removed`,
+    duplicatesRemoved: (n: number) => `${n} duplicate${n === 1 ? "" : "s"} removed`,
     invalidCount: (n: number) => `${n} invalid`,
     noGroupsTitle: "You have no groups yet",
     noGroupsBodyBefore: "Groups are saved audiences.",
@@ -501,8 +509,11 @@ export const en = {
     notEnoughCreditBody: (needed: string, available: string) =>
       `This send needs ${needed} but only ${available} is available.`,
     submitting: "Submitting\u2026",
-    scheduleN: (n: number) => `Schedule ${n} messages`,
-    sendN: (n: number) => `Send ${n} messages`,
+    scheduleN: (n: number) => `Schedule ${n} message${n === 1 ? "" : "s"}`,
+    sendN: (n: number) => `Send ${n} message${n === 1 ? "" : "s"}`,
+    approvalNeededTitle: "This message needs approval before it is sent",
+    approvalNeededBody:
+      "Confirming reserves the funds and holds the campaign until an Owner or Approver releases it. Nothing is sent before then.",
     cannotRecall: "Once handed to the provider a message cannot be recalled.",
     quoteExpired: "This quote has expired",
     quoteExpiredBody: "Price it again before sending.",
@@ -911,6 +922,9 @@ export const en = {
     heading: "Verify your email",
     checkInbox: "Check your inbox",
     mailSink: "Local mail sink (demo)",
+    openVerificationLink: "Open verification link",
+    openInvitationLink: "Open invitation link",
+    openLink: "Open link",
   },
 
   invite: {
@@ -1196,6 +1210,8 @@ export const en = {
       noDecisionsTitle: "No decisions yet",
       noDecisionsBody: "Approvals, suspensions and rejections appear here.",
       colBusiness: "Business",
+      recordedTitle: "Recorded",
+      recordedBody: (name: string, status: string) => `${name} is now ${status}.`,
     },
 
     inquiries: {

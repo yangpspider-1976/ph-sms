@@ -17,7 +17,7 @@ import {
   Pill,
 } from "@/components/ui";
 import { IconDocument, IconFile } from "@/components/icons";
-import { useT } from "@/i18n/client";
+import { useLocale, useT } from "@/i18n/client";
 
 /**
  * CSV import.
@@ -25,8 +25,16 @@ import { useT } from "@/i18n/client";
  * Upload produces a preview with a per-row reason for every exclusion; nothing
  * reaches the contact list until the customer confirms what they are looking at.
  */
-export function ImportPanel() {
+export function ImportPanel({
+  maxUploadBytes,
+  maxDataRows,
+}: {
+  maxUploadBytes: number;
+  maxDataRows: number;
+}) {
   const t = useT();
+  const { tag } = useLocale();
+  const maxMiB = Math.round(maxUploadBytes / 1024 / 1024);
 
   const [result, setResult] = useState<ImportActionResult | null>(null);
   const [preview, setPreview] = useState<ImportPreview | null>(null);
@@ -38,8 +46,26 @@ export function ImportPanel() {
 
   function upload(formData: FormData) {
     setCommitted(null);
+
+    // Checked here as well as on the server: a body over the platform's request
+    // limit is refused before the action runs, so the server check never gets
+    // the chance to explain itself.
+    const file = formData.get("file");
+    if (file instanceof File && file.size > maxUploadBytes) {
+      setResult({ ok: false, message: t.contactsExtra.fileTooLarge(maxMiB), code: "TOO_LARGE" });
+      setPreview(null);
+      return;
+    }
+
     startTransition(async () => {
-      const outcome = await uploadContactsAction(formData);
+      let outcome: ImportActionResult;
+      try {
+        outcome = await uploadContactsAction(formData);
+      } catch {
+        // A rejected request (network, or a proxy refusing the body) would
+        // otherwise replace the whole page with an error screen.
+        outcome = { ok: false, message: t.contactsExtra.uploadFailed, code: "UPLOAD_FAILED" };
+      }
       setResult(outcome);
       setPreview(outcome.ok ? outcome.preview : null);
       setNeedsAcknowledge(!outcome.ok && outcome.code === "UNKNOWN_COLUMNS");
@@ -86,7 +112,7 @@ export function ImportPanel() {
           <span>
             <span className="block text-[13.5px] font-semibold text-ink">{t.contacts.importPanel.chooseFile}</span>
             <span className="block text-[12.5px] text-muted">
-              {t.contactsExtra.fileLimits}
+              {t.contactsExtra.fileLimits(maxMiB, maxDataRows.toLocaleString(tag))}
             </span>
           </span>
           <input

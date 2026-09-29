@@ -130,11 +130,12 @@ These are accepted for a demo. They are not acceptable for a live service.
 - **The health check reports the worker as failing between runs.**
   `dispatch_worker` fails once a due job has waited 120 seconds, which is
   routine here. Do not page on it on Hobby.
-- **Uploads are limited to 1 MB.** Contact imports go through a server action,
-  and Next.js limits those to 1 MB unless `serverActions.bodySizeLimit` is
-  raised. This was already true locally, below the 5 MiB the import screen
-  advertises. Vercel would stop at 4.5 MB regardless, so reaching the full cap
-  needs uploads to go directly to object storage.
+- **Uploads are limited to 4 MiB.** Contact imports go through a server action,
+  and Vercel refuses a request body over 4.5 MB before the app sees it. The
+  import cap is 4 MiB (the 10,000-row cap is usually reached first) and
+  `serverActions.bodySizeLimit` in `next.config.ts` is raised to match — Next.js
+  would otherwise stop at 1 MB. Anything larger needs uploads to go directly to
+  object storage.
 - **Hobby is for non-commercial use** under Vercel's terms.
 
 ## Stopping all sending

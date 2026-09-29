@@ -58,7 +58,9 @@ export const configSchema = z.object({
 export type AppConfig = z.infer<typeof configSchema>;
 
 export const MOCK_DEFAULTS: AppConfig = {
-  maxUploadBytes: 5 * 1024 * 1024, // 5 MiB
+  // 4 MiB, not the 5 MiB first specified: Vercel rejects a request body over
+  // 4.5 MB before it reaches the app, so a larger cap could not be honoured there.
+  maxUploadBytes: 4 * 1024 * 1024,
   maxDataRows: 10_000, // excluding header
   maxFieldLength: 500,
   maxNameLength: 100,

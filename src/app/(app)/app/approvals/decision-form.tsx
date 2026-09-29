@@ -28,33 +28,28 @@ export function ApprovalDecision({
 
   const blockedBySeparation = isOwnWork && !canSelfApprove;
 
-  function approve() {
-    startTransition(async () => {
-      const outcome = await approveCampaignAction(campaignId);
+  // A decided campaign leaves the queue, taking this form and any notice in it
+  // along with it — so on success the page states the outcome instead.
+  function settle(outcome: ApprovalResult) {
+    if (outcome.ok) {
+      setResult(null);
+      router.replace(`/app/approvals?decided=${campaignId}`);
+    } else {
       setResult(outcome);
-      if (outcome.ok) router.refresh();
-    });
+    }
+  }
+
+  function approve() {
+    startTransition(async () => settle(await approveCampaignAction(campaignId)));
   }
 
   function reject(formData: FormData) {
-    startTransition(async () => {
-      const outcome = await rejectCampaignAction(formData);
-      setResult(outcome);
-      if (outcome.ok) router.refresh();
-    });
-  }
-
-  if (result?.ok) {
-    return (
-      <Notice tone="success" title={t.approvals.decisionRecorded}>
-        {result.message}
-      </Notice>
-    );
+    startTransition(async () => settle(await rejectCampaignAction(formData)));
   }
 
   return (
     <div className="space-y-3">
-      {result && !result.ok ? (
+      {result ? (
         <Notice tone="danger" title={t.approvals.notRecorded}>
           {result.message}
         </Notice>

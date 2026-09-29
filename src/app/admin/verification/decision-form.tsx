@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { decideVerificationAction, type AdminResult } from "@/server/actions/admin";
 import { Button, Input, Notice, Select } from "@/components/ui";
+import { useT } from "@/i18n/client";
 
 const OPTIONS = [
   { value: "ACTIVE", label: "Approve" },
@@ -25,6 +26,8 @@ export function VerificationDecision({
   organizationId: string;
   name: string;
 }) {
+  const t = useT();
+
   const [decision, setDecision] = useState<string>("ACTIVE");
   const [result, setResult] = useState<AdminResult | null>(null);
   const [pending, startTransition] = useTransition();
@@ -35,8 +38,14 @@ export function VerificationDecision({
   function submit(formData: FormData) {
     startTransition(async () => {
       const outcome = await decideVerificationAction(formData);
-      setResult(outcome);
-      if (outcome.ok) router.refresh();
+      if (outcome.ok) {
+        // A decided business usually leaves the queue, taking this form and any
+        // notice in it along with it — so the page states the outcome instead.
+        setResult(null);
+        router.replace(`/admin/verification?decided=${organizationId}`);
+      } else {
+        setResult(outcome);
+      }
     });
   }
 
@@ -79,13 +88,15 @@ export function VerificationDecision({
           />
         </div>
 
+        {/* The whole name: testers sharing the demo register look-alike
+            businesses, and a first word alone left several identical buttons. */}
         <Button type="submit" disabled={pending}>
-          {pending ? "Saving…" : `Record for ${name.split(" ")[0]}`}
+          <span className="whitespace-normal">{pending ? "Saving…" : `Record for ${name}`}</span>
         </Button>
       </div>
 
       {result ? (
-        <Notice tone={result.ok ? "success" : "danger"} title={result.ok ? "Recorded" : "Not recorded"}>
+        <Notice tone="danger" title={t.common.notRecorded}>
           {result.message}
         </Notice>
       ) : null}

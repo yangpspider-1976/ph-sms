@@ -3,6 +3,7 @@ import { requireOrgContext } from "@/server/auth/context";
 import { countContacts, listContacts, listImports } from "@/server/domain/contacts";
 import { listGroups } from "@/server/domain/groups";
 import { listOrganizationSuppressions } from "@/server/domain/suppression";
+import { getEffectiveConfig } from "@/server/domain/app-config";
 import { formatManila } from "@/server/config";
 import {
   ButtonLink,
@@ -27,12 +28,13 @@ export default async function ContactsPage() {
   const ctx = await requireOrgContext();
   const orgId = ctx.org.organizationId;
 
-  const [rows, total, recentImports, optOuts, groups] = await Promise.all([
+  const [rows, total, recentImports, optOuts, groups, config] = await Promise.all([
     listContacts(orgId, 50),
     countContacts(orgId),
     listImports(orgId, 5),
     listOrganizationSuppressions(orgId, 5),
     listGroups(orgId),
+    getEffectiveConfig(),
   ]);
 
   return (
@@ -65,7 +67,7 @@ export default async function ContactsPage() {
 
       {ctx.can("contacts.manage") ? (
         <div className="mt-5">
-          <ImportPanel />
+          <ImportPanel maxUploadBytes={config.maxUploadBytes} maxDataRows={config.maxDataRows} />
         </div>
       ) : null}
 

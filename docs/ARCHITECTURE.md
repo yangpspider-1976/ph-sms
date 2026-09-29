@@ -166,6 +166,6 @@ page; `LIVE` excludes all of them and the actions behind them refuse to run.
   tenant would want them produced by the worker and fetched from object storage.
 - **The mail sink is a database table.** Real delivery is a separate integration.
 - **No object storage.** Uploaded CSVs are encrypted into a column. That is
-  reasonable at a 5 MiB cap and would not be at a larger one.
+  reasonable at a 4 MiB cap and would not be at a larger one.
 - **Restoring a backup can resurrect deleted data.** The retention job cannot fix
   this; see [RUNBOOK.md](RUNBOOK.md).

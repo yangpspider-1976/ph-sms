@@ -1,4 +1,4 @@
-import { desc, inArray } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/server/db";
 import { organizations } from "@/server/db/schema";
 import { requirePlatformAdmin } from "@/server/auth/context";
@@ -8,6 +8,7 @@ import {
   CardHeader,
   DataTable,
   EmptyState,
+  Notice,
   PageHeader,
   Pill,
   type Tone,
@@ -27,10 +28,30 @@ const TONE: Record<string, Tone> = {
   REJECTED: "neutral",
 };
 
-export default async function VerificationPage() {
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export default async function VerificationPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ decided?: string }>;
+}) {
   const t = await getDictionary();
 
   await requirePlatformAdmin();
+
+  // Set after a decision is recorded. Read back from the database rather than
+  // echoed from the form, so the notice states what is actually stored.
+  const { decided: decidedId } = await searchParams;
+  const justDecided =
+    decidedId && UUID.test(decidedId)
+      ? (
+          await db
+            .select({ name: organizations.name, status: organizations.status })
+            .from(organizations)
+            .where(eq(organizations.id, decidedId))
+            .limit(1)
+        )[0]
+      : undefined;
 
   const queue = await db
     .select()
@@ -51,6 +72,14 @@ export default async function VerificationPage() {
         title={t.admin.verification.title}
         description={t.admin.verification.subheading}
       />
+
+      {justDecided ? (
+        <div className="mb-5 max-w-3xl">
+          <Notice tone="success" title={t.admin.verification.recordedTitle}>
+            {t.admin.verification.recordedBody(justDecided.name, t.status.org[justDecided.status])}
+          </Notice>
+        </div>
+      ) : null}
 
       <Card>
         <CardHeader

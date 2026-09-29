@@ -6,6 +6,7 @@ import { mailSink } from "@/server/db/schema";
 import { desc } from "drizzle-orm";
 import { demoFeaturesEnabled } from "@/server/env";
 import { getDictionary } from "@/i18n/server";
+import type { Dictionary } from "@/i18n/dictionaries";
 
 export const metadata = { title: "Verify your email" };
 
@@ -52,6 +53,14 @@ export default async function VerifyEmailPage({
   );
 }
 
+/** Names a sink link by where it leads, so an invitation is not called a verification. */
+function linkLabel(link: string, t: Dictionary): string {
+  const path = new URL(link, "http://sink.invalid").pathname;
+  if (path === "/verify-email") return t.verifyEmail.openVerificationLink;
+  if (path === "/invite") return t.verifyEmail.openInvitationLink;
+  return t.verifyEmail.openLink;
+}
+
 /** Local mail sink: in mock mode no email is actually delivered anywhere. */
 async function MailSinkPanel() {
   const t = await getDictionary();
@@ -71,7 +80,7 @@ async function MailSinkPanel() {
             <span className="block text-muted">to {mail.toEmail}</span>
             {mail.link ? (
               <Link href={mail.link} className="font-semibold text-brand-700 hover:underline">
-                Open verification link
+                {linkLabel(mail.link, t)}
               </Link>
             ) : null}
           </li>

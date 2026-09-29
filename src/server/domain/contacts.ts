@@ -17,6 +17,9 @@ import { recordAudit } from "@/server/audit";
  * customer cannot clear opt-outs by deleting and re-importing a list.
  */
 
+/** Preview rows per INSERT: 14 columns each keeps a batch far under 65,534 parameters. */
+const IMPORT_ROW_BATCH = 1_000;
+
 export type ImportPreview = {
   importId: string;
   counts: {
@@ -140,7 +143,11 @@ export async function createImport(input: {
       };
     });
 
-    if (rows.length > 0) await tx.insert(importRows).values(rows);
+    // Batched: every column is a bind parameter, and PostgreSQL allows 65,534
+    // per statement — one INSERT for a file near the row cap exceeds that.
+    for (let i = 0; i < rows.length; i += IMPORT_ROW_BATCH) {
+      await tx.insert(importRows).values(rows.slice(i, i + IMPORT_ROW_BATCH));
+    }
 
     await tx
       .update(imports)

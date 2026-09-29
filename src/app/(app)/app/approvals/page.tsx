@@ -1,3 +1,6 @@
+import { and, eq } from "drizzle-orm";
+import { db } from "@/server/db";
+import { campaigns } from "@/server/db/schema";
 import { requireOrgContext } from "@/server/auth/context";
 import { listPendingApproval } from "@/server/domain/approval";
 import { formatCentavos, formatManila } from "@/server/config";
@@ -15,7 +18,13 @@ export const dynamic = "force-dynamic";
  * Nothing here has been sent, and nothing will be until someone decides. The
  * money is already reserved, which is why rejecting returns it explicitly.
  */
-export default async function ApprovalsPage() {
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export default async function ApprovalsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ decided?: string }>;
+}) {
   const t = await getDictionary();
 
   const ctx = await requireOrgContext();
@@ -35,6 +44,36 @@ export default async function ApprovalsPage() {
 
   const pending = await listPendingApproval(ctx.org.organizationId);
 
+  // Set after a decision. Read back from the campaign — scoped to this
+  // organization — so the notice states what was stored, not what was asked.
+  const { decided: decidedId } = await searchParams;
+  const decided =
+    decidedId && UUID.test(decidedId)
+      ? (
+          await db
+            .select({
+              name: campaigns.name,
+              approvedAt: campaigns.approvedAt,
+              rejectedAt: campaigns.rejectedAt,
+              scheduledAt: campaigns.scheduledAt,
+            })
+            .from(campaigns)
+            .where(
+              and(eq(campaigns.id, decidedId), eq(campaigns.organizationId, ctx.org.organizationId)),
+            )
+            .limit(1)
+        )[0]
+      : undefined;
+  const decidedNotice = !decided
+    ? null
+    : decided.rejectedAt
+      ? t.approvalsExtra.rejectedNotice(decided.name)
+      : decided.approvedAt
+        ? decided.scheduledAt
+          ? t.approvalsExtra.approvedScheduledNotice(decided.name, formatManila(decided.scheduledAt))
+          : t.approvalsExtra.approvedNotice(decided.name)
+        : null;
+
   return (
     <>
       <PageHeader
@@ -46,6 +85,14 @@ export default async function ApprovalsPage() {
         <div className="mb-5 max-w-3xl">
           <Notice tone="info" title={t.approvals.separationTitle}>
             {t.approvalsExtra.approverSeparationBody}
+          </Notice>
+        </div>
+      ) : null}
+
+      {decidedNotice ? (
+        <div className="mb-5 max-w-3xl">
+          <Notice tone="success" title={t.approvals.decisionRecorded}>
+            {decidedNotice}
           </Notice>
         </div>
       ) : null}

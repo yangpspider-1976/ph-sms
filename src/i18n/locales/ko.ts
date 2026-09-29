@@ -233,6 +233,11 @@ export const ko: Dictionary = {
       `${sender} · 수신자 ${recipients}명 · ${reserved} 예치 · ${submitted} 제출`,
     scheduledNote: (when: string) =>
       `${when} (아시아/마닐라)로 예약됨. 승인해도 예약 시각은 유지됩니다.`,
+    approvedNotice: (name: string) => `${name}: 승인되었습니다. 발송 대기열에 추가되었습니다.`,
+    approvedScheduledNotice: (name: string, when: string) =>
+      `${name}: 승인되었습니다. 예약된 시각인 ${when} (아시아/마닐라)에 발송됩니다.`,
+    rejectedNotice: (name: string) =>
+      `${name}: 거부되었습니다. 아무것도 발송되지 않았으며 예치된 금액은 반환되었습니다.`,
   },
 
   contacts: {
@@ -387,7 +392,10 @@ export const ko: Dictionary = {
   contactsExtra: {
     csvNote: "CSV 가능, UTF-8 인코딩, 다음 열 필수:",
     csvNoteColumn: "열이 있어야 합니다.",
-    fileLimits: "최대 5MiB, 10,000행. 번호는 형식만 검증합니다.",
+    fileLimits: (mib: number, rows: string) =>
+      `최대 ${mib}MiB, ${rows}행. 번호는 형식만 검증합니다.`,
+    fileTooLarge: (mib: number) => `파일이 ${mib}MiB 제한보다 큽니다.`,
+    uploadFailed: "파일을 업로드하지 못했습니다. 연결 상태를 확인한 후 다시 시도하세요.",
     colRow: "행",
     countEligible: (n: number) => `가져올 항목 ${n}`,
     countDuplicate: (n: number) => `중복 ${n}`,
@@ -498,6 +506,9 @@ export const ko: Dictionary = {
     submitting: "제출 중…",
     scheduleN: (n: number) => `메시지 ${n}건 예약`,
     sendN: (n: number) => `메시지 ${n}건 발송`,
+    approvalNeededTitle: "이 메시지는 발송 전에 승인이 필요합니다",
+    approvalNeededBody:
+      "확인하면 금액이 예약되고, 소유자 또는 승인자가 승인할 때까지 캠페인이 보류됩니다. 그 전에는 아무것도 발송되지 않습니다.",
     cannotRecall: "통신사에 전달된 메시지는 회수할 수 없습니다.",
     quoteExpired: "이 견적은 만료되었습니다",
     quoteExpiredBody: "발송하기 전에 다시 산정하세요.",
@@ -901,6 +912,9 @@ export const ko: Dictionary = {
     heading: "이메일 인증",
     checkInbox: "받은편지함을 확인하세요",
     mailSink: "로컬 메일 싱크 (데모)",
+    openVerificationLink: "인증 링크 열기",
+    openInvitationLink: "초대 링크 열기",
+    openLink: "링크 열기",
   },
 
   invite: {
@@ -1183,6 +1197,8 @@ export const ko: Dictionary = {
       noDecisionsTitle: "결정 내역이 없습니다",
       noDecisionsBody: "승인·정지·거부 내역이 여기에 표시됩니다.",
       colBusiness: "사업자",
+      recordedTitle: "기록되었습니다",
+      recordedBody: (name: string, status: string) => `${name}의 상태가 ${status}(으)로 변경되었습니다.`,
     },
 
     inquiries: {

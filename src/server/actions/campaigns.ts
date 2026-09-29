@@ -40,6 +40,9 @@ export type QuoteView = {
   senderValue: string;
   /** Whether "Reply STOP" may be shown: only if this sender can receive replies. */
   senderAcceptsReplies: boolean;
+  /** Content checks will hold the campaign for an approver once confirmed. */
+  requiresApproval: boolean;
+  approvalReason: string | null;
 };
 
 export type QuoteResult =
@@ -122,6 +125,8 @@ export async function createQuoteAction(raw: unknown): Promise<QuoteResult> {
         sampleMasked: quote.recipients.slice(0, 5).map(maskNormalized),
         senderValue: sender?.value ?? "",
         senderAcceptsReplies: sender?.supportsInboundReplies ?? false,
+        requiresApproval: quote.requiresApproval,
+        approvalReason: quote.approvalReason,
       },
     };
   } catch (err) {

@@ -72,10 +72,14 @@ export function Card({ className, ...props }: ComponentProps<"div">) {
  * The container is part of the component rather than something each page
  * remembers to add: a bare wide table pushes the whole document sideways on a
  * phone, and that was missed on six pages before the responsive tests caught it.
+ *
+ * `relative` matters too: a visually hidden header (`sr-only` is absolutely
+ * positioned) otherwise takes its position from an ancestor outside the scroll
+ * container, escapes it, and widens the page — /admin/settings by 64px.
  */
 export function DataTable({ className, children, ...props }: ComponentProps<"table">) {
   return (
-    <div className="min-w-0 overflow-x-auto">
+    <div className="relative min-w-0 overflow-x-auto">
       <table className={cx("data-table", className)} {...props}>
         {children}
       </table>

@@ -103,7 +103,9 @@ test.describe("core journey", () => {
     await expect(page.getByText("Submitted for review").first()).toBeVisible();
 
     await page.getByTestId("demo-approve-sender").first().click();
-    await expect(page.getByText("Approved", { exact: false }).first()).toBeVisible();
+    // Wait for the approval to be stored — the shortcut disappears then — rather
+    // than for "Approved", which other text on the page already matches.
+    await expect(page.getByTestId("demo-approve-sender")).toHaveCount(0);
 
     /* --- 7. Compose a send with recipients pasted in -------------------- */
 

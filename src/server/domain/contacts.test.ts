@@ -109,6 +109,29 @@ describe("importing", () => {
     expect(record.originalEncrypted!.startsWith("v1.")).toBe(true);
   });
 
+  it("previews a file at the row cap", async () => {
+    // One INSERT for every row ran past PostgreSQL's 65,534 bind-parameter
+    // limit at about 4,700 rows, so a file under the 10,000-row cap failed.
+    const lines = ["phone_number,first_name"];
+    for (let i = 1; i <= MOCK_DEFAULTS.maxDataRows; i += 1) lines.push(`${NUMBERS.ok(i)},Guest`);
+
+    const outcome = await createImport({
+      organizationId: tenant.organizationId,
+      userId: tenant.userId,
+      filename: "cap.csv",
+      bytes: csv(lines.join("\n")),
+    });
+
+    expect(outcome.ok).toBe(true);
+    if (!outcome.ok) return;
+    expect(outcome.preview.counts.eligible).toBe(MOCK_DEFAULTS.maxDataRows);
+    const stored = await db
+      .select({ id: importRows.id })
+      .from(importRows)
+      .where(eq(importRows.importId, outcome.preview.importId));
+    expect(stored).toHaveLength(MOCK_DEFAULTS.maxDataRows);
+  });
+
   it("surfaces a parse failure rather than importing a broken file", async () => {
     const outcome = await createImport({
       organizationId: tenant.organizationId,
