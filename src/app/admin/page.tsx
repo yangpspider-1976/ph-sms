@@ -158,7 +158,14 @@ export default async function AdminOverviewPage() {
                   {recentInquiries.map((inquiry) => (
                     <tr key={inquiry.id}>
                       <td>{inquiry.company}</td>
-                      <td>{inquiry.audience.split(" ").slice(0, 4).join(" ")}</td>
+                      <td>
+                        {/* Clamped by CSS so it ends in an ellipsis; cutting the
+                            string left "Ticket holders for the" with no sign
+                            that anything was missing. */}
+                        <span className="line-clamp-2 min-w-[160px]" title={inquiry.audience}>
+                          {inquiry.audience}
+                        </span>
+                      </td>
                       <td>
                         <Pill tone={INQUIRY_TONE[inquiry.status] ?? "neutral"}>
                           {t.status.inquiry[inquiry.status]}

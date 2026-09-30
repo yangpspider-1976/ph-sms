@@ -95,6 +95,11 @@
   ::placeholder {
     color: var(--color-muted);
   }
+
+  /* A modal dialog makes the page inert but leaves it scrollable underneath. */
+  :root:has(dialog:modal) {
+    overflow: hidden;
+  }
 }
 
 @layer components {
@@ -156,6 +161,23 @@
     font-size: 14px;
     color: var(--color-ink);
     background: #fff;
+  }
+
+  /* A select styled as a field loses the native arrow to appearance:none, and
+     without one it reads as a text box nobody thinks to click. Same chevron as
+     IconChevronDown, in the muted ink. */
+  select.field {
+    appearance: none;
+    padding-right: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235f7085' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5.5 9.5 6.5 6.5 6.5-6.5'/%3E%3C/svg%3E");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 15px;
+  }
+
+  select.field:disabled {
+    background-color: var(--color-navy-50);
+    cursor: not-allowed;
   }
 
   .field:focus {

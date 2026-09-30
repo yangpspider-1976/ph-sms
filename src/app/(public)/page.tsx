@@ -317,11 +317,10 @@ function BulkBand() {
               </p>
             </div>
             <div className="flex items-center gap-6">
-              <ButtonLink
-                href="/bulk"
-                size="lg"
-                className="bg-white text-ink hover:bg-navy-50"
-              >
+              {/* A variant, not a className override: `cx` does not merge, so
+                  overriding primary's colours left its white text on a white
+                  button and the label disappeared. */}
+              <ButtonLink href="/bulk" size="lg" variant="ghost">
                 Talk to our team <IconArrowRight size={17} />
               </ButtonLink>
               <Scribble className="hidden lg:block" rotate={-6} on="dark">

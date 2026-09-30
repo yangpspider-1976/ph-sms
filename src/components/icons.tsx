@@ -204,6 +204,12 @@ export const IconX = (p: IconProps) => (
   </Base>
 );
 
+export const IconMenu = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M4 6h16M4 12h16M4 18h16" />
+  </Base>
+);
+
 export const IconUser = (p: IconProps) => (
   <Base {...p}>
     <circle cx="12" cy="8.5" r="3.7" />

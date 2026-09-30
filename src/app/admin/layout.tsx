@@ -24,6 +24,7 @@ import { env } from "@/server/env";
 import { getDictionary } from "@/i18n/server";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { LogoutButton } from "@/components/logout-button";
+import { MobileNav } from "@/components/mobile-nav";
 
 const NAV: NavItem[] = [
   { href: "/admin", label: "Overview", icon: <IconHome size={18} /> },
@@ -47,25 +48,40 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="flex min-h-screen bg-canvas">
-      {/* The admin console is visually distinct from the customer portal on purpose. */}
+      {/* The admin console is visually distinct from the customer portal on purpose.
+          Logo pinned, nav scrolls inside the sidebar — see the customer layout. */}
       <aside className="sticky top-0 hidden h-screen w-[235px] shrink-0 flex-col bg-navy-900 lg:flex">
-        <div className="px-5 py-5">
+        <div className="shrink-0 px-5 py-5">
           <Wordmark href="/admin" subtitle={t.adminExtra.adminSubtitle} onDark />
         </div>
 
-        <SidebarNav items={NAV} tone="dark" />
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto [scrollbar-color:var(--color-navy-700)_transparent] [scrollbar-width:thin]">
+          <SidebarNav items={NAV} tone="dark" />
 
-        <div className="mt-auto border-t border-white/8 px-6 py-5">
-          {/* navy-300 (7.45:1 on navy-900). navy-400 measured 4.20:1 and failed AA. */}
-          <p className="text-[12.5px] leading-snug text-navy-300">{PRODUCT_TAGLINE}</p>
+          <div className="mt-auto border-t border-white/8 px-6 py-5">
+            {/* navy-300 (7.45:1 on navy-900). navy-400 measured 4.20:1 and failed AA. */}
+            <p className="text-[12.5px] leading-snug text-navy-300">{PRODUCT_TAGLINE}</p>
+          </div>
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 border-b border-line bg-white">
-          <div className="flex h-[60px] items-center gap-3 px-5 sm:px-8">
-            <div className="lg:hidden">
-              <Wordmark href="/admin" size={26} />
+          <div className="flex h-[60px] items-center gap-3 px-4 sm:px-8">
+            <div className="flex items-center gap-3 lg:hidden">
+              <MobileNav
+                items={NAV}
+                tone="dark"
+                homeHref="/admin"
+                subtitle={t.adminExtra.adminSubtitle}
+                // A phone header has no room for the switcher next to the mode pill.
+                footer={
+                  <div className="sm:hidden">
+                    <LocaleSwitcher tone="dark" />
+                  </div>
+                }
+              />
+              <Wordmark href="/admin" size={26} textClassName="hidden sm:block" />
             </div>
 
             <div className="ml-auto flex items-center gap-2 sm:gap-3">
@@ -79,7 +95,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               ) : null}
               {env.APP_MODE === "LIVE" ? <Pill tone="success">{t.adminExtra.modeLive}</Pill> : null}
 
-              <LocaleSwitcher />
+              <span className="hidden sm:block">
+                <LocaleSwitcher />
+              </span>
 
               <span className="hidden h-6 w-px bg-line sm:block" />
 

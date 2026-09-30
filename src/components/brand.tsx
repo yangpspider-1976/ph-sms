@@ -34,16 +34,24 @@ export function Wordmark({
   subtitle,
   onDark = false,
   size = 30,
+  textClassName,
 }: {
   href?: string;
   subtitle?: string;
   onDark?: boolean;
   size?: number;
+  /** Lets a crowded header drop the name and keep the mark, e.g. "hidden sm:block". */
+  textClassName?: string;
 }) {
   return (
-    <Link href={href} className="flex items-center gap-2.5">
+    <Link
+      href={href}
+      // The mark is decorative, so a hidden name would leave the link unnamed.
+      aria-label={textClassName ? PRODUCT_NAME : undefined}
+      className="flex items-center gap-2.5"
+    >
       <LogoMark size={size} />
-      <span className="leading-none">
+      <span className={cx("whitespace-nowrap leading-none", textClassName)}>
         <span
           className={cx(
             "block text-[19px] font-extrabold tracking-tight",

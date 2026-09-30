@@ -20,9 +20,12 @@ export type NavItem = {
 export function SidebarNav({
   items,
   tone,
+  onNavigate,
 }: {
   items: NavItem[];
   tone: "light" | "dark";
+  /** Called when a link is chosen, including the current page's own link. */
+  onNavigate?: () => void;
 }) {
   const t = useT();
 
@@ -42,6 +45,7 @@ export function SidebarNav({
             key={item.href}
             href={item.href}
             aria-current={active ? "page" : undefined}
+            onClick={onNavigate}
             className={cx(
               "flex items-center gap-3 rounded-[9px] px-3.5 py-2.5 text-[14px] font-semibold transition-colors",
               tone === "dark"

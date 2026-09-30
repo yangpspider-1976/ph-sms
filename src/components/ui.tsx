@@ -186,11 +186,13 @@ export function Pill({
   return (
     <span
       className={cx(
-        "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12.5px] font-semibold",
+        // A status is one token: wrapped, "Credit / added" reads as two, and
+        // the dot is squeezed out of shape.
+        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[12.5px] font-semibold",
         TONES[tone],
       )}
     >
-      {dot ? <span className="h-1.5 w-1.5 rounded-full bg-current opacity-80" /> : null}
+      {dot ? <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-80" /> : null}
       {children}
     </span>
   );
@@ -311,8 +313,9 @@ export function Textarea({ className, ...props }: ComponentProps<"textarea">) {
   return <textarea className={cx("field resize-y", className)} {...props} />;
 }
 
+/** The arrow is drawn by `select.field` in globals.css. */
 export function Select({ className, ...props }: ComponentProps<"select">) {
-  return <select className={cx("field appearance-none pr-8", className)} {...props} />;
+  return <select className={cx("field", className)} {...props} />;
 }
 
 /* -------------------------------------------------------------------------- */
