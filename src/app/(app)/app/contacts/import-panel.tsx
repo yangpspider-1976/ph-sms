@@ -18,6 +18,7 @@ import {
 } from "@/components/ui";
 import { IconDocument, IconFile } from "@/components/icons";
 import { useLocale, useT } from "@/i18n/client";
+import { keepValuesOnSubmit } from "@/components/form-submit";
 
 /**
  * CSV import.
@@ -99,7 +100,7 @@ export function ImportPanel({
         {t.contactsExtra.csvNoteColumn}
       </p>
 
-      <form ref={formRef} action={upload} className="mt-4 space-y-3">
+      <form ref={formRef} action={upload} onSubmit={keepValuesOnSubmit(upload)} className="mt-4 space-y-3">
         {/* flex-wrap and a width cap on the input: a file input has a wide
             intrinsic size and pushed the page sideways on a phone. */}
         <label

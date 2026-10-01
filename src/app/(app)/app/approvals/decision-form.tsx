@@ -9,6 +9,7 @@ import {
 } from "@/server/actions/approval";
 import { Button, Input, Notice } from "@/components/ui";
 import { useT } from "@/i18n/client";
+import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function ApprovalDecision({
   campaignId,
@@ -62,7 +63,7 @@ export function ApprovalDecision({
       ) : null}
 
       {rejecting ? (
-        <form action={reject} className="space-y-3">
+        <form action={reject} onSubmit={keepValuesOnSubmit(reject)} className="space-y-3">
           <input type="hidden" name="campaignId" value={campaignId} />
           <div>
             <label className="field-label" htmlFor={`reason-${campaignId}`}>

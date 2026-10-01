@@ -1,17 +1,23 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { signupAction, type ActionState } from "@/server/actions/auth";
 import { Button, Field, Input, Notice, Textarea } from "@/components/ui";
 import { useT } from "@/i18n/client";
+import { focusFirstInvalid, keepValuesOnSubmit } from "@/components/form-submit";
 
 export function SignupForm() {
   const t = useT();
   const [state, action, pending] = useActionState<ActionState, FormData>(signupAction, null);
   const err = (field: string) => state?.fieldErrors?.[field];
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (state?.fieldErrors) focusFirstInvalid(formRef.current);
+  }, [state]);
 
   return (
-    <form action={action} className="space-y-4">
+    <form ref={formRef} action={action} onSubmit={keepValuesOnSubmit(action)} className="space-y-4">
       {state?.error ? (
         <Notice tone="danger" title={t.auth.signup.failed}>
           {state.error}

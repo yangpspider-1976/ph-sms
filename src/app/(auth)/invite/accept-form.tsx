@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { acceptInviteAction } from "@/server/actions/team";
 import { Button, Field, Input, Notice } from "@/components/ui";
 import { useT } from "@/i18n/client";
+import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function AcceptInviteForm({
   token,
@@ -28,7 +29,7 @@ export function AcceptInviteForm({
   }
 
   return (
-    <form action={submit} className="space-y-4">
+    <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="space-y-4">
       <input type="hidden" name="token" value={token} />
 
       {error ? (

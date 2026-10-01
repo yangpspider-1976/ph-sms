@@ -9,6 +9,7 @@ import {
 } from "@/server/actions/groups";
 import { Button, Card, Field, Input, Notice } from "@/components/ui";
 import { useT } from "@/i18n/client";
+import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function GroupSettings({
   groupId,
@@ -46,7 +47,7 @@ export function GroupSettings({
     <Card className="p-5">
       <h2 className="card-title">{t.groups.settingsTitle}</h2>
 
-      <form action={save} className="mt-3 space-y-3">
+      <form action={save} onSubmit={keepValuesOnSubmit(save)} className="mt-3 space-y-3">
         <input type="hidden" name="groupId" value={groupId} />
         <Field label={t.common.name} htmlFor="settings-name">
           <Input id="settings-name" name="name" defaultValue={name} required maxLength={80} />

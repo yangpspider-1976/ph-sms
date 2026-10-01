@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { decideSenderAction, type AdminResult } from "@/server/actions/admin";
 import { Button, Input, Notice, Select } from "@/components/ui";
 import { useT } from "@/i18n/client";
+import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function SenderDecision({ senderId, value }: { senderId: string; value: string }) {
   const t = useT();
@@ -23,7 +24,7 @@ export function SenderDecision({ senderId, value }: { senderId: string; value: s
   }
 
   return (
-    <form action={submit} className="space-y-3">
+    <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="space-y-3">
       <input type="hidden" name="senderId" value={senderId} />
 
       <div className="flex flex-wrap items-end gap-3">

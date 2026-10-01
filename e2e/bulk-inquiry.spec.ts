@@ -79,3 +79,41 @@ test("a bulk inquiry reaches the admin pipeline without sending anything", async
   // The inquiry's company never appears as a campaign.
   await expect(page.getByText(company)).toHaveCount(0);
 });
+
+test("a field the server rejects keeps everything else that was typed", async ({ page }) => {
+  await page.goto("/bulk");
+
+  await page.getByLabel("Business name").fill("Keep Co");
+  await page.getByLabel("Contact name").fill("Sample Contact");
+  await page.getByLabel("Email").fill("contact@example.test");
+  await page.getByLabel("Messages per send").fill("25000");
+  await page.getByLabel("How often").fill("Monthly");
+  await page.getByLabel("Message purpose").selectOption("PROMOTIONAL");
+  // Satisfies the browser's `required`, fails the server's ten-character minimum.
+  await page.getByLabel("Who receives these messages?").fill("short");
+  await page.getByLabel("How did they agree to hear from you?").fill("Checkout opt-in");
+  await page
+    .getByLabel("Sample message")
+    .fill("Our sale runs until Sunday. Visit any branch for details.");
+
+  await page.getByRole("button", { name: "Request a quote" }).click();
+
+  // The problem is pointed out where it is...
+  const audience = page.getByLabel("Who receives these messages?");
+  await expect(page.getByText("Describe who receives these messages.")).toBeVisible();
+  await expect(audience).toHaveAttribute("aria-invalid", "true");
+  await expect(audience).toBeFocused();
+
+  // ...and nothing was cleared. React resets a form after its action returns,
+  // which used to wipe every field to report one.
+  await expect(audience).toHaveValue("short");
+  await expect(page.getByLabel("Business name")).toHaveValue("Keep Co");
+  await expect(page.getByLabel("Contact name")).toHaveValue("Sample Contact");
+  await expect(page.getByLabel("Email")).toHaveValue("contact@example.test");
+  await expect(page.getByLabel("Messages per send")).toHaveValue("25000");
+  await expect(page.getByLabel("How often")).toHaveValue("Monthly");
+  await expect(page.getByLabel("Message purpose")).toHaveValue("PROMOTIONAL");
+  await expect(page.getByLabel("How did they agree to hear from you?")).toHaveValue(
+    "Checkout opt-in",
+  );
+});

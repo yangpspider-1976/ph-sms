@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { updateInquiryAction, type AdminResult } from "@/server/actions/admin";
 import { Button, Input, Notice, Select } from "@/components/ui";
 import { useT } from "@/i18n/client";
+import { keepValuesOnSubmit } from "@/components/form-submit";
 
 const STATUSES = [
   "NEW",
@@ -40,7 +41,7 @@ export function InquiryForm({
   }
 
   return (
-    <form action={submit} className="space-y-3">
+    <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="space-y-3">
       <input type="hidden" name="inquiryId" value={inquiryId} />
 
       <div className="flex flex-wrap items-end gap-3">

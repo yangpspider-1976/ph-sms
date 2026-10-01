@@ -4,13 +4,14 @@ import { useActionState } from "react";
 import { loginAction, type ActionState } from "@/server/actions/auth";
 import { Button, Field, Input, Notice } from "@/components/ui";
 import { useT } from "@/i18n/client";
+import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function LoginForm() {
   const t = useT();
   const [state, action, pending] = useActionState<ActionState, FormData>(loginAction, null);
 
   return (
-    <form action={action} className="space-y-4">
+    <form action={action} onSubmit={keepValuesOnSubmit(action)} className="space-y-4">
       {state?.error ? (
         <Notice tone="danger" title={t.auth.login.failed}>
           {state.error}

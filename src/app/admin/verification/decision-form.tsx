@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { decideVerificationAction, type AdminResult } from "@/server/actions/admin";
 import { Button, Input, Notice, Select } from "@/components/ui";
 import { useT } from "@/i18n/client";
+import { keepValuesOnSubmit } from "@/components/form-submit";
 
 const OPTIONS = [
   { value: "ACTIVE", label: "Approve" },
@@ -50,7 +51,7 @@ export function VerificationDecision({
   }
 
   return (
-    <form action={submit} className="space-y-3">
+    <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="space-y-3">
       <input type="hidden" name="organizationId" value={organizationId} />
 
       <div className="flex flex-wrap items-end gap-3">

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { updateContactAction, type ContactResult } from "@/server/actions/groups";
 import { Button, Card, Field, Input, Notice } from "@/components/ui";
 import { useT } from "@/i18n/client";
+import { keepValuesOnSubmit } from "@/components/form-submit";
 
 /** Corrects a contact's details. The number is not among them, by design. */
 export function ContactForm({
@@ -38,7 +39,7 @@ export function ContactForm({
     <Card className="p-5">
       <h2 className="card-title">{t.contacts.detail.editDetails}</h2>
 
-      <form action={save} className="mt-3 space-y-3">
+      <form action={save} onSubmit={keepValuesOnSubmit(save)} className="mt-3 space-y-3">
         <input type="hidden" name="contactId" value={contactId} />
 
         <div className="grid gap-3 sm:grid-cols-2">

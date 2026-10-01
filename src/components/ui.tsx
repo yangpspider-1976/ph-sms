@@ -1,4 +1,4 @@
-import type { ComponentProps, ReactNode } from "react";
+import { cloneElement, isValidElement, type ComponentProps, type ReactNode } from "react";
 import Link from "next/link";
 import { IconChevronRight, IconInfo } from "./icons";
 
@@ -288,18 +288,31 @@ export function Field({
   htmlFor?: string;
   required?: boolean;
 }) {
+  // An error is tied to its control, so a screen reader reads it on focus and
+  // the control can be styled and found as invalid — not just red text nearby.
+  const errorId = error && htmlFor ? `${htmlFor}-error` : undefined;
+  const control =
+    errorId && isValidElement<{ "aria-describedby"?: string }>(children)
+      ? cloneElement(children, {
+          "aria-invalid": true,
+          "aria-describedby": cx(children.props["aria-describedby"], errorId),
+        } as Record<string, unknown>)
+      : children;
+
   return (
     <div>
       <label className="field-label" htmlFor={htmlFor}>
         {label}
         {required ? <span className="ml-0.5 text-danger-fg">*</span> : null}
       </label>
-      {children}
+      {control}
       {hint && !error ? (
         <p className="mt-1.5 text-[12.5px] text-muted">{hint}</p>
       ) : null}
       {error ? (
-        <p className="mt-1.5 text-[12.5px] font-medium text-danger-fg">{error}</p>
+        <p id={errorId} className="mt-1.5 text-[12.5px] font-medium text-danger-fg">
+          {error}
+        </p>
       ) : null}
     </div>
   );

@@ -9,6 +9,7 @@ import {
 } from "@/server/actions/app-config";
 import { Button, Card, DataTable, Notice, Pill } from "@/components/ui";
 import { useLocale, useT } from "@/i18n/client";
+import { keepValuesOnSubmit } from "@/components/form-submit";
 
 type Row = {
   key: string;
@@ -93,7 +94,7 @@ export function ConfigEditor({ rows, mode }: { rows: Row[]; mode: string }) {
                 </td>
                 <td>
                   {editing === row.key ? (
-                    <form action={save} className="flex flex-wrap items-center gap-2">
+                    <form action={save} onSubmit={keepValuesOnSubmit(save)} className="flex flex-wrap items-center gap-2">
                       <input type="hidden" name="key" value={row.key} />
                       <label className="sr-only" htmlFor={`value-${row.key}`}>
                         {row.label}

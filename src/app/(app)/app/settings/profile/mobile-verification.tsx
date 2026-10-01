@@ -10,6 +10,7 @@ import {
 } from "@/server/actions/mobile";
 import { Button, Card, Field, Input, Notice, Pill } from "@/components/ui";
 import { useT } from "@/i18n/client";
+import { keepValuesOnSubmit } from "@/components/form-submit";
 
 /**
  * Optional mobile verification (AUTH-02).
@@ -119,7 +120,7 @@ export function MobileVerification({
       ) : null}
 
       {stage === "idle" && !verifiedAt ? (
-        <form action={start} className="mt-4 max-w-sm space-y-3">
+        <form action={start} onSubmit={keepValuesOnSubmit(start)} className="mt-4 max-w-sm space-y-3">
           <Field
             label={t.settings.profile.mobileLabel}
             htmlFor="mobile-number"
@@ -142,7 +143,7 @@ export function MobileVerification({
 
       {stage === "code" ? (
         <div className="mt-4 max-w-sm space-y-4">
-          <form action={confirm} className="space-y-3">
+          <form action={confirm} onSubmit={keepValuesOnSubmit(confirm)} className="space-y-3">
             <Field
               label={t.settings.profile.codeLabel}
               htmlFor="mobile-code"
@@ -178,7 +179,7 @@ export function MobileVerification({
             </div>
           </form>
 
-          <form action={start} className="space-y-3 border-t border-line pt-4">
+          <form action={start} onSubmit={keepValuesOnSubmit(start)} className="space-y-3 border-t border-line pt-4">
             <Field
               label={t.settings.profile.wrongNumber}
               htmlFor="mobile-number-retry"

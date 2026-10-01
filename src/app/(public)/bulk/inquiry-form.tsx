@@ -1,15 +1,21 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { submitInquiryAction, type InquiryResult } from "@/server/actions/inquiries";
 import { Button, Field, Input, Notice, Select, Textarea } from "@/components/ui";
 import { useT } from "@/i18n/client";
+import { focusFirstInvalid, keepValuesOnSubmit } from "@/components/form-submit";
 
 export function InquiryForm() {
   const t = useT();
 
   const [result, setResult] = useState<InquiryResult | null>(null);
   const [pending, startTransition] = useTransition();
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (result && !result.ok && result.fieldErrors) focusFirstInvalid(formRef.current);
+  }, [result]);
 
   function submit(formData: FormData) {
     startTransition(async () => {
@@ -29,7 +35,7 @@ export function InquiryForm() {
   }
 
   return (
-    <form action={submit} className="space-y-4">
+    <form ref={formRef} action={submit} onSubmit={keepValuesOnSubmit(submit)} className="space-y-4">
       <h2 className="card-title">{t.bulk.formTitle}</h2>
 
       {result && !result.ok && !result.fieldErrors ? (

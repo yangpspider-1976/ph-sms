@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { addOptOutsAction, type OptOutResult } from "@/server/actions/contacts";
 import { Button, Card, Field, Input, Notice, Textarea } from "@/components/ui";
 import { useT } from "@/i18n/client";
+import { keepValuesOnSubmit } from "@/components/form-submit";
 
 /**
  * Manual opt-out intake.
@@ -20,11 +21,14 @@ export function OptOutForm() {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
-  function submit(formData: FormData) {
+  function submit(formData: FormData, form?: HTMLFormElement) {
     startTransition(async () => {
       const outcome = await addOptOutsAction(formData);
       setResult(outcome);
-      if (outcome.ok) router.refresh();
+      if (outcome.ok) {
+        form?.reset();
+        router.refresh();
+      }
     });
   }
 
@@ -35,7 +39,7 @@ export function OptOutForm() {
         Enter the numbers a recipient asked you to remove. One per line, or separated by commas.
       </p>
 
-      <form action={submit} className="mt-4 space-y-4">
+      <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="mt-4 space-y-4">
         <Field label={t.contacts.optOuts.numbersLabel} htmlFor="numbers" required>
           <Textarea
             id="numbers"

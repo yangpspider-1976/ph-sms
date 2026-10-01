@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { applyForSenderAction, type SenderResult } from "@/server/actions/senders";
 import { Button, Card, Field, Input, Notice, Textarea } from "@/components/ui";
 import { useT } from "@/i18n/client";
+import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function SenderApplicationForm() {
   const t = useT();
@@ -13,11 +14,14 @@ export function SenderApplicationForm() {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
-  function submit(formData: FormData) {
+  function submit(formData: FormData, form?: HTMLFormElement) {
     startTransition(async () => {
       const outcome = await applyForSenderAction(formData);
       setResult(outcome);
-      if (outcome.ok) router.refresh();
+      if (outcome.ok) {
+        form?.reset();
+        router.refresh();
+      }
     });
   }
 
@@ -29,7 +33,7 @@ export function SenderApplicationForm() {
         are not.
       </p>
 
-      <form action={submit} className="mt-4 space-y-4">
+      <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="mt-4 space-y-4">
         <Field
           label={t.settings.senders.senderIdLabel}
           htmlFor="value"

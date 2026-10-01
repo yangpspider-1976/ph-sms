@@ -11,6 +11,7 @@ import {
 } from "@/server/actions/mfa";
 import { Button, ButtonLink, Field, Input, Notice } from "@/components/ui";
 import { useT } from "@/i18n/client";
+import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function MfaPanel({
   enrolled,
@@ -85,7 +86,7 @@ export function MfaPanel({
 
   if (enrolled) {
     return (
-      <form action={verify} className="space-y-4">
+      <form action={verify} onSubmit={keepValuesOnSubmit(verify)} className="space-y-4">
         {result && !result.ok ? (
           <Notice tone="danger" title={t.adminExtra.mfaNotVerified}>
             {result.message}
@@ -147,7 +148,7 @@ export function MfaPanel({
   }
 
   return (
-    <form action={confirm} className="space-y-4">
+    <form action={confirm} onSubmit={keepValuesOnSubmit(confirm)} className="space-y-4">
       <input type="hidden" name="secret" value={setup.secret} />
 
       <div>

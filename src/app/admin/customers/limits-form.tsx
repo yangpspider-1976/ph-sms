@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { updateLimitsAction, type AdminResult } from "@/server/actions/admin";
 import { Button, Input, Notice } from "@/components/ui";
 import { useT } from "@/i18n/client";
+import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function LimitsForm({
   organizationId,
@@ -32,7 +33,7 @@ export function LimitsForm({
   }
 
   return (
-    <form action={submit} className="space-y-2">
+    <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="space-y-2">
       <input type="hidden" name="organizationId" value={organizationId} />
 
       <div className="flex flex-wrap items-end gap-3">

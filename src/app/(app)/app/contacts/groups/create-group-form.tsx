@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createGroupAction, type GroupResult } from "@/server/actions/groups";
 import { Button, Card, Field, Input, Notice } from "@/components/ui";
 import { useT } from "@/i18n/client";
+import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function CreateGroupForm() {
   const t = useT();
@@ -28,7 +29,7 @@ export function CreateGroupForm() {
   return (
     <Card className="p-5">
       <h2 className="card-title">{t.groups.newGroup}</h2>
-      <form ref={formRef} action={submit} className="mt-3 grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_auto] sm:items-end">
+      <form ref={formRef} action={submit} onSubmit={keepValuesOnSubmit(submit)} className="mt-3 grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_auto] sm:items-end">
         <Field label={t.common.name} htmlFor="group-name">
           <Input id="group-name" name="name" required maxLength={80} placeholder={t.groups.namePlaceholder} />
         </Field>

@@ -7,6 +7,7 @@ import {
 } from "@/server/actions/support";
 import { Button, Card, Field, Input, Notice, Select, Textarea } from "@/components/ui";
 import { useT } from "@/i18n/client";
+import { keepValuesOnSubmit } from "@/components/form-submit";
 
 /**
  * Support request.
@@ -45,7 +46,7 @@ export function SupportForm() {
         </div>
       ) : null}
 
-      <form ref={formRef} action={submit} className="mt-4 space-y-3">
+      <form ref={formRef} action={submit} onSubmit={keepValuesOnSubmit(submit)} className="mt-4 space-y-3">
         <Field label={t.supportPage.subject} htmlFor="support-subject">
           <Input
             id="support-subject"

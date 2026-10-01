@@ -6,6 +6,7 @@ import { saveTemplateAction, type TemplateResult } from "@/server/actions/templa
 import { analyzeMessage } from "@/server/domain/segments";
 import { Button, Card, Field, Input, Notice, Textarea } from "@/components/ui";
 import { useT } from "@/i18n/client";
+import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function TemplateForm() {
   const t = useT();
@@ -17,12 +18,13 @@ export function TemplateForm() {
 
   const info = analyzeMessage(body);
 
-  function submit(formData: FormData) {
+  function submit(formData: FormData, form?: HTMLFormElement) {
     startTransition(async () => {
       const outcome = await saveTemplateAction(formData);
       setResult(outcome);
       if (outcome.ok) {
         setBody("");
+        form?.reset();
         router.refresh();
       }
     });
@@ -32,7 +34,7 @@ export function TemplateForm() {
     <Card className="max-w-2xl p-5">
       <h2 className="card-title">{t.templates.newTemplate}</h2>
 
-      <form action={submit} className="mt-4 space-y-4">
+      <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="mt-4 space-y-4">
         <Field label={t.common.name} htmlFor="name" required>
           <Input id="name" name="name" required placeholder={t.templates.namePlaceholder} />
         </Field>

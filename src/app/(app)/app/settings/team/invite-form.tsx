@@ -6,6 +6,7 @@ import { inviteMemberAction, type TeamResult } from "@/server/actions/team";
 import { Button, Card, Field, Input, Notice, Select } from "@/components/ui";
 import { ROLE_ORDER } from "@/server/auth/rbac";
 import { useT } from "@/i18n/client";
+import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function InviteForm() {
   const t = useT();
@@ -14,11 +15,14 @@ export function InviteForm() {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
 
-  function submit(formData: FormData) {
+  function submit(formData: FormData, form?: HTMLFormElement) {
     startTransition(async () => {
       const outcome = await inviteMemberAction(formData);
       setResult(outcome);
-      if (outcome.ok) router.refresh();
+      if (outcome.ok) {
+        form?.reset();
+        router.refresh();
+      }
     });
   }
 
@@ -30,7 +34,7 @@ export function InviteForm() {
         let someone else use it.
       </p>
 
-      <form action={submit} className="mt-4 space-y-4">
+      <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="mt-4 space-y-4">
         <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,200px)]">
           <Field label={t.settings.team.emailLabel} htmlFor="invite-email" required>
             <Input id="invite-email" name="email" type="email" required placeholder={t.settings.team.emailPlaceholder} />
