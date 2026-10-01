@@ -305,7 +305,11 @@ test.describe("Part A — core tests", () => {
     await expect(page.getByRole("link", { name: "Add credit" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Add credit" })).toHaveCount(0);
 
-    await page.goto("/app/settings/team");
+    // Through the menu, as the guide says. Going straight to the address is
+    // how a missing Settings link went unnoticed.
+    await page.getByRole("link", { name: "Settings", exact: true }).click();
+    await expect(page).toHaveURL(/\/app\/settings$/);
+    await page.getByRole("link", { name: /^Team/ }).click();
     await expect(page.getByText("Your role cannot manage the team").first()).toBeVisible();
 
     await page.goto("/app/contacts/opt-outs");

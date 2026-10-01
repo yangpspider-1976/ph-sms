@@ -10,6 +10,7 @@ import {
   IconHome,
   IconMegaphone,
   IconSend,
+  IconSettings,
   IconUser,
   IconUsers,
   IconChevronDown,
@@ -34,6 +35,10 @@ function navFor(t: Dictionary): NavItem[] {
     { href: "/app/contacts", label: t.nav.contacts, icon: <IconUsers size={18} /> },
     { href: "/app/templates", label: t.nav.templates, icon: <IconDocument size={18} /> },
     { href: "/app/credits", label: t.nav.credits, icon: <IconCard size={18} /> },
+    // Every role can open Settings (profile, team, sender IDs). It used to be
+    // reachable only through the organization button in the header, which
+    // nobody reads as a way in.
+    { href: "/app/settings", label: t.nav.settings, icon: <IconSettings size={18} /> },
     { href: "/app/support", label: t.nav.support, icon: <IconHelp size={18} /> },
   ];
 }
