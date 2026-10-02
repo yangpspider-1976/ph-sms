@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { requireOrgContext } from "@/server/auth/context";
 import { listMembers, listPendingInvites } from "@/server/domain/team";
 import { ROLE_ORDER, ROLE_TONES } from "@/server/auth/rbac";
@@ -9,7 +10,10 @@ import { MemberRow } from "./member-row";
 import { InviteRow } from "./invite-row";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Team" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.settings.team.title };
+}
 export const dynamic = "force-dynamic";
 
 export default async function TeamPage() {
@@ -109,8 +113,7 @@ export default async function TeamPage() {
               </div>
               {demoFeaturesEnabled() ? (
                 <p className="px-5 pb-4 text-[12px] text-muted">
-                  Demo mode: invitation emails are written to the local mail sink rather than
-                  sent. Open <span className="font-mono">/verify-email</span> to find the link.
+                  {t.settings.team.demoMailNote("/verify-email")}
                 </p>
               ) : null}
             </Card>

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/server/db";
@@ -27,7 +28,10 @@ import {
   IconChevronRight,
 } from "@/components/icons";
 
-export const metadata = { title: "Operations overview" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.adminExtra.overviewTitle };
+}
 export const dynamic = "force-dynamic";
 
 const INQUIRY_TONE: Record<string, Tone> = {
@@ -134,7 +138,7 @@ export default async function AdminOverviewPage() {
                   href="/admin/inquiries"
                   className="text-[13px] font-semibold text-brand-600 hover:underline"
                 >
-                  View all
+                  {t.adminExtra.viewAll}
                 </Link>
               }
             />
@@ -178,7 +182,7 @@ export default async function AdminOverviewPage() {
                           variant={inquiry.status === "NEW" ? "primary" : "secondary"}
                           className="w-[104px] justify-center py-2"
                         >
-                          {inquiry.status === "NEW" ? "Review" : "Open"}
+                          {inquiry.status === "NEW" ? t.adminExtra.review : t.adminExtra.open}
                         </ButtonLink>
                       </td>
                     </tr>
@@ -250,7 +254,7 @@ export default async function AdminOverviewPage() {
                   href="/admin/verification"
                   className="text-[13px] font-semibold text-brand-600 hover:underline"
                 >
-                  View all
+                  {t.adminExtra.viewAll}
                 </Link>
               }
             />
@@ -275,7 +279,7 @@ export default async function AdminOverviewPage() {
                       <td>
                         <span className="block">{org.name}</span>
                         <span className="block text-[12.5px] font-normal text-muted">
-                          Business registration
+                          {t.adminExtra.businessRegistration}
                         </span>
                       </td>
                       <td className="whitespace-nowrap text-muted">
@@ -288,7 +292,7 @@ export default async function AdminOverviewPage() {
                           variant="secondary"
                           className="py-2"
                         >
-                          View documents
+                          {t.adminExtra.viewDocuments}
                         </ButtonLink>
                       </td>
                     </tr>

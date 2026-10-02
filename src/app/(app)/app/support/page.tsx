@@ -1,9 +1,13 @@
+import type { Metadata } from "next";
 import { requireOrgContext } from "@/server/auth/context";
 import { getDictionary } from "@/i18n/server";
 import { Card, PageHeader } from "@/components/ui";
 import { SupportForm } from "./support-form";
 
-export const metadata = { title: "Support" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.support.title };
+}
 export const dynamic = "force-dynamic";
 
 export default async function SupportPage() {

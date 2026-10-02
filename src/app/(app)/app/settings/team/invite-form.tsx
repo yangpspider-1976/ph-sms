@@ -29,10 +29,7 @@ export function InviteForm() {
   return (
     <Card className="max-w-2xl p-5">
       <h2 className="card-title">{t.settings.team.inviteTitle}</h2>
-      <p className="mt-1 text-[13px] text-muted">
-        The invitation is tied to this email address and this role. Forwarding the link does not
-        let someone else use it.
-      </p>
+      <p className="mt-1 text-[13px] text-muted">{t.settings.team.inviteIntro}</p>
 
       <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="mt-4 space-y-4">
         <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,200px)]">
@@ -51,13 +48,16 @@ export function InviteForm() {
         </div>
 
         {result ? (
-          <Notice tone={result.ok ? "success" : "danger"} title={result.ok ? "Invitation sent" : "Not sent"}>
+          <Notice
+            tone={result.ok ? "success" : "danger"}
+            title={result.ok ? t.settings.team.inviteSent : t.settings.team.inviteNotSent}
+          >
             {result.message}
           </Notice>
         ) : null}
 
         <Button type="submit" disabled={pending}>
-          {pending ? "Sending…" : "Send invitation"}
+          {pending ? t.settings.team.sendingInvite : t.settings.team.sendInvite}
         </Button>
       </form>
     </Card>

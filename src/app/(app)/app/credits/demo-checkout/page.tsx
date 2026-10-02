@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/server/db";
@@ -9,7 +10,10 @@ import { Card, DetailRow, Notice, PageHeader } from "@/components/ui";
 import { DemoPayButton } from "./demo-pay-button";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Demo checkout" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.credits.checkoutTitle };
+}
 export const dynamic = "force-dynamic";
 
 /**
@@ -69,7 +73,7 @@ export default async function DemoCheckoutPage({
           </div>
         ) : (
           <p className="mt-5 text-[13px] text-muted">
-            This payment is already {payment.status.toLowerCase()}.
+            {t.credits.paymentAlready(t.status.payment[payment.status])}
           </p>
         )}
       </Card>

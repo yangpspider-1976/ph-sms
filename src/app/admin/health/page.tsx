@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { requirePlatformAdmin } from "@/server/auth/context";
 import { healthReport } from "@/server/domain/health";
 import { getSmsProvider } from "@/server/providers/sms";
@@ -17,7 +18,10 @@ import {
   type Tone,
 } from "@/components/ui";
 
-export const metadata = { title: "System health" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.admin.health.title };
+}
 export const dynamic = "force-dynamic";
 
 /**

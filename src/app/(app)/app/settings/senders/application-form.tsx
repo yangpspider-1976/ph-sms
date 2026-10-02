@@ -28,10 +28,7 @@ export function SenderApplicationForm() {
   return (
     <Card className="max-w-2xl p-5">
       <h2 className="card-title">{t.settings.senders.applyTitle}</h2>
-      <p className="mt-1 text-[13px] text-muted">
-        Up to 11 characters, letters and numbers. Networks reject names that imply a business you
-        are not.
-      </p>
+      <p className="mt-1 text-[13px] text-muted">{t.settings.senders.applyIntro}</p>
 
       <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="mt-4 space-y-4">
         <Field
@@ -69,14 +66,14 @@ export function SenderApplicationForm() {
         {result ? (
           <Notice
             tone={result.ok ? "success" : "danger"}
-            title={result.ok ? "Submitted for review" : "Not submitted"}
+            title={result.ok ? t.settings.senders.submitted : t.settings.senders.notSubmitted}
           >
             {result.message}
           </Notice>
         ) : null}
 
         <Button type="submit" disabled={pending}>
-          {pending ? "Submitting…" : "Apply for review"}
+          {pending ? t.settings.senders.applying : t.settings.senders.apply}
         </Button>
       </form>
     </Card>

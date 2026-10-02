@@ -54,6 +54,8 @@ export const ko: Dictionary = {
     // Korean puts the total before the shown count and uses a counter word.
     of: (shown: number, total: number) => `총 ${total}건 중 ${shown}건 표시`,
     timezoneNote: "표시 시간 기준: 아시아/마닐라",
+    unicode: "유니코드",
+    segments: (n: number) => `${n}개 세그먼트`,
   },
 
   nav: {
@@ -139,6 +141,8 @@ export const ko: Dictionary = {
       intentHint: "누가 메시지를 받으며, 수신에 어떻게 동의했는지 알려주세요.",
       submit: "심사 요청",
       submitting: "제출 중…",
+      noIdScans:
+        "개인 신분증 사본은 요청하지 않습니다. 사업자 등록 정보는 조직 인증에만 사용됩니다.",
     },
     demoLogins: {
       title: "데모 계정",
@@ -271,6 +275,7 @@ export const ko: Dictionary = {
     colExcluded: "제외됨",
     colUploaded: "업로드일",
     detail: {
+      metaTitle: "연락처",
       subheading: "여기에서는 번호가 마스킹됩니다. 번호 자체는 수정할 수 없습니다.",
       record: "기록",
       mobileNumber: "휴대폰 번호",
@@ -306,6 +311,11 @@ export const ko: Dictionary = {
       reasonLabel: "사유",
       reasonHint: "번호를 제외한 이유를 설명할 수 있도록 기록과 함께 보관됩니다.",
       reasonPlaceholder: "발송 중단 요청",
+      formIntro: "수신자가 삭제를 요청한 번호를 입력하세요. 한 줄에 하나씩, 또는 쉼표로 구분해 입력합니다.",
+      recorded: "등록되었습니다",
+      notRecorded: "등록하지 못했습니다",
+      add: "수신 거부 목록에 추가",
+      adding: "등록하는 중…",
     },
     imports: {
       subheading: "행 단위 가져오기 결과입니다.",
@@ -322,6 +332,9 @@ export const ko: Dictionary = {
       optedOut: "수신 거부",
       uploaded: "업로드일",
       originalDeleted: "원본 삭제됨",
+      expiredBody:
+        "업로드한 파일과 제외된 행은 예정대로 삭제되었습니다. 이 파일에서 가져온 연락처는 영향을 받지 않습니다.",
+      noRowsStored: "이 가져오기에 저장된 행이 더 이상 없습니다.",
     },
     importPanel: {
       title: "연락처 가져오기",
@@ -341,6 +354,9 @@ export const ko: Dictionary = {
         "이 시점에 수신 거부를 다시 확인하므로, 검토 중에 수신 거부한 사람은 그대로 제외됩니다.",
       summaryLine: (read: number, imported: number, excluded: number) =>
         `읽은 행 ${read} · 가져올 항목 ${imported} · 제외 ${excluded}`,
+      ignoreUnknown: "인식하지 못한 열은 무시하고 나머지를 가져옵니다.",
+      upload: "업로드 후 미리보기",
+      reading: "읽는 중…",
     },
   },
 
@@ -483,7 +499,7 @@ export const ko: Dictionary = {
     reviewHeading: "확인 및 발송",
     quoteFixedUntil: (when: string) =>
       `이 견적은 ${when}까지 고정됩니다. 이후 메시지나 수신자를 변경하면 새 견적이 필요합니다.`,
-    campaignName: "캐페인 이름",
+    campaignName: "캠페인 이름",
     campaignNameHint: "내부 보고용입니다.",
     rowSender: "발신자",
     rowRecipients: "수신자 수",
@@ -541,6 +557,7 @@ export const ko: Dictionary = {
     testWriteMessage: "먼저 메시지를 작성하세요.",
     testCostNote: (cost: string) =>
       `테스트도 실제 메시지이며 동일하게 과금됩니다 — 현재 문구 기준 약 ${cost}.`,
+    overAvailable: (amount: string) => `사용 가능한 크레딧(${amount})을 초과합니다.`,
   },
 
   settings: {
@@ -608,6 +625,22 @@ export const ko: Dictionary = {
       relationHint: "심사 담당자가 등록된 사업자 정보와 대조합니다.",
       relationPlaceholder: "등록된 상호명으로, 매장과 영수증에 사용하고 있습니다.",
       notApproved: "승인되지 않음",
+      applyIntro:
+        "영문자와 숫자로 최대 11자까지 가능합니다. 귀사가 아닌 다른 사업자로 오인될 수 있는 이름은 통신사가 거부합니다.",
+      submitted: "심사를 신청했습니다",
+      notSubmitted: "제출하지 못했습니다",
+      apply: "심사 신청",
+      applying: "제출하는 중…",
+      demoApproveNote: (value: string) =>
+        `데모 모드: 심사를 기다리지 않고 ${value}을(를) 직접 승인합니다.`,
+      demoApprove: "승인 (데모)",
+      demoApproving: "승인하는 중…",
+      cannotSendBody:
+        "캠페인을 제출하려면 승인된 발신자 ID가 하나 이상 있어야 합니다. 아래에서 신청하면 심사자가 등록된 사업자 정보와 이름을 대조합니다.",
+      canReceiveReplies: "회신 수신 가능",
+      oneWay: "단방향",
+      oneWayNote:
+        "이 발신자는 회신을 받을 수 없으므로, 메시지에서 STOP으로 회신하라고 안내하면 안 됩니다. 수신 거부 요청은 수신 거부 목록에 기록하세요.",
     },
     team: {
       title: "팀",
@@ -623,6 +656,21 @@ export const ko: Dictionary = {
       expired: "만료됨",
       pending: "대기 중",
       notChanged: "변경되지 않음",
+      inviteIntro:
+        "초대는 이 이메일 주소와 역할에만 유효합니다. 링크를 전달해도 다른 사람은 사용할 수 없습니다.",
+      inviteSent: "초대를 보냈습니다",
+      inviteNotSent: "보내지 못했습니다",
+      sendInvite: "초대 보내기",
+      sendingInvite: "보내는 중…",
+      invitedAs: (role: string, when: string) => `${role}(으)로 초대됨 · ${when} 만료 예정`,
+      invitedAsExpired: (role: string, when: string) => `${role}(으)로 초대됨 · ${when} 만료됨`,
+      revoke: "초대 취소",
+      revoking: "취소하는 중…",
+      removing: "제거하는 중…",
+      lastOwnerNote:
+        "마지막 소유자는 제거하거나 역할을 낮출 수 없습니다. 조직에는 결제를 관리하고 접근 권한을 복구할 수 있는 사람이 항상 있어야 합니다.",
+      demoMailNote: (path: string) =>
+        `데모 모드: 초대 이메일은 실제로 발송되지 않고 로컬 메일 싱크에 기록됩니다. 링크는 ${path}에서 확인하세요.`,
     },
   },
 
@@ -636,6 +684,15 @@ export const ko: Dictionary = {
     newTemplate: "새 템플릿",
     namePlaceholder: "예약 확정 안내",
     bodyPlaceholder: "예약이 확정되었습니다. 내일 봁겠습니다.",
+    messageLabel: "메시지",
+    counter: (characters: number, segments: number, encoding: string) =>
+      `${characters}자 · ${segments}개 세그먼트 · ${encoding}`,
+    plainTextNote:
+      "일반 텍스트만 사용할 수 있습니다. 개인화 변수는 아직 지원되지 않으니 메시지 전체를 직접 작성하세요.",
+    saved: "저장되었습니다",
+    notSaved: "저장하지 못했습니다",
+    save: "템플릿 저장",
+    saving: "저장 중…",
   },
 
   credits: {
@@ -669,6 +726,11 @@ export const ko: Dictionary = {
     package: "패키지",
     creditLabel: "크레딧",
     paymentNotAccepted: "결제가 수락되지 않았습니다",
+    paymentAlready: (status: string) => `이 결제는 이미 '${status}' 상태입니다.`,
+    confirmedOnlyNote:
+      "크레딧은 결제 대행사가 결제를 확인한 경우에만 추가됩니다. 결제 페이지에서 돌아오는 것만으로는 크레딧이 추가되지 않습니다.",
+    completePayment: "데모 결제 완료",
+    completing: "처리하는 중…",
   },
 
   accountStatus: {
@@ -676,6 +738,16 @@ export const ko: Dictionary = {
     subheading: "승인된 사업자와 승인된 발신자 ID가 모두 있어야 발송할 수 있습니다.",
     organization: "조직",
     yourRole: "역할",
+    reviewingTitle: "사업자 심사가 진행 중입니다",
+    reviewingBody:
+      "제출하신 정보를 심사자가 확인하고 있습니다. 심사가 끝나기 전에는 메시지를 보낼 수 없습니다.",
+    needsInfoTitle: "추가 정보가 필요합니다",
+    needsInfoBody:
+      "계정을 활성화하기 전에 심사자가 추가 정보를 요청했습니다. 필요한 내용은 이메일을 확인하세요.",
+    suspendedTitle: "이 계정은 정지되었습니다",
+    suspendedBody: "발송이 중지되었습니다. 계정 재활성화는 고객 지원에 문의하세요.",
+    rejectedTitle: "이 신청은 승인되지 않았습니다",
+    rejectedBody: "착오가 있었다고 생각되거나 상황이 바뀌었다면 고객 지원에 문의하세요.",
   },
 
   support: {
@@ -736,6 +808,14 @@ export const ko: Dictionary = {
     rowFinished: "\uc644\ub8cc \uc2dc\uac01",
     timesNote:
       "\ubaa8\ub4e0 \uc2dc\uac01\uc740 \uc544\uc2dc\uc544/\ub9c8\ub2d0\ub77c \uae30\uc900\uc785\ub2c8\ub2e4. \ud1b5\uc2e0\uc0ac \uc811\uc218\uac00 \uc804\ub2ec\uc744 \ubcf4\uc7a5\ud558\uc9c0 \uc54a\uc73c\uba70, \uc804\ub2ec\uc774 \uc5f4\ub78c\uc744 \ubcf4\uc7a5\ud558\uc9c0\ub3c4 \uc54a\uc2b5\ub2c8\ub2e4.",
+    unresolvedTitle: (n: number) => `미확인 메시지 ${n}건`,
+    unresolvedBody:
+      "제출 후 연결이 끊겨 통신사가 이 메시지를 접수했는지 알 수 없습니다. 중복 발송 위험이 있어 자동으로 재시도하지 않으며, 비용은 정산이 끝날 때까지 예치된 상태로 유지됩니다.",
+    stopCampaign: "캠페인 중지",
+    stopConfirm: "남은 메시지 발송을 중지할까요? 이미 보낸 메시지는 회수할 수 없습니다.",
+    stopYes: "네, 중지합니다",
+    stopping: "중지하는 중…",
+    keepSending: "계속 발송",
   },
 
   supportPage: {
@@ -788,7 +868,50 @@ export const ko: Dictionary = {
     linkAcceptableUse: "이용 정책",
     footerNote: "필리핀 휴대폰 번호만 가능 • 표시 시간은 아시아/마닐라 기준",
     navMain: "메인",
+    logIn: "로그인",
+    getStarted: "시작하기",
     legalDraft: "초안 — 법무 검토 대기 중",
+  },
+
+  home: {
+    heroTitle: "기업용 SMS,\n간편하게.",
+    heroBody: "필리핀 휴대폰 번호로 문자를 보내세요. 수신자를 직접 입력하거나 CSV 파일을 업로드하면 됩니다.",
+    startSending: "발송 시작하기",
+    requestBulkQuote: "대량 발송 견적 요청",
+    philippinesOnly: "필리핀 전용",
+    verifiedBusinesses: "인증된 사업자",
+    prepaidCredits: "선불 크레딧",
+    scribbleHero: "간편하게.\n안정적으로.\n비즈니스를 위해.",
+    scribbleUpload: "명단 업로드는\n몇 초면 끝",
+    phoneNewMessage: "새 메시지",
+    phoneSample:
+      "안녕하세요! PH SMS에서 보내는 샘플 메시지입니다. 여기에서 메시지 내용을 자유롭게 작성할 수 있습니다.\n\n감사합니다!",
+    stepsTitle: "명단에서 고객의 휴대폰까지",
+    stepsSubheading: "필리핀 기업을 위해 만든 간단한 절차입니다.",
+    step1Title: "수신자 추가",
+    step1Body: "휴대폰 번호를 직접 입력하거나 CSV 파일을 업로드하세요.",
+    step2Title: "메시지 작성",
+    step2Body: "문자 메시지를 작성하고 어떻게 보일지 미리 확인하세요.",
+    step3Title: "검토 후 발송",
+    step3Body: "명단과 메시지를 확인한 뒤, 준비되면 발송하세요.",
+    bulkTitle: "대량으로 발송하시나요?",
+    bulkBody: "다음 대량 발송 캠페인 계획을 함께 세워 드립니다.",
+    bulkCta: "담당팀과 상담하기",
+    scribbleBulk: "같은 사람들,\n더 가깝게\n연결된\n필리핀.",
+  },
+
+  legal: {
+    privacyTitle: "개인정보 처리방침",
+    privacyIntent:
+      "개인정보를 수집·이용·보관·삭제하는 방법과 정보주체가 자신의 권리를 행사하는 방법입니다.",
+    termsTitle: "서비스 이용약관",
+    termsIntent: "플랫폼과 이를 이용하는 사업자 간의 약정입니다.",
+    acceptableUseTitle: "이용 정책",
+    acceptableUseIntent: "발송할 수 있는 내용과 없는 내용, 그리고 악용 사례를 처리하는 방법입니다.",
+    notWritten:
+      "이 문서는 아직 작성되지 않았습니다. 이 계정이 정식 운영되기 전에 필리핀 개인정보보호책임자(DPO) 또는 법률 자문가가 승인된 문안을 제공해야 하며, SMS 파트너의 통신사 요구사항과도 맞아야 합니다. 이 페이지의 어떤 내용도 법률 자문이 아닙니다.",
+    requiredBeforeLive:
+      "정식 운영 전에 필요한 사항: 처리의 법적 근거, 수집 시 제공하는 고지, 보관 기간, 수신 거부 처리 방법, 정보주체의 요청 방법.",
   },
 
   features: {
@@ -796,7 +919,7 @@ export const ko: Dictionary = {
     subheading: "현재 제공하는 기능과, 의도적으로 제공하지 않는 기능입니다.",
     sendTitle: "사실그대로 알려주는 발송",
     sendBody:
-      "모든 메시지는 캐페인 실행 여부, 통신사 접수 여부, 실제 전달 여부라는 세 가지 상태를 가집니다. 접수는 전달이 아니고 전달은 열람이 아니기 때문에, 하나의 듣기 좋은 숫자로 합치지 않습니다.",
+      "모든 메시지는 캠페인 실행 여부, 통신사 접수 여부, 실제 전달 여부라는 세 가지 상태를 가집니다. 접수는 전달이 아니고 전달은 열람이 아니기 때문에, 하나의 듣기 좋은 숫자로 합치지 않습니다.",
     moneyTitle: "감사 가능한 금액 관리",
     moneyBody:
       "크레딧은 선불이며 모든 변동이 추가 전용 원장에 기록됩니다. 발송 시 최대 비용을 예치한 뒤 실제 비용으로 정산합니다. 정정은 기존 항목을 고치는 것이 아니라 새 항목으로 남습니다.",
@@ -837,7 +960,7 @@ export const ko: Dictionary = {
       "서버가 발송 비용을 산정해 견적을 고정합니다. 표시된 수신자·세그먼트·비용 그대로 확인해야 발송되며, 그전에는 아무것도 차감되지 않습니다.",
     step6Title: "실제 결과 확인하기",
     step6Body:
-      "캐페인 페이지에서 수신자별 접수·전달 결과를 확인하고, 원장에서 예치 금액과 최종 차감 금액을 볼 수 있습니다.",
+      "캠페인 페이지에서 수신자별 접수·전달 결과를 확인하고, 원장에서 예치 금액과 최종 차감 금액을 볼 수 있습니다.",
     timingTitle: "발송 시간에 대해",
     timingBody:
       "발송은 즉시 이루어지지 않습니다. 메시지는 대기열에 들어가 순차 발송되며, 수신 확인은 그 뒤에 도착합니다 — 몇 분이 걸리기도 하고, 일부 통신망에서는 아예 오지 않습니다.",
@@ -905,10 +1028,18 @@ export const ko: Dictionary = {
     senderNeeds: "사용하고 싶은 발신자 ID",
     senderNeedsHint: "통신사 승인이 필요합니다.",
     honeypot: "이 칸은 비워 두세요",
+    metaTitle: "대량 SMS 문의",
+    noListNote: "수신자 명단을 첨부하거나 붙여 넣지 마세요. 견적에는 위의 정보만 있으면 됩니다.",
+    submit: "견적 요청",
+    submitting: "보내는 중…",
   },
 
   onboarding: {
+    metaTitle: "조직 설정하기",
     noOrgTitle: "아직 소속 조직이 없습니다",
+    noOrgBody:
+      "계정이 아직 사업자에 연결되어 있지 않습니다. 새로 등록하거나, 소유자에게 해당 조직으로 초대해 달라고 요청하세요.",
+    registerBusiness: "사업자 등록하기",
   },
 
   verifyEmail: {
@@ -918,9 +1049,12 @@ export const ko: Dictionary = {
     openVerificationLink: "인증 링크 열기",
     openInvitationLink: "초대 링크 열기",
     openLink: "링크 열기",
+    continueToLogin: "로그인하러 가기",
+    backToLogin: "로그인으로 돌아가기",
   },
 
   invite: {
+    metaTitle: "초대 수락",
     noTokenTitle: "초대 토큰이 없습니다",
     cannotUseTitle: "이 초대는 사용할 수 없습니다",
     signedInAsOtherTitle: "다른 계정으로 로그인되어 있습니다",
@@ -929,6 +1063,17 @@ export const ko: Dictionary = {
     nameLabel: "이름",
     passwordLabel: "비밀번호 설정",
     passwordHint: "12자 이상이어야 합니다.",
+    confirmsAddress:
+      "초대를 수락하면 이메일 주소가 확인되므로 별도의 인증 이메일은 발송되지 않습니다.",
+    existingAccount: "이 주소로 된 계정이 이미 있습니다. 수락하면 이 조직이 기존 계정에 추가됩니다.",
+    accept: "초대 수락하기",
+    joining: "참여하는 중…",
+    noTokenBody: "초대 이메일에 있는 링크를 사용하세요.",
+    backToLogin: "로그인으로 돌아가기",
+    joinTitle: (organization: string) => `${organization}에 참여하기`,
+    invitedAs: (role: string) => `${role}(으)로 초대되었습니다.`,
+    wrongAccountBody: (invited: string, signedIn: string) =>
+      `이 초대는 ${invited} 주소로 발송되었지만, 현재 ${signedIn} 계정으로 로그인되어 있습니다. 로그아웃한 뒤 링크를 다시 여세요.`,
   },
 
   publicExtra: {
@@ -963,7 +1108,7 @@ export const ko: Dictionary = {
     colAmount: "금액",
     colWhen: "일시",
     colReason: "사유",
-    colCampaign: "캐페인",
+    colCampaign: "캠페인",
     colCreated: "생성일",
     colRecipients: "수신자 수",
     colAccepted: "접수됨",
@@ -982,9 +1127,9 @@ export const ko: Dictionary = {
       warnBody:
         "필리핀에서 실제로 금지되는 메시지의 범위는 DPO와 통신사가 결정합니다. 여기의 규칙은 메시지를 차단하거나 보류할 뿐, 수정하지는 않습니다.",
       heldTitle: "최근 보류된 캠페인",
-      heldDescription: "콘텐츠 규칙에 따라 검토로 보류된 캐페인입니다. 최신순.",
+      heldDescription: "콘텐츠 규칙에 따라 검토로 보류된 캠페인입니다. 최신순.",
       heldEmptyTitle: "보류된 항목이 없습니다",
-      heldEmptyBody: "최근 30일간 검토 규칙에 해당한 캐페인이 없습니다.",
+      heldEmptyBody: "최근 30일간 검토 규칙에 해당한 캠페인이 없습니다.",
       colWhyHeld: "보류 사유",
       rulesTitle: "콘텐츠 규칙",
       rulesSummary: (total: number, blocking: number, threshold: string) =>
@@ -1020,10 +1165,10 @@ export const ko: Dictionary = {
       statQueued: "대기열 작업",
       statPaused: "일시 중지된 작업",
       needsOperator: "운영자 확인이 필요한 항목",
-      recentTitle: "최근 캐페인",
+      recentTitle: "최근 캠페인",
       recentDescription: "전체 조직 기준.",
-      emptyTitle: "캐페인이 아직 없습니다",
-      emptyBody: "제출된 캐페인이 대기열에 들어가 발송되면 여기에 표시됩니다.",
+      emptyTitle: "캠페인이 아직 없습니다",
+      emptyBody: "제출된 캠페인이 대기열에 들어가 발송되면 여기에 표시됩니다.",
     },
 
     audit: {
@@ -1112,7 +1257,7 @@ export const ko: Dictionary = {
 
     senders: {
       title: "발신자 ID",
-      subheading: "캐페인은 승인된 발신자 ID로만 발송할 수 있습니다.",
+      subheading: "캠페인은 승인된 발신자 ID로만 발송할 수 있습니다.",
       repliesTitle: "회신 처리 방식이 중요합니다",
       emptyQueueTitle: "검토 대기 중인 항목이 없습니다",
       emptyQueueBody: "새 발신자 ID 신청이 여기에 표시됩니다.",
@@ -1210,6 +1355,7 @@ export const ko: Dictionary = {
   },
 
   adminExtra: {
+    mfaTitle: "2단계 인증",
     adminSubtitle: "\uad00\ub9ac\uc790",
     modeMock: "\ub370\ubaa8 \ubaa8\ub4dc",
     modeSandbox: "\uc81c\ud734\uc0ac \uc0cc\ub4dc\ubc15\uc2a4",
@@ -1270,6 +1416,93 @@ export const ko: Dictionary = {
       "\ucf54\ub4dc\uac00 \uc815\uc0c1 \ub3d9\uc791\ud568\uc744 \ud655\uc778\ud55c \ub4a4\uc5d0\ub9cc \ud0a4\uac00 \uc800\uc7a5\ub418\ubbc0\ub85c, \uc2a4\uc2a4\ub85c \uc7a0\uae30\ub294 \uc77c\uc740 \uc5c6\uc2b5\ub2c8\ub2e4.",
     mfaNotRequired: "\uc774 \ubaa8\ub4dc\uc5d0\uc11c\ub294 \ud544\uc694\ud558\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4",
     mfaSessionVerified: "\uc774 \uc138\uc158\uc740 \uc778\uc99d\ub418\uc5c8\uc2b5\ub2c8\ub2e4",
+    sidebarTagline: "더 가깝게 연결된 필리핀을 위한 간편한 메시징",
+    auditFooter: "모든 운영 작업은 감사 로그에 기록됩니다.",
+    footerTagline: "필리핀 기업의 연결을 더욱 단단하게 만듭니다.",
+    designPreview: "디자인 미리보기 • 샘플 콘텐츠",
+    auditScopeBody:
+      "승인, 역할 변경, 발송, 중지, 지갑 변동, 내보내기, 수신 거부 변경, 정책 변경이 모두 기록됩니다. 전체 전화번호와 메시지 본문은 기록하지 않으며, 로그는 내용을 복제하지 않고 해당 레코드를 가리킵니다.",
+    auditFilterLabel: "작업으로 필터",
+    liftFreeze: "발송 동결 해제",
+    liftFreezeConfirm: "이 계정의 발송을 다시 허용할까요? 미수금 기록은 그대로 남습니다.",
+    lifting: "해제하는 중…",
+    adjustmentsBody:
+      "관리자 조정으로 진행 중인 발송에 이미 예치된 금액보다 잔액을 낮출 수 없으며, 모든 조정에는 사유와 처리자 정보가 필요합니다. 이 기능은 도메인 계층에 있지만 의도적으로 원클릭 버튼으로 제공하지 않습니다.",
+    dailyLimit: "일일 한도",
+    monthlyLimit: "월간 한도",
+    updateLimits: "한도 변경",
+    updated: "변경되었습니다",
+    notUpdated: "변경하지 못했습니다",
+    pipelineStatus: "진행 상태",
+    internalNote: "내부 메모",
+    update: "변경",
+    crmOnlyBody:
+      "문의의 진행 단계를 바꿔도 SMS가 대기열에 들어가지 않습니다. 계약된 캠페인도 승인된 발신자와 충전된 계정으로, 검토를 거치는 일반 발송 절차를 통해 제출됩니다.",
+    mfaRecoveryNote:
+      "각 코드는 한 번만 사용할 수 있습니다. 인증 앱과 다른 곳에 보관하세요. 기기를 잃어버렸을 때 다시 로그인할 수 있는 유일한 방법입니다.",
+    mfaContinue: "관리자 콘솔로 이동",
+    mfaVerify: "확인",
+    mfaChecking: "확인하는 중…",
+    mfaNeedApp: "Google Authenticator, 1Password, Authy 같은 인증 앱이 필요합니다.",
+    mfaSetUp: "2단계 인증 설정",
+    mfaPreparing: "준비하는 중…",
+    mfaSetupUri: "대부분의 앱은 전체 설정 URI도 사용할 수 있습니다:",
+    mfaTurnOn: "2단계 인증 켜기",
+    mfaConfirming: "확인하는 중…",
+    mfaEnterCode: "인증 앱에 표시된 코드를 입력하세요.",
+    mfaRequired: "플랫폼 관리에는 2단계 인증이 필요합니다.",
+    mfaNotRequiredBody:
+      "2단계 인증은 플랫폼이 정식 운영될 때만 적용됩니다. 지금 미리 등록해 둘 수 있으며, 어느 경우든 관리자 콘솔에는 접근할 수 있습니다.",
+    mfaReturn: "관리자 콘솔로 돌아갈 수 있습니다.",
+    mfaLostDevice: "기기를 잃어버렸나요? 6자리 코드 대신 복구 코드 중 하나를 사용하세요.",
+    viewAll: "모두 보기",
+    review: "검토",
+    open: "열기",
+    businessRegistration: "사업자 등록",
+    viewDocuments: "서류 보기",
+    decision: "결정",
+    inboundRepliesLabel: "이 발신자는 수신 회신을 받을 수 있으며, 수집 경로가 이를 처리합니다.",
+    inboundRepliesHint:
+      "사실인 경우에만 선택하세요. 이 설정이 있어야 수신자에게 STOP으로 회신할 수 있다고 안내할 수 있습니다.",
+    recorded: "기록되었습니다",
+    repliesBody:
+      "발신자가 수신 회신을 받을 수 있는지에 따라 수신자에게 STOP 회신을 안내할 수 있는지가 결정됩니다. 파트너가 수신 경로가 있고 수집되고 있다고 확인하기 전에는 꺼 두세요.",
+    canReceive: "수신 가능",
+    oneWay: "단방향",
+    configEditorNote: (mode: string) =>
+      `변경 사항은 다음 발송부터 적용되며 재시작할 필요가 없습니다. 모든 변경은 버전 기록에 보관되고 감사 로그에 기록됩니다. 재정의 값은 ${mode} 환경에만 저장됩니다.`,
+    noGapsBody:
+      "확인 대상 항목이 모두 갖춰졌습니다. 샌드박스, UAT, 복구 테스트는 별도로 승인받아야 합니다.",
+    gapsTitle: (n: number) => `정식 운영 전에 아직 필요한 항목 ${n}개`,
+    gapsBody: "이 항목들은 정식 운영 활성화만 막습니다. 모의(mock) 모드에서는 없어도 모든 기능이 작동합니다.",
+    runtimeNote: "모드는 서버 환경에서 읽으며 요청으로 변경할 수 없습니다.",
+    idempotencyNo: "아니요 — 시간 초과 시 재시도하지 않음",
+    receiptsWebhook: "웹훅",
+    notAvailable: "지원 안 함",
+    timeZoneValue: "Asia/Manila (표시) · UTC (저장)",
+    limitsNote: "플랫폼 기본값입니다. 고객 화면에서 조직별 한도를 따로 지정할 수 있습니다.",
+    illustrativeBody:
+      "테스트용 값이며 승인된 상용 요금이 아닙니다. 공개 요금 페이지에는 표시되지 않습니다.",
+    retentionNote: "잠정 기간입니다. 최종 기간은 개발팀이 아니라 법무 및 DPO가 결정합니다.",
+    hours: (n: number) => `${n}시간`,
+    days: (n: number) => `${n}일`,
+    retentionRun: (command: string) =>
+      `${command} 명령으로 실행합니다. 수신 거부 기록은 의도적으로 연락처보다 훨씬 오래 보관합니다. 수신 거부는 그 출처인 연락처 기록보다 오래 유지되어야 하기 때문입니다.`,
+    blockIntro: "모든 조직에 적용됩니다. 신중하게 사용하세요.",
+    blocked: "차단되었습니다",
+    notBlocked: "차단하지 못했습니다",
+    block: "플랫폼 전체 차단",
+    blocking: "차단하는 중…",
+    decisionApprove: "승인",
+    decisionNeedsInfo: "추가 정보 요청",
+    decisionReject: "반려",
+    decisionSuspend: "정지",
+    reasonOptional: "(선택)",
+    reasonWhy: "이 결정을 내린 이유",
+    reasonOptionalPlaceholder: "기록과 함께 보관되는 선택 메모",
+    recordFor: (name: string) => `${name} 결정 기록`,
+    noIdScansNote:
+      "개인 신분증 사본은 수집하지 않습니다. 인증은 제출된 사업자 등록 정보를 기준으로 합니다.",
   },
 
   roles: {
@@ -1385,6 +1618,10 @@ export const ko: Dictionary = {
       PLATFORM: "플랫폼 전체",
     },
     unknown: (raw: string) => raw.toLowerCase().replace(/_/g, " "),
+    purpose: {
+      INFORMATIONAL: "정보성",
+      PROMOTIONAL: "프로모션",
+    },
   },
 
   locale: {

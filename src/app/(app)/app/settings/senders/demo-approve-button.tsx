@@ -39,9 +39,7 @@ export function DemoApproveButton({ senderId, value }: { senderId: string; value
 
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-[9px] border border-dashed border-brand-200 bg-brand-50/50 px-3 py-2.5">
-      <span className="text-[12.5px] text-body">
-        Demo mode: approve {value} yourself instead of waiting for a reviewer.
-      </span>
+      <span className="text-[12.5px] text-body">{t.settings.senders.demoApproveNote(value)}</span>
       <Button
         variant="secondary"
         size="sm"
@@ -49,7 +47,7 @@ export function DemoApproveButton({ senderId, value }: { senderId: string; value
         disabled={pending}
         data-testid="demo-approve-sender"
       >
-        {pending ? "Approving…" : "Approve (demo)"}
+        {pending ? t.settings.senders.demoApproving : t.settings.senders.demoApprove}
       </Button>
     </div>
   );

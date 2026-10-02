@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { requireOrgContext } from "@/server/auth/context";
 import { listOrganizationSuppressions } from "@/server/domain/suppression";
 import { formatManila } from "@/server/config";
@@ -15,7 +16,10 @@ import { OptOutForm } from "./opt-out-form";
 import { getDictionary } from "@/i18n/server";
 import type { Dictionary } from "@/i18n/dictionaries";
 
-export const metadata = { title: "Opt-out list" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.contacts.optOuts.title };
+}
 export const dynamic = "force-dynamic";
 
 export default async function OptOutsPage() {

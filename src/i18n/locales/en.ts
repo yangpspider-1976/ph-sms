@@ -56,6 +56,8 @@ export const en = {
     value: "Value",
     of: (shown: number, total: number) => `Showing ${shown} of ${total}.`,
     timezoneNote: "Times shown in Asia/Manila",
+    unicode: "Unicode",
+    segments: (n: number) => `${n} segment${n === 1 ? "" : "s"}`,
   },
 
   nav: {
@@ -141,6 +143,8 @@ export const en = {
       intentHint: "Who receives your messages, and how they agreed to hear from you.",
       submit: "Submit for review",
       submitting: "Submitting…",
+      noIdScans:
+        "We do not ask for personal ID scans. Business registration details are used to verify the organization only.",
     },
     demoLogins: {
       title: "Demo logins",
@@ -274,6 +278,7 @@ export const en = {
     colExcluded: "Excluded",
     colUploaded: "Uploaded",
     detail: {
+      metaTitle: "Contact",
       subheading: "Numbers are masked here. The number itself cannot be edited.",
       record: "Record",
       mobileNumber: "Mobile number",
@@ -309,6 +314,12 @@ export const en = {
       reasonLabel: "Reason",
       reasonHint: "Kept with the record so you can show why the number was removed.",
       reasonPlaceholder: "Requested to stop",
+      formIntro:
+        "Enter the numbers a recipient asked you to remove. One per line, or separated by commas.",
+      recorded: "Recorded",
+      notRecorded: "Not recorded",
+      add: "Add to opt-out list",
+      adding: "Recording…",
     },
     imports: {
       subheading: "Import result, row by row.",
@@ -325,6 +336,9 @@ export const en = {
       optedOut: "Opted out",
       uploaded: "Uploaded",
       originalDeleted: "Original deleted",
+      expiredBody:
+        "The uploaded file and its rejected rows were deleted on schedule. Contacts that were imported from it are unaffected.",
+      noRowsStored: "No rows are stored for this import any more.",
     },
     importPanel: {
       title: "Import contacts",
@@ -344,6 +358,9 @@ export const en = {
         "Opt-outs are re-checked at this point, so a recipient who opted out while you were reviewing is still excluded.",
       summaryLine: (read: number, imported: number, excluded: number) =>
         `${read} rows read \u00b7 ${imported} will be imported \u00b7 ${excluded} excluded`,
+      ignoreUnknown: "Ignore the columns we do not recognise and import the rest.",
+      upload: "Upload and preview",
+      reading: "Reading…",
     },
   },
 
@@ -547,6 +564,7 @@ export const en = {
     testWriteMessage: "Write your message first.",
     testCostNote: (cost: string) =>
       `A test is a real message and is charged like one \u2014 about ${cost} for this wording.`,
+    overAvailable: (amount: string) => `More than your available credit of ${amount}.`,
   },
 
   settings: {
@@ -615,6 +633,22 @@ export const en = {
       relationPlaceholder:
         "This is our registered trading name, used on our storefront and receipts.",
       notApproved: "Not approved",
+      applyIntro:
+        "Up to 11 characters, letters and numbers. Networks reject names that imply a business you are not.",
+      submitted: "Submitted for review",
+      notSubmitted: "Not submitted",
+      apply: "Apply for review",
+      applying: "Submitting…",
+      demoApproveNote: (value: string) =>
+        `Demo mode: approve ${value} yourself instead of waiting for a reviewer.`,
+      demoApprove: "Approve (demo)",
+      demoApproving: "Approving…",
+      cannotSendBody:
+        "You need at least one approved sender identity before any campaign can be submitted. Apply below; a reviewer checks the name against your registered business.",
+      canReceiveReplies: "Can receive replies",
+      oneWay: "One-way",
+      oneWayNote:
+        "This sender cannot receive replies, so your messages must not tell recipients to reply STOP. Record opt-out requests on your opt-out list instead.",
     },
     team: {
       title: "Team",
@@ -630,6 +664,21 @@ export const en = {
       expired: "Expired",
       pending: "Pending",
       notChanged: "Not changed",
+      inviteIntro:
+        "The invitation is tied to this email address and this role. Forwarding the link does not let someone else use it.",
+      inviteSent: "Invitation sent",
+      inviteNotSent: "Not sent",
+      sendInvite: "Send invitation",
+      sendingInvite: "Sending…",
+      invitedAs: (role: string, when: string) => `Invited as ${role} · expires ${when}`,
+      invitedAsExpired: (role: string, when: string) => `Invited as ${role} · expired ${when}`,
+      revoke: "Revoke",
+      revoking: "Revoking…",
+      removing: "Removing…",
+      lastOwnerNote:
+        "The last owner cannot be removed or demoted — an organization must always have someone who can manage billing and restore access.",
+      demoMailNote: (path: string) =>
+        `Demo mode: invitation emails are written to the local mail sink rather than sent. Open ${path} to find the link.`,
     },
   },
 
@@ -643,6 +692,15 @@ export const en = {
     newTemplate: "New template",
     namePlaceholder: "Reservation confirmed",
     bodyPlaceholder: "Your reservation is confirmed. We look forward to seeing you tomorrow.",
+    messageLabel: "Message",
+    counter: (characters: number, segments: number, encoding: string) =>
+      `${characters} characters · ${segments} segment${segments === 1 ? "" : "s"} · ${encoding}`,
+    plainTextNote:
+      "Plain text only. Personalization variables are not available yet, so write the message out in full.",
+    saved: "Saved",
+    notSaved: "Not saved",
+    save: "Save template",
+    saving: "Saving…",
   },
 
   credits: {
@@ -676,6 +734,11 @@ export const en = {
     package: "Package",
     creditLabel: "Credit",
     paymentNotAccepted: "Payment not accepted",
+    paymentAlready: (status: string) => `This payment is already ${status.toLowerCase()}.`,
+    confirmedOnlyNote:
+      "Credit is added only when the payment provider confirms it. Returning from a payment page does not add credit on its own.",
+    completePayment: "Complete demo payment",
+    completing: "Completing…",
   },
 
   accountStatus: {
@@ -683,6 +746,17 @@ export const en = {
     subheading: "Only approved businesses with an approved sender identity can send.",
     organization: "Organization",
     yourRole: "Your role",
+    reviewingTitle: "Your business is being reviewed",
+    reviewingBody:
+      "A reviewer is checking the details you submitted. You cannot send messages until the review is complete.",
+    needsInfoTitle: "We need more information",
+    needsInfoBody:
+      "A reviewer has asked for more detail before your account can be activated. Check your email for what is needed.",
+    suspendedTitle: "This account is suspended",
+    suspendedBody: "Sending is disabled. Contact support to discuss reactivating the account.",
+    rejectedTitle: "This application was not approved",
+    rejectedBody:
+      "Contact support if you believe this was a mistake or your circumstances have changed.",
   },
 
   support: {
@@ -743,6 +817,14 @@ export const en = {
     rowFinished: "Finished",
     timesNote:
       "All times are Asia/Manila. Accepted by the provider does not mean delivered, and delivered does not mean read.",
+    unresolvedTitle: (n: number) => `${n} message${n === 1 ? "" : "s"} unresolved`,
+    unresolvedBody:
+      "The connection dropped after these were submitted, so we cannot say whether the provider accepted them. They are not retried automatically, because that risks sending twice. Their cost stays held pending reconciliation.",
+    stopCampaign: "Stop campaign",
+    stopConfirm: "Stop remaining messages? Already-sent messages cannot be recalled.",
+    stopYes: "Yes, stop",
+    stopping: "Stopping…",
+    keepSending: "Keep sending",
   },
 
   supportPage: {
@@ -795,7 +877,51 @@ export const en = {
     linkAcceptableUse: "Acceptable use",
     footerNote: "Philippine mobile destinations only \u2022 Times shown in Asia/Manila",
     navMain: "Main",
+    logIn: "Log in",
+    getStarted: "Get started",
     legalDraft: "Draft placeholder \u2014 pending legal review",
+  },
+
+  home: {
+    // Line breaks are part of the copy: each language breaks where it reads well.
+    heroTitle: "Business SMS.\nMade simple.",
+    heroBody: "Send to Philippine mobile numbers. Enter recipients manually or upload a CSV.",
+    startSending: "Start sending",
+    requestBulkQuote: "Request bulk quote",
+    philippinesOnly: "Philippines only",
+    verifiedBusinesses: "Verified businesses",
+    prepaidCredits: "Prepaid credits",
+    scribbleHero: "Simple.\nReliable.\nFor your business.",
+    scribbleUpload: "Upload your list\nin seconds",
+    phoneNewMessage: "New Message",
+    phoneSample:
+      "Hello! This is a sample message from PH SMS. You can customize your message here.\n\nThank you!",
+    stepsTitle: "From your list to their phone",
+    stepsSubheading: "A simple process, built for Philippine businesses.",
+    step1Title: "Add recipients",
+    step1Body: "Enter mobile numbers manually or upload a CSV file.",
+    step2Title: "Write your message",
+    step2Body: "Create your SMS message and preview how it will look.",
+    step3Title: "Review & send",
+    step3Body: "Check your list and message, then send when you're ready.",
+    bulkTitle: "Sending at scale?",
+    bulkBody: "Let us help plan your next bulk campaign.",
+    bulkCta: "Talk to our team",
+    scribbleBulk: "Same people.\nA more\nconnected\nPhilippines.",
+  },
+
+  legal: {
+    privacyTitle: "Privacy notice",
+    privacyIntent:
+      "How personal data is collected, used, retained and deleted, and how a data subject exercises their rights.",
+    termsTitle: "Terms of service",
+    termsIntent: "The agreement between the platform and the business using it.",
+    acceptableUseTitle: "Acceptable use policy",
+    acceptableUseIntent: "What may and may not be sent, and how abuse is handled.",
+    notWritten:
+      "This document has not been written. Approved wording must be supplied by the Philippine DPO or legal adviser before this account goes live, and must line up with the SMS partner's carrier requirements. Nothing on this page is legal advice.",
+    requiredBeforeLive:
+      "Required before live activation: the processing basis relied on, the notice given at collection, retention periods, how opt-out is handled and how a data subject makes a request.",
   },
 
   features: {
@@ -915,10 +1041,18 @@ export const en = {
     senderNeeds: "Sender ID you want to use",
     senderNeedsHint: "Subject to approval by the network.",
     honeypot: "Leave this empty",
+    metaTitle: "Bulk SMS inquiry",
+    noListNote: "Do not attach or paste a recipient list. We only need the details above to quote.",
+    submit: "Request a quote",
+    submitting: "Sending…",
   },
 
   onboarding: {
+    metaTitle: "Set up your organization",
     noOrgTitle: "No organization yet",
+    noOrgBody:
+      "Your account is not attached to a business yet. Create one, or ask an owner to invite you to theirs.",
+    registerBusiness: "Register a business",
   },
 
   verifyEmail: {
@@ -928,9 +1062,12 @@ export const en = {
     openVerificationLink: "Open verification link",
     openInvitationLink: "Open invitation link",
     openLink: "Open link",
+    continueToLogin: "Continue to log in",
+    backToLogin: "Back to log in",
   },
 
   invite: {
+    metaTitle: "Accept invitation",
     noTokenTitle: "No invitation token",
     cannotUseTitle: "This invitation cannot be used",
     signedInAsOtherTitle: "Signed in as someone else",
@@ -939,6 +1076,18 @@ export const en = {
     nameLabel: "Your name",
     passwordLabel: "Choose a password",
     passwordHint: "At least 12 characters.",
+    confirmsAddress:
+      "Accepting this invitation confirms the address, so there is no separate verification email.",
+    existingAccount:
+      "You already have an account for this address. Accepting adds this organization to it.",
+    accept: "Accept invitation",
+    joining: "Joining…",
+    noTokenBody: "Use the link from your invitation email.",
+    backToLogin: "Back to log in",
+    joinTitle: (organization: string) => `Join ${organization}`,
+    invitedAs: (role: string) => `You were invited as ${role}.`,
+    wrongAccountBody: (invited: string, signedIn: string) =>
+      `This invitation is for ${invited}, but you are signed in as ${signedIn}. Sign out first, then open the link again.`,
   },
 
   publicExtra: {
@@ -1223,6 +1372,7 @@ export const en = {
   },
 
   adminExtra: {
+    mfaTitle: "Two-factor authentication",
     adminSubtitle: "Admin",
     modeMock: "Demo mode",
     modeSandbox: "Partner sandbox",
@@ -1285,6 +1435,97 @@ export const en = {
       "The key is only saved once a code proves it works, so you cannot lock yourself out.",
     mfaNotRequired: "Not required in this mode",
     mfaSessionVerified: "This session is verified",
+    sidebarTagline: "Simple Messaging for a More Connected Philippines",
+    auditFooter: "All operational actions are recorded in the audit log.",
+    footerTagline: "Building stronger business connections in the Philippines.",
+    designPreview: "Design preview • Sample content",
+    auditScopeBody:
+      "Approvals, role changes, sends, stops, wallet movements, exports, suppression changes and policy changes are all recorded. Full phone numbers and message bodies are not: the log points at records rather than duplicating their contents.",
+    auditFilterLabel: "Filter by action",
+    liftFreeze: "Lift sending freeze",
+    liftFreezeConfirm: "Let this account send again? The debt stays recorded.",
+    lifting: "Lifting…",
+    adjustmentsBody:
+      "An admin adjustment cannot take a balance below funds already held for a live send, and every adjustment needs a reason and an operator identity. The action exists in the domain layer but is deliberately not exposed as a one-click control.",
+    dailyLimit: "Daily limit",
+    monthlyLimit: "Monthly limit",
+    updateLimits: "Update limits",
+    updated: "Updated",
+    notUpdated: "Not updated",
+    pipelineStatus: "Pipeline status",
+    internalNote: "Internal note",
+    update: "Update",
+    crmOnlyBody:
+      "Moving an inquiry through the pipeline never queues an SMS. A contracted campaign is still submitted through the normal reviewed send path, against an approved sender and a funded account.",
+    mfaRecoveryNote:
+      "Each code works once. Store them somewhere separate from your authenticator app — they are the only way back in if you lose the device.",
+    mfaContinue: "Continue to the admin console",
+    mfaVerify: "Verify",
+    mfaChecking: "Checking…",
+    mfaNeedApp:
+      "You will need an authenticator app such as Google Authenticator, 1Password or Authy.",
+    mfaSetUp: "Set up two-factor authentication",
+    mfaPreparing: "Preparing…",
+    mfaSetupUri: "Most apps also accept the full setup URI:",
+    mfaTurnOn: "Turn on two-factor authentication",
+    mfaConfirming: "Confirming…",
+    mfaEnterCode: "Enter the code from your authenticator app.",
+    mfaRequired: "Platform administration requires a second factor.",
+    mfaNotRequiredBody:
+      "A second factor is only enforced when the platform is live. You can enrol now so it is ready, and the admin console stays reachable either way.",
+    mfaReturn: "You can return to the admin console.",
+    mfaLostDevice: "Lost your device? Use one of your recovery codes instead of the 6-digit code.",
+    viewAll: "View all",
+    review: "Review",
+    open: "Open",
+    businessRegistration: "Business registration",
+    viewDocuments: "View documents",
+    decision: "Decision",
+    inboundRepliesLabel:
+      "This sender can receive inbound replies, and an ingestion route processes them.",
+    inboundRepliesHint:
+      "Only tick this if it is true. It is what allows the product to tell recipients they can reply STOP.",
+    recorded: "Recorded",
+    repliesBody:
+      "Whether a sender can receive inbound replies decides whether the product may ever tell recipients to reply STOP. Leave it off unless the partner has confirmed an inbound route exists and is ingested.",
+    canReceive: "Can receive",
+    oneWay: "One-way",
+    configEditorNote: (mode: string) =>
+      `Changes apply to the next send — nothing needs restarting. Every change is kept in the version history and written to the audit log. Overrides are saved against the ${mode} environment only.`,
+    noGapsBody:
+      "Every checked input is present. Sandbox, UAT and recovery testing are still separate sign-offs.",
+    gapsTitle: (n: number) => `${n} input${n === 1 ? "" : "s"} still required before live`,
+    gapsBody: "These block live activation only. Everything in mock mode works without them.",
+    runtimeNote: "The mode is read from the server environment and cannot be changed by a request.",
+    idempotencyNo: "No — timeouts are not retried",
+    receiptsWebhook: "Webhook",
+    notAvailable: "Not available",
+    timeZoneValue: "Asia/Manila (display) · UTC (stored)",
+    limitsNote:
+      "Platform defaults. An organization can be given its own limits from the customers screen.",
+    illustrativeBody:
+      "This is a test value, not approved commercial pricing, and it is not shown on the public pricing page.",
+    retentionNote:
+      "Provisional windows. Final periods are a legal and DPO decision, not a development one.",
+    hours: (n: number) => `${n} hour${n === 1 ? "" : "s"}`,
+    days: (n: number) => `${n} day${n === 1 ? "" : "s"}`,
+    retentionRun: (command: string) =>
+      `Run with ${command}. Suppression is retained far longer than contacts on purpose: an opt-out has to outlive the contact record it came from.`,
+    blockIntro: "Applies to every organization. Use sparingly.",
+    blocked: "Blocked",
+    notBlocked: "Not blocked",
+    block: "Block platform-wide",
+    blocking: "Blocking…",
+    decisionApprove: "Approve",
+    decisionNeedsInfo: "Request more information",
+    decisionReject: "Reject",
+    decisionSuspend: "Suspend",
+    reasonOptional: "(optional)",
+    reasonWhy: "Why this decision was made",
+    reasonOptionalPlaceholder: "Optional note kept with the record",
+    recordFor: (name: string) => `Record for ${name}`,
+    noIdScansNote:
+      "Personal ID scans are not collected. Verification is based on the business registration details supplied.",
   },
 
   roles: {
@@ -1402,6 +1643,10 @@ export const en = {
       PLATFORM: "Platform-wide",
     },
     unknown: (raw: string) => raw.toLowerCase().replace(/_/g, " "),
+    purpose: {
+      INFORMATIONAL: "Informational",
+      PROMOTIONAL: "Promotional",
+    },
   },
 
   locale: {

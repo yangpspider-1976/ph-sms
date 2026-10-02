@@ -35,9 +35,7 @@ export function OptOutForm() {
   return (
     <Card className="max-w-2xl p-5">
       <h2 className="card-title">{t.contacts.optOuts.formTitle}</h2>
-      <p className="mt-1 text-[13px] text-muted">
-        Enter the numbers a recipient asked you to remove. One per line, or separated by commas.
-      </p>
+      <p className="mt-1 text-[13px] text-muted">{t.contacts.optOuts.formIntro}</p>
 
       <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="mt-4 space-y-4">
         <Field label={t.contacts.optOuts.numbersLabel} htmlFor="numbers" required>
@@ -61,14 +59,14 @@ export function OptOutForm() {
         {result ? (
           <Notice
             tone={result.ok ? "success" : "danger"}
-            title={result.ok ? "Recorded" : "Not recorded"}
+            title={result.ok ? t.contacts.optOuts.recorded : t.contacts.optOuts.notRecorded}
           >
             {result.message}
           </Notice>
         ) : null}
 
         <Button type="submit" disabled={pending}>
-          {pending ? "Recording…" : "Add to opt-out list"}
+          {pending ? t.contacts.optOuts.adding : t.contacts.optOuts.add}
         </Button>
       </form>
     </Card>

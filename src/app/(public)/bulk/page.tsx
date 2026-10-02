@@ -1,8 +1,12 @@
+import type { Metadata } from "next";
 import { Card, Notice, PageHeader } from "@/components/ui";
 import { InquiryForm } from "./inquiry-form";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Bulk SMS inquiry" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.bulk.metaTitle };
+}
 
 export default async function BulkPage() {
   const t = await getDictionary();

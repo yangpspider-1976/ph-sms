@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PRODUCT_TAGLINE, Wordmark } from "@/components/brand";
+import { PRODUCT_NAME, Wordmark } from "@/components/brand";
 import { SidebarNav, type NavItem } from "@/components/sidebar";
 import { Pill } from "@/components/ui";
 import { formatManilaDate } from "@/server/config";
@@ -22,27 +22,32 @@ import {
 import { requirePlatformAdmin } from "@/server/auth/context";
 import { env } from "@/server/env";
 import { getDictionary } from "@/i18n/server";
+import type { Dictionary } from "@/i18n/dictionaries";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { LogoutButton } from "@/components/logout-button";
 import { MobileNav } from "@/components/mobile-nav";
 
-const NAV: NavItem[] = [
-  { href: "/admin", label: "Overview", icon: <IconHome size={18} /> },
-  { href: "/admin/customers", label: "Customers", icon: <IconUsers size={18} /> },
-  { href: "/admin/verification", label: "Verification", icon: <IconShield size={18} /> },
-  { href: "/admin/activity", label: "SMS Activity", icon: <IconChat size={18} /> },
-  { href: "/admin/inquiries", label: "Bulk Inquiries", icon: <IconDocument size={18} /> },
-  { href: "/admin/senders", label: "Sender IDs", icon: <IconTag size={18} /> },
-  { href: "/admin/credits", label: "Credits", icon: <IconDatabase size={18} /> },
-  { href: "/admin/suppression", label: "Suppression", icon: <IconBlock size={18} /> },
-  { href: "/admin/abuse", label: "Abuse", icon: <IconShield size={18} /> },
-  { href: "/admin/health", label: "System health", icon: <IconSliders size={18} /> },
-  { href: "/admin/audit", label: "Audit logs", icon: <IconList size={18} /> },
-  { href: "/admin/settings", label: "Settings", icon: <IconSettings size={18} /> },
-];
+function navFor(t: Dictionary): NavItem[] {
+  const n = t.adminNav;
+  return [
+    { href: "/admin", label: n.overview, icon: <IconHome size={18} /> },
+    { href: "/admin/customers", label: n.customers, icon: <IconUsers size={18} /> },
+    { href: "/admin/verification", label: n.verification, icon: <IconShield size={18} /> },
+    { href: "/admin/activity", label: n.activity, icon: <IconChat size={18} /> },
+    { href: "/admin/inquiries", label: n.inquiries, icon: <IconDocument size={18} /> },
+    { href: "/admin/senders", label: n.senders, icon: <IconTag size={18} /> },
+    { href: "/admin/credits", label: n.credits, icon: <IconDatabase size={18} /> },
+    { href: "/admin/suppression", label: n.suppression, icon: <IconBlock size={18} /> },
+    { href: "/admin/abuse", label: n.abuse, icon: <IconShield size={18} /> },
+    { href: "/admin/health", label: n.health, icon: <IconSliders size={18} /> },
+    { href: "/admin/audit", label: n.audit, icon: <IconList size={18} /> },
+    { href: "/admin/settings", label: n.settings, icon: <IconSettings size={18} /> },
+  ];
+}
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const t = await getDictionary();
+  const nav = navFor(t);
 
   const admin = await requirePlatformAdmin();
 
@@ -56,11 +61,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto [scrollbar-color:var(--color-navy-700)_transparent] [scrollbar-width:thin]">
-          <SidebarNav items={NAV} tone="dark" />
+          <SidebarNav items={nav} tone="dark" />
 
           <div className="mt-auto border-t border-white/8 px-6 py-5">
             {/* navy-300 (7.45:1 on navy-900). navy-400 measured 4.20:1 and failed AA. */}
-            <p className="text-[12.5px] leading-snug text-navy-300">{PRODUCT_TAGLINE}</p>
+            <p className="text-[12.5px] leading-snug text-navy-300">{t.adminExtra.sidebarTagline}</p>
           </div>
         </div>
       </aside>
@@ -70,7 +75,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <div className="flex h-[60px] items-center gap-3 px-4 sm:px-8">
             <div className="flex items-center gap-3 lg:hidden">
               <MobileNav
-                items={NAV}
+                items={nav}
                 tone="dark"
                 homeHref="/admin"
                 subtitle={t.adminExtra.adminSubtitle}
@@ -121,17 +126,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
         <footer className="border-t border-line bg-white px-5 py-4 sm:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-[12.5px] text-muted">{t.adminExtra.auditFooter}</p>
             <p className="text-[12.5px] text-muted">
-              All operational actions are recorded in the audit log.
-            </p>
-            <p className="text-[12.5px] text-muted">
-              <span className="font-semibold text-body">PH SMS</span> • Building stronger business
-              connections in the Philippines.
+              <span className="font-semibold text-body">{PRODUCT_NAME}</span> •{" "}
+              {t.adminExtra.footerTagline}
             </p>
           </div>
-          <p className="mt-2 text-right text-[11.5px] text-muted">
-            Design preview • Sample content
-          </p>
+          <p className="mt-2 text-right text-[11.5px] text-muted">{t.adminExtra.designPreview}</p>
         </footer>
       </div>
     </div>

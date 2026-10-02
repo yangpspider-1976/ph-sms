@@ -39,7 +39,7 @@ export function LimitsForm({
       <div className="flex flex-wrap items-end gap-3">
         <div className="w-[130px]">
           <label className="field-label" htmlFor={`daily-${organizationId}`}>
-            Daily limit
+            {t.adminExtra.dailyLimit}
           </label>
           <Input
             id={`daily-${organizationId}`}
@@ -51,7 +51,7 @@ export function LimitsForm({
         </div>
         <div className="w-[140px]">
           <label className="field-label" htmlFor={`monthly-${organizationId}`}>
-            Monthly limit
+            {t.adminExtra.monthlyLimit}
           </label>
           <Input
             id={`monthly-${organizationId}`}
@@ -62,7 +62,7 @@ export function LimitsForm({
           />
         </div>
         <Button type="submit" variant="secondary" size="sm" className="py-2.5" disabled={pending}>
-          {pending ? "Saving…" : "Update limits"}
+          {pending ? t.common.saving : t.adminExtra.updateLimits}
         </Button>
         {usingDefaults ? (
           <span className="pb-2 text-[12px] text-muted">{t.admin.customers.usingDefaults}</span>
@@ -70,7 +70,10 @@ export function LimitsForm({
       </div>
 
       {result ? (
-        <Notice tone={result.ok ? "success" : "danger"} title={result.ok ? "Updated" : "Not updated"}>
+        <Notice
+          tone={result.ok ? "success" : "danger"}
+          title={result.ok ? t.adminExtra.updated : t.adminExtra.notUpdated}
+        >
           {result.message}
         </Notice>
       ) : null}

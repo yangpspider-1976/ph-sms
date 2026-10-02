@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/server/db";
@@ -18,7 +19,10 @@ import {
 import { IconChat } from "@/components/icons";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "SMS activity" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.admin.activity.title };
+}
 export const dynamic = "force-dynamic";
 
 const TONE: Record<string, Tone> = {

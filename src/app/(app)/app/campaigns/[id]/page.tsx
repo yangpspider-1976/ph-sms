@@ -70,8 +70,8 @@ export default async function CampaignDetailPage({
     <>
       <PageHeader
         title={campaign.name}
-        description={`${campaign.senderValueSnapshot} · ${campaign.purpose.toLowerCase()} · ${
-          campaign.encoding === "GSM7" ? "GSM-7" : "Unicode"
+        description={`${campaign.senderValueSnapshot} · ${t.status.purpose[campaign.purpose]} · ${
+          campaign.encoding === "GSM7" ? "GSM-7" : t.common.unicode
         }`}
         action={
           stoppable && ctx.can("campaign.cancel") ? (
@@ -129,10 +129,8 @@ export default async function CampaignDetailPage({
 
       {counts.unresolved > 0 ? (
         <div className="mb-5">
-          <Notice tone="warning" title={`${counts.unresolved} message(s) unresolved`}>
-            The connection dropped after these were submitted, so we cannot say whether the
-            provider accepted them. They are not retried automatically, because that risks
-            sending twice. Their cost stays held pending reconciliation.
+          <Notice tone="warning" title={t.campaignDetail.unresolvedTitle(counts.unresolved)}>
+            {t.campaignDetail.unresolvedBody}
           </Notice>
         </div>
       ) : null}

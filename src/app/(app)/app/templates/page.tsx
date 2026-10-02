@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { requireOrgContext } from "@/server/auth/context";
 import { listTemplates } from "@/server/actions/templates";
 import { analyzeMessage } from "@/server/domain/segments";
@@ -7,7 +8,10 @@ import { IconDocument } from "@/components/icons";
 import { TemplateForm } from "./template-form";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Templates" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.templates.title };
+}
 export const dynamic = "force-dynamic";
 
 export default async function TemplatesPage() {
@@ -57,10 +61,10 @@ export default async function TemplatesPage() {
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                       <Pill tone="neutral" dot={false}>
-                        {info.encoding === "GSM7" ? "GSM-7" : "Unicode"}
+                        {info.encoding === "GSM7" ? "GSM-7" : t.common.unicode}
                       </Pill>
                       <Pill tone={info.segments > 1 ? "warning" : "success"} dot={false}>
-                        {info.segments} segment{info.segments === 1 ? "" : "s"}
+                        {t.common.segments(info.segments)}
                       </Pill>
                       <Pill tone="neutral" dot={false}>
                         {formatCentavos(cost)} each

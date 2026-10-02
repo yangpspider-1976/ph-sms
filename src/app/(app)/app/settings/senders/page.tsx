@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { requireOrgContext } from "@/server/auth/context";
 import { listSenders } from "@/server/actions/senders";
 import { formatManila } from "@/server/config";
@@ -16,7 +17,10 @@ import { SenderApplicationForm } from "./application-form";
 import { DemoApproveButton } from "./demo-approve-button";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Sender identities" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.settings.senders.title };
+}
 export const dynamic = "force-dynamic";
 
 const TONE: Record<string, Tone> = {
@@ -44,8 +48,7 @@ export default async function SenderIdentitiesPage() {
       {approved.length === 0 ? (
         <div className="mb-5 max-w-3xl">
           <Notice tone="warning" title={t.settings.senders.cannotSendTitle}>
-            You need at least one approved sender identity before any campaign can be submitted.
-            Apply below; a reviewer checks the name against your registered business.
+            {t.settings.senders.cannotSendBody}
           </Notice>
         </div>
       ) : null}
@@ -82,7 +85,9 @@ export default async function SenderIdentitiesPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     {sender.status === "APPROVED" ? (
                       <Pill tone="neutral" dot={false}>
-                        {sender.supportsInboundReplies ? "Can receive replies" : "One-way"}
+                        {sender.supportsInboundReplies
+                            ? t.settings.senders.canReceiveReplies
+                            : t.settings.senders.oneWay}
                       </Pill>
                     ) : null}
                     <Pill tone={TONE[sender.status] ?? "neutral"}>
@@ -97,8 +102,7 @@ export default async function SenderIdentitiesPage() {
 
                 {sender.status === "APPROVED" && !sender.supportsInboundReplies ? (
                   <p className="mt-2 text-[12.5px] text-muted">
-                    This sender cannot receive replies, so your messages must not tell recipients
-                    to reply STOP. Record opt-out requests on your opt-out list instead.
+                    {t.settings.senders.oneWayNote}
                   </p>
                 ) : null}
 

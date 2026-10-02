@@ -76,19 +76,6 @@ export function Wordmark({
 }
 
 /**
- * Persistent demo marker. In MOCK mode nothing here sends an SMS or takes a
- * payment, and the interface says so on every page rather than letting a
- * screenshot be mistaken for a live system.
- */
-export function DemoFooterMark({ className }: { className?: string }) {
-  return (
-    <p className={cx("text-[12px] text-muted", className)}>
-      Design preview • Sample content • Demo — no real SMS or payments
-    </p>
-  );
-}
-
-/**
  * Loose handwritten annotation used on the marketing page.
  *
  * The colour is a prop rather than something the caller overrides via

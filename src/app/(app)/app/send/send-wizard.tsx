@@ -634,7 +634,7 @@ export function SendWizard({
             ) : null}
             {estimatedCost > limits.availableCentavos ? (
               <p className="mt-2 text-[12.5px] font-semibold text-danger-fg">
-                More than your available credit of {peso(limits.availableCentavos)}.
+                {t.send.overAvailable(peso(limits.availableCentavos))}
               </p>
             ) : null}
           </div>
@@ -704,7 +704,7 @@ function ReviewPanel({
         <DetailRow
           label={t.send.rowEncoding}
           value={t.send.encodingValue(
-            quote.encoding === "GSM7" ? "GSM-7" : "Unicode",
+            quote.encoding === "GSM7" ? "GSM-7" : t.common.unicode,
             quote.segmentsPerMessage,
           )}
         />

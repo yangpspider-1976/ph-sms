@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/server/db";
 import { organizations } from "@/server/db/schema";
@@ -17,7 +18,10 @@ import { IconShield } from "@/components/icons";
 import { VerificationDecision } from "./decision-form";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Business verification" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.admin.verification.title };
+}
 export const dynamic = "force-dynamic";
 
 const TONE: Record<string, Tone> = {
@@ -125,8 +129,7 @@ export default async function VerificationPage({
                 ) : null}
 
                 <p className="mt-3 text-[12px] text-muted">
-                  Personal ID scans are not collected. Verification is based on the business
-                  registration details supplied.
+                  {t.adminExtra.noIdScansNote}
                 </p>
 
                 <div className="mt-4">

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/server/db";
 import { senderIdentities, templates } from "@/server/db/schema";
@@ -11,7 +12,10 @@ import { Card, Notice, PageHeader } from "@/components/ui";
 import { SendWizard } from "./send-wizard";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Send SMS" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.send.title };
+}
 export const dynamic = "force-dynamic";
 
 export default async function SendPage({

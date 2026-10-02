@@ -47,7 +47,7 @@ export function InquiryForm({
       <div className="flex flex-wrap items-end gap-3">
         <div className="w-full max-w-[210px]">
           <label className="field-label" htmlFor={`status-${inquiryId}`}>
-            Pipeline status
+            {t.adminExtra.pipelineStatus}
           </label>
           <Select id={`status-${inquiryId}`} name="status" defaultValue={status}>
             {STATUSES.map((s) => (
@@ -60,7 +60,7 @@ export function InquiryForm({
 
         <div className="min-w-[220px] flex-1">
           <label className="field-label" htmlFor={`note-${inquiryId}`}>
-            Internal note
+            {t.adminExtra.internalNote}
           </label>
           <Input
             id={`note-${inquiryId}`}
@@ -71,12 +71,15 @@ export function InquiryForm({
         </div>
 
         <Button type="submit" variant="secondary" disabled={pending}>
-          {pending ? "Saving…" : "Update"}
+          {pending ? t.common.saving : t.adminExtra.update}
         </Button>
       </div>
 
       {result ? (
-        <Notice tone={result.ok ? "success" : "danger"} title={result.ok ? "Updated" : "Not updated"}>
+        <Notice
+          tone={result.ok ? "success" : "danger"}
+          title={result.ok ? t.adminExtra.updated : t.adminExtra.notUpdated}
+        >
           {result.message}
         </Notice>
       ) : null}

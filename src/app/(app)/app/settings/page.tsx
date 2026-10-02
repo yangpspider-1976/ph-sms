@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { requireOrgContext } from "@/server/auth/context";
 import { formatManila } from "@/server/config";
 import { Card, DetailRow, NavTile, Notice, PageHeader, Pill } from "@/components/ui";
@@ -10,7 +11,10 @@ import {
   IconUsers,
 } from "@/components/icons";
 
-export const metadata = { title: "Organization settings" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.settings.title };
+}
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {

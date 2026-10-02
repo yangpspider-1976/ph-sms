@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/server/db";
 import { ledgerEntries, organizations, paymentEvents, payments, wallets } from "@/server/db/schema";
@@ -18,7 +19,10 @@ import { IconDatabase } from "@/components/icons";
 import { ClearFreezeButton } from "./clear-freeze-button";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Credits" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.admin.credits.title };
+}
 export const dynamic = "force-dynamic";
 
 const PAYMENT_TONE: Record<string, Tone> = {
@@ -215,9 +219,7 @@ export default async function AdminCreditsPage() {
 
       <div className="mt-5 max-w-3xl">
         <Notice tone="info" title={t.admin.credits.adjustmentsTitle}>
-          An admin adjustment cannot take a balance below funds already held for a live send, and
-          every adjustment needs a reason and an operator identity. The action exists in the
-          domain layer but is deliberately not exposed as a one-click control.
+          {t.adminExtra.adjustmentsBody}
         </Notice>
       </div>
     </>

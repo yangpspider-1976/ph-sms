@@ -32,7 +32,7 @@ export function DemoPayButton({ reference }: { reference: string }) {
         </Notice>
       ) : null}
       <Button onClick={pay} disabled={pending}>
-        {pending ? "Completing…" : "Complete demo payment"}
+        {pending ? t.credits.completing : t.credits.completePayment}
       </Button>
     </div>
   );

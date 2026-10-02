@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { requirePlatformAdmin } from "@/server/auth/context";
 import { env, liveReadinessGaps } from "@/server/env";
 import { formatCentavos, liveConfigGaps } from "@/server/config";
@@ -9,7 +10,10 @@ import { getPaymentProvider } from "@/server/providers/payments";
 import { Card, CardHeader, DetailRow, Notice, PageHeader, Pill } from "@/components/ui";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Platform settings" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.admin.settings.title };
+}
 export const dynamic = "force-dynamic";
 
 /**
@@ -45,12 +49,11 @@ export default async function AdminSettingsPage() {
       <div className="mb-5 max-w-3xl">
         {gaps.length === 0 ? (
           <Notice tone="success" title={t.admin.settings.noGapsTitle}>
-            Every checked input is present. Sandbox, UAT and recovery testing are still separate
-            sign-offs.
+            {t.adminExtra.noGapsBody}
           </Notice>
         ) : (
-          <Notice tone="warning" title={`${gaps.length} inputs still required before live`}>
-            These block live activation only. Everything in mock mode works without them.
+          <Notice tone="warning" title={t.adminExtra.gapsTitle(gaps.length)}>
+            {t.adminExtra.gapsBody}
             <ul className="mt-2 list-disc space-y-0.5 pl-4">
               {gaps.map((gap) => (
                 <li key={gap}>{gap}</li>
@@ -77,9 +80,7 @@ export default async function AdminSettingsPage() {
       <div className="grid gap-5 xl:grid-cols-2">
         <Card className="p-5">
           <h2 className="card-title">{t.admin.settings.runtimeTitle}</h2>
-          <p className="mt-1 text-[12.5px] text-muted">
-            The mode is read from the server environment and cannot be changed by a request.
-          </p>
+          <p className="mt-1 text-[12.5px] text-muted">{t.adminExtra.runtimeNote}</p>
           <dl className="mt-3">
             <DetailRow
               label={t.admin.settings.rowMode}
@@ -90,24 +91,27 @@ export default async function AdminSettingsPage() {
             <DetailRow label={t.admin.settings.rowSmsAdapter} value={sms.capabilities.name} />
             <DetailRow
               label={t.admin.settings.rowIdempotency}
-              value={sms.capabilities.guaranteesIdempotency ? "Yes" : "No — timeouts are not retried"}
+              value={
+                sms.capabilities.guaranteesIdempotency ? t.common.yes : t.adminExtra.idempotencyNo
+              }
             />
             <DetailRow
               label={t.admin.settings.rowReceipts}
-              value={sms.capabilities.supportsDeliveryWebhook ? "Webhook" : "Not available"}
+              value={
+                sms.capabilities.supportsDeliveryWebhook
+                  ? t.adminExtra.receiptsWebhook
+                  : t.adminExtra.notAvailable
+              }
             />
             <DetailRow label={t.admin.settings.rowPaymentAdapter} value={payments.name} />
             <DetailRow label={t.admin.settings.rowMailTransport} value={env.MAIL_TRANSPORT} />
-            <DetailRow label={t.admin.settings.rowTimeZone} value="Asia/Manila (display) · UTC (stored)" />
+            <DetailRow label={t.admin.settings.rowTimeZone} value={t.adminExtra.timeZoneValue} />
           </dl>
         </Card>
 
         <Card className="p-5">
           <h2 className="card-title">{t.admin.settings.limitsTitle}</h2>
-          <p className="mt-1 text-[12.5px] text-muted">
-            Platform defaults. An organization can be given its own limits from the customers
-            screen.
-          </p>
+          <p className="mt-1 text-[12.5px] text-muted">{t.adminExtra.limitsNote}</p>
           <dl className="mt-3">
             <DetailRow label={t.admin.settings.rowCeiling} value={config.selfServiceCeiling} />
             <DetailRow label={t.admin.settings.rowDailyQuota} value={config.dailyDestinationQuota} />
@@ -126,8 +130,7 @@ export default async function AdminSettingsPage() {
           <h2 className="card-title">{t.admin.settings.pricingTitle}</h2>
           <div className="mt-2">
             <Notice tone="warning" title={t.admin.settings.illustrativeTitle}>
-              This is a test value, not approved commercial pricing, and it is not shown on the
-              public pricing page.
+              {t.adminExtra.illustrativeBody}
             </Notice>
           </div>
           <dl className="mt-3">
@@ -151,21 +154,16 @@ export default async function AdminSettingsPage() {
 
         <Card className="p-5">
           <h2 className="card-title">{t.admin.settings.retentionTitle}</h2>
-          <p className="mt-1 text-[12.5px] text-muted">
-            Provisional windows. Final periods are a legal and DPO decision, not a development
-            one.
-          </p>
+          <p className="mt-1 text-[12.5px] text-muted">{t.adminExtra.retentionNote}</p>
           <dl className="mt-3">
-            <DetailRow label={t.admin.settings.rowUploads} value={`${config.uploadRetentionHours} hours`} />
-            <DetailRow label={t.admin.settings.rowMessageDetail} value={`${config.messageDetailRetentionDays} days`} />
-            <DetailRow label={t.admin.settings.rowAuditEvents} value={`${config.auditRetentionDays} days`} />
-            <DetailRow label={t.admin.settings.rowContacts} value={`${config.contactRetentionDays} days`} />
-            <DetailRow label={t.admin.settings.rowSuppression} value={`${config.suppressionRetentionDays} days`} />
+            <DetailRow label={t.admin.settings.rowUploads} value={t.adminExtra.hours(config.uploadRetentionHours)} />
+            <DetailRow label={t.admin.settings.rowMessageDetail} value={t.adminExtra.days(config.messageDetailRetentionDays)} />
+            <DetailRow label={t.admin.settings.rowAuditEvents} value={t.adminExtra.days(config.auditRetentionDays)} />
+            <DetailRow label={t.admin.settings.rowContacts} value={t.adminExtra.days(config.contactRetentionDays)} />
+            <DetailRow label={t.admin.settings.rowSuppression} value={t.adminExtra.days(config.suppressionRetentionDays)} />
           </dl>
           <p className="mt-3 text-[12px] text-muted">
-            Run with <code className="text-[11.5px]">npm run retention</code>. Suppression is
-            retained far longer than contacts on purpose: an opt-out has to outlive the contact
-            record it came from.
+            {t.adminExtra.retentionRun("npm run retention")}
           </p>
         </Card>
       </div>

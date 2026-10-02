@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { requireOrgContext } from "@/server/auth/context";
 import { listCampaignsForOrg } from "@/server/domain/campaigns";
@@ -14,7 +15,10 @@ import {
 import { IconMegaphone } from "@/components/icons";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Campaigns" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.campaigns.metaTitle };
+}
 export const dynamic = "force-dynamic";
 
 const TONE: Record<string, Tone> = {

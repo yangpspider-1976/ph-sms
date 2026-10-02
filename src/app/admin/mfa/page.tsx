@@ -1,15 +1,20 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/server/db";
 import { users } from "@/server/db/schema";
 import { requireUser } from "@/server/auth/context";
 import { env } from "@/server/env";
-import { DemoFooterMark, Wordmark } from "@/components/brand";
+import { Wordmark } from "@/components/brand";
+import { DemoFooterMark } from "@/components/demo-mark";
 import { Card, Notice } from "@/components/ui";
 import { MfaPanel } from "./mfa-panel";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Two-factor authentication" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.adminExtra.mfaTitle };
+}
 export const dynamic = "force-dynamic";
 
 /**
@@ -52,19 +57,16 @@ export default async function AdminMfaPage() {
       <main className="flex flex-1 items-start justify-center px-5 py-12">
         <div className="w-full max-w-[460px]">
           <h1 className="text-[26px] font-extrabold tracking-tight text-ink">
-            Two-factor authentication
+            {t.adminExtra.mfaTitle}
           </h1>
           <p className="mt-1.5 text-[14px] text-body">
-            {enrolled
-              ? "Enter the code from your authenticator app."
-              : "Platform administration requires a second factor."}
+            {enrolled ? t.adminExtra.mfaEnterCode : t.adminExtra.mfaRequired}
           </p>
 
           {env.APP_MODE !== "LIVE" ? (
             <div className="mt-5">
               <Notice tone="info" title={t.adminExtra.mfaNotRequired}>
-                A second factor is only enforced when the platform is live. You can enrol now so
-                it is ready, and the admin console stays reachable either way.
+                {t.adminExtra.mfaNotRequiredBody}
               </Notice>
             </div>
           ) : null}
@@ -72,7 +74,7 @@ export default async function AdminMfaPage() {
           {satisfied ? (
             <div className="mt-5">
               <Notice tone="success" title={t.adminExtra.mfaSessionVerified}>
-                You can return to the admin console.
+                {t.adminExtra.mfaReturn}
               </Notice>
             </div>
           ) : null}
@@ -85,7 +87,7 @@ export default async function AdminMfaPage() {
           </Card>
 
           <p className="mt-4 text-center text-[12.5px] text-muted">
-            Lost your device? Use one of your recovery codes instead of the 6-digit code.
+            {t.adminExtra.mfaLostDevice}
           </p>
         </div>
       </main>

@@ -1,4 +1,5 @@
-import { DemoFooterMark, Wordmark } from "@/components/brand";
+import { Wordmark } from "@/components/brand";
+import { DemoFooterMark } from "@/components/demo-mark";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {

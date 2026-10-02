@@ -58,11 +58,7 @@ export function ConfigEditor({ rows, mode }: { rows: Row[]; mode: string }) {
     <Card>
       <div className="px-5 pt-5">
         <h2 className="card-title">{t.admin.settings.editableTitle}</h2>
-        <p className="mt-1 text-[12.5px] text-muted">
-          Changes apply to the next send — nothing needs restarting. Every change is kept in the
-          version history and written to the audit log. Overrides are saved against the{" "}
-          <strong>{mode}</strong> environment only.
-        </p>
+        <p className="mt-1 text-[12.5px] text-muted">{t.adminExtra.configEditorNote(mode)}</p>
       </div>
 
       {result ? (

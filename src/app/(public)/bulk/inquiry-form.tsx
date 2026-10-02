@@ -130,12 +130,10 @@ export function InquiryForm() {
         <input id="website" name="website" tabIndex={-1} autoComplete="off" />
       </div>
 
-      <p className="text-[12.5px] text-muted">
-        Do not attach or paste a recipient list. We only need the details above to quote.
-      </p>
+      <p className="text-[12.5px] text-muted">{t.bulk.noListNote}</p>
 
       <Button type="submit" size="lg" disabled={pending}>
-        {pending ? "Sending…" : "Request a quote"}
+        {pending ? t.bulk.submitting : t.bulk.submit}
       </Button>
     </form>
   );

@@ -36,7 +36,10 @@ export function InviteRow({
       <div className="min-w-0">
         <p className="text-[13.5px] font-semibold text-ink">{email}</p>
         <p className="mt-0.5 text-[12.5px] text-muted">
-          Invited as {role.toLowerCase()} · {expired ? "expired" : "expires"} {expiresAt}
+          {(expired ? t.settings.team.invitedAsExpired : t.settings.team.invitedAs)(
+            t.roles.labels[role as keyof typeof t.roles.labels] ?? role,
+            expiresAt,
+          )}
         </p>
       </div>
       <div className="flex items-center gap-2">
@@ -46,7 +49,7 @@ export function InviteRow({
           <Pill tone="warning">{t.settings.team.pending}</Pill>
         )}
         <Button variant="ghost" size="sm" onClick={revoke} disabled={pending}>
-          {pending ? "Revoking…" : "Revoke"}
+          {pending ? t.settings.team.revoking : t.settings.team.revoke}
         </Button>
       </div>
     </div>

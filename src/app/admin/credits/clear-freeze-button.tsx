@@ -41,21 +41,19 @@ export function ClearFreezeButton({ organizationId }: { organizationId: string }
   if (!confirming) {
     return (
       <Button variant="ghost" size="sm" onClick={() => setConfirming(true)}>
-        Lift sending freeze
+        {t.adminExtra.liftFreeze}
       </Button>
     );
   }
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-[12.5px] text-body">
-        Let this account send again? The debt stays recorded.
-      </span>
+      <span className="text-[12.5px] text-body">{t.adminExtra.liftFreezeConfirm}</span>
       <Button size="sm" onClick={clear} disabled={pending}>
-        {pending ? "Lifting…" : "Confirm"}
+        {pending ? t.adminExtra.lifting : t.common.confirm}
       </Button>
       <Button size="sm" variant="ghost" onClick={() => setConfirming(false)} disabled={pending}>
-        Cancel
+        {t.common.cancel}
       </Button>
     </div>
   );

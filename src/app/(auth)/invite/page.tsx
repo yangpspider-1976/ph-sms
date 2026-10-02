@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { peekInvite, TeamError } from "@/server/domain/team";
 import { getSessionUser } from "@/server/auth/session";
@@ -5,7 +6,10 @@ import { Card, Notice } from "@/components/ui";
 import { AcceptInviteForm } from "./accept-form";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Accept invitation" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.invite.metaTitle };
+}
 export const dynamic = "force-dynamic";
 
 export default async function InvitePage({
@@ -21,7 +25,7 @@ export default async function InvitePage({
     return (
       <Shell>
         <Notice tone="danger" title={t.invite.noTokenTitle}>
-          Use the link from your invitation email.
+          {t.invite.noTokenBody}
         </Notice>
       </Shell>
     );
@@ -38,7 +42,7 @@ export default async function InvitePage({
         </Notice>
         <p className="mt-4 text-center text-[13px] text-muted">
           <Link href="/login" className="font-semibold text-brand-700 hover:underline">
-            Back to log in
+            {t.invite.backToLogin}
           </Link>
         </p>
       </Shell>
@@ -52,10 +56,10 @@ export default async function InvitePage({
   return (
     <Shell>
       <h1 className="text-[24px] font-extrabold tracking-tight text-ink">
-        Join {invite.organizationName}
+        {t.invite.joinTitle(invite.organizationName)}
       </h1>
       <p className="mt-1.5 text-[14px] text-body">
-        You were invited as <strong>{t.roles.labels[invite.role]}</strong>.
+        {t.invite.invitedAs(t.roles.labels[invite.role])}
       </p>
 
       <Card className="mt-6 p-6">
@@ -64,8 +68,7 @@ export default async function InvitePage({
         {wrongAccount ? (
           <div className="mt-5">
             <Notice tone="warning" title={t.invite.signedInAsOtherTitle}>
-              This invitation is for {invite.email}, but you are signed in as {signedIn!.email}.
-              Sign out first, then open the link again.
+              {t.invite.wrongAccountBody(invite.email, signedIn!.email)}
             </Notice>
           </div>
         ) : (

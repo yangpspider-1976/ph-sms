@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/server/db";
 import { campaigns } from "@/server/db/schema";
@@ -9,7 +10,10 @@ import { IconShield } from "@/components/icons";
 import { ApprovalDecision } from "./decision-form";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Approvals" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.approvals.metaTitle };
+}
 export const dynamic = "force-dynamic";
 
 /**

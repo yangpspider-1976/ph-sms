@@ -48,21 +48,19 @@ export function StopCampaignButton({ campaignId }: { campaignId: string }) {
   if (!confirming) {
     return (
       <Button variant="danger" onClick={() => setConfirming(true)}>
-        Stop campaign
+        {t.campaignDetail.stopCampaign}
       </Button>
     );
   }
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-[13px] text-body">
-        Stop remaining messages? Already-sent messages cannot be recalled.
-      </span>
+      <span className="text-[13px] text-body">{t.campaignDetail.stopConfirm}</span>
       <Button variant="danger" onClick={stop} disabled={pending}>
-        {pending ? "Stopping…" : "Yes, stop"}
+        {pending ? t.campaignDetail.stopping : t.campaignDetail.stopYes}
       </Button>
       <Button variant="ghost" onClick={() => setConfirming(false)} disabled={pending}>
-        Keep sending
+        {t.campaignDetail.keepSending}
       </Button>
     </div>
   );

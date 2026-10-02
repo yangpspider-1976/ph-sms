@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/server/db";
 import { campaigns, memberships, organizations, wallets } from "@/server/db/schema";
@@ -8,7 +9,10 @@ import { IconUsers } from "@/components/icons";
 import { LimitsForm } from "./limits-form";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Customers" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.admin.customers.title };
+}
 export const dynamic = "force-dynamic";
 
 const TONE: Record<string, Tone> = {

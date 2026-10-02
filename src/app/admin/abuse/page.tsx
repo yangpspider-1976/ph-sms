@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { desc, eq, gte, sql } from "drizzle-orm";
 import { requirePlatformAdmin } from "@/server/auth/context";
 import { db } from "@/server/db";
@@ -19,7 +20,10 @@ import Link from "next/link";
 import { PolicyEditor } from "./policy-editor";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Abuse and content policy" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.admin.abuse.title };
+}
 export const dynamic = "force-dynamic";
 
 /**

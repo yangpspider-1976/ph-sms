@@ -30,7 +30,7 @@ export function SenderDecision({ senderId, value }: { senderId: string; value: s
       <div className="flex flex-wrap items-end gap-3">
         <div className="w-full max-w-[190px]">
           <label className="field-label" htmlFor={`sd-${senderId}`}>
-            Decision
+            {t.adminExtra.decision}
           </label>
           <Select
             id={`sd-${senderId}`}
@@ -46,7 +46,7 @@ export function SenderDecision({ senderId, value }: { senderId: string; value: s
 
         <div className="min-w-[220px] flex-1">
           <label className="field-label" htmlFor={`sr-${senderId}`}>
-            Reason
+            {t.common.reason}
           </label>
           <Input id={`sr-${senderId}`} name="reason" placeholder={t.adminExtra.decisionNotePlaceholder} />
         </div>
@@ -64,17 +64,17 @@ export function SenderDecision({ senderId, value }: { senderId: string; value: s
             className="mt-0.5 h-4 w-4 accent-brand-600"
           />
           <span>
-            This sender can receive inbound replies, and an ingestion route processes them.
-            <span className="block text-[12px] text-muted">
-              Only tick this if it is true. It is what allows the product to tell recipients they
-              can reply STOP.
-            </span>
+            {t.adminExtra.inboundRepliesLabel}
+            <span className="block text-[12px] text-muted">{t.adminExtra.inboundRepliesHint}</span>
           </span>
         </label>
       ) : null}
 
       {result ? (
-        <Notice tone={result.ok ? "success" : "danger"} title={result.ok ? "Recorded" : "Not recorded"}>
+        <Notice
+          tone={result.ok ? "success" : "danger"}
+          title={result.ok ? t.adminExtra.recorded : t.common.notRecorded}
+        >
           {result.message}
         </Notice>
       ) : null}

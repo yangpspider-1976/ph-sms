@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { and, eq } from "drizzle-orm";
 import { requireOrgContext } from "@/server/auth/context";
@@ -10,7 +11,10 @@ import Link from "next/link";
 import { ContactForm } from "./contact-form";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Contact" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.contacts.detail.metaTitle };
+}
 export const dynamic = "force-dynamic";
 
 export default async function ContactPage({

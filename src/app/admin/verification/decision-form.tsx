@@ -8,10 +8,10 @@ import { useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 const OPTIONS = [
-  { value: "ACTIVE", label: "Approve" },
-  { value: "NEEDS_INFORMATION", label: "Request more information" },
-  { value: "REJECTED", label: "Reject" },
-  { value: "SUSPENDED", label: "Suspend" },
+  { value: "ACTIVE", labelKey: "decisionApprove" },
+  { value: "NEEDS_INFORMATION", labelKey: "decisionNeedsInfo" },
+  { value: "REJECTED", labelKey: "decisionReject" },
+  { value: "SUSPENDED", labelKey: "decisionSuspend" },
 ] as const;
 
 /**
@@ -57,7 +57,7 @@ export function VerificationDecision({
       <div className="flex flex-wrap items-end gap-3">
         <div className="w-full max-w-[230px]">
           <label className="field-label" htmlFor={`decision-${organizationId}`}>
-            Decision
+            {t.adminExtra.decision}
           </label>
           <Select
             id={`decision-${organizationId}`}
@@ -67,7 +67,7 @@ export function VerificationDecision({
           >
             {OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
-                {o.label}
+                {t.adminExtra[o.labelKey]}
               </option>
             ))}
           </Select>
@@ -75,16 +75,19 @@ export function VerificationDecision({
 
         <div className="min-w-[220px] flex-1">
           <label className="field-label" htmlFor={`reason-${organizationId}`}>
-            Reason {reasonRequired ? <span className="text-danger-fg">*</span> : "(optional)"}
+            {t.common.reason}{" "}
+            {reasonRequired ? (
+              <span className="text-danger-fg">*</span>
+            ) : (
+              t.adminExtra.reasonOptional
+            )}
           </label>
           <Input
             id={`reason-${organizationId}`}
             name="reason"
             required={reasonRequired}
             placeholder={
-              reasonRequired
-                ? "Why this decision was made"
-                : "Optional note kept with the record"
+              reasonRequired ? t.adminExtra.reasonWhy : t.adminExtra.reasonOptionalPlaceholder
             }
           />
         </div>
@@ -92,7 +95,7 @@ export function VerificationDecision({
         {/* The whole name: testers sharing the demo register look-alike
             businesses, and a first word alone left several identical buttons. */}
         <Button type="submit" disabled={pending}>
-          <span className="whitespace-normal">{pending ? "Saving…" : `Record for ${name}`}</span>
+          <span className="whitespace-normal">{pending ? t.common.saving : t.adminExtra.recordFor(name)}</span>
         </Button>
       </div>
 

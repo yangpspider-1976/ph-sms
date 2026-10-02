@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { requirePlatformAdmin } from "@/server/auth/context";
 import { listPlatformSuppressions } from "@/server/domain/suppression";
 import { formatManila } from "@/server/config";
@@ -13,7 +14,10 @@ import { IconBlock } from "@/components/icons";
 import { PlatformBlockForm } from "./block-form";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Suppression" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.adminNav.suppression };
+}
 export const dynamic = "force-dynamic";
 
 export default async function AdminSuppressionPage() {

@@ -28,9 +28,7 @@ export function PlatformBlockForm() {
   return (
     <Card className="max-w-2xl p-5">
       <h2 className="card-title">{t.admin.suppression.addTitle}</h2>
-      <p className="mt-1 text-[13px] text-muted">
-        Applies to every organization. Use sparingly.
-      </p>
+      <p className="mt-1 text-[13px] text-muted">{t.adminExtra.blockIntro}</p>
 
       <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="mt-4 space-y-4">
         <Field label={t.admin.suppression.numbersLabel} htmlFor="numbers" required>
@@ -42,13 +40,16 @@ export function PlatformBlockForm() {
         </Field>
 
         {result ? (
-          <Notice tone={result.ok ? "success" : "danger"} title={result.ok ? "Blocked" : "Not blocked"}>
+          <Notice
+            tone={result.ok ? "success" : "danger"}
+            title={result.ok ? t.adminExtra.blocked : t.adminExtra.notBlocked}
+          >
             {result.message}
           </Notice>
         ) : null}
 
         <Button type="submit" variant="danger" disabled={pending}>
-          {pending ? "Blocking…" : "Block platform-wide"}
+          {pending ? t.adminExtra.blocking : t.adminExtra.block}
         </Button>
       </form>
     </Card>

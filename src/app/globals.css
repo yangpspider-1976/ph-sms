@@ -76,6 +76,15 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /* Korean wraps between words, as English does. The browser default breaks
+     between any two syllables, which splits a word across lines ("휴대폰까 / 지").
+     overflow-wrap still breaks a run with no spaces, such as a URL, rather than
+     letting it push the page sideways. */
+  :lang(ko) {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
   h1,
   h2,
   h3,

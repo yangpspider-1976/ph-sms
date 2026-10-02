@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { eq } from "drizzle-orm";
 import { requireOrgContext } from "@/server/auth/context";
 import { db } from "@/server/db";
@@ -7,7 +8,10 @@ import { Card, DetailRow, PageHeader, Pill } from "@/components/ui";
 import { MobileVerification } from "./mobile-verification";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Your profile" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.settings.profile.title };
+}
 export const dynamic = "force-dynamic";
 
 export default async function ProfilePage() {

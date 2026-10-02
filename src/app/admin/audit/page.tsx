@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { desc, eq, ilike, and, type SQL } from "drizzle-orm";
 import { db } from "@/server/db";
 import { auditEvents, organizations, users } from "@/server/db/schema";
@@ -17,7 +18,10 @@ import {
 import { IconList } from "@/components/icons";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Audit logs" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.admin.audit.title };
+}
 export const dynamic = "force-dynamic";
 
 /** Actions that change money, access or policy get extra visual weight. */
@@ -62,9 +66,7 @@ export default async function AuditPage({
 
       <div className="mb-5 max-w-3xl">
         <Notice tone="info" title={t.admin.audit.scopeTitle}>
-          Approvals, role changes, sends, stops, wallet movements, exports, suppression changes
-          and policy changes are all recorded. Full phone numbers and message bodies are not:
-          the log points at records rather than duplicating their contents.
+          {t.adminExtra.auditScopeBody}
         </Notice>
       </div>
 
@@ -72,7 +74,7 @@ export default async function AuditPage({
         <form className="flex flex-wrap items-end gap-3">
           <div className="min-w-[240px] flex-1">
             <label className="field-label" htmlFor="action">
-              Filter by action
+              {t.adminExtra.auditFilterLabel}
             </label>
             <Input
               id="action"
@@ -82,7 +84,7 @@ export default async function AuditPage({
             />
           </div>
           <Button type="submit" variant="secondary">
-            Search
+            {t.common.search}
           </Button>
         </form>
       </Card>

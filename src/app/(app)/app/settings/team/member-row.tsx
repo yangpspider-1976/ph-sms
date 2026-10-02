@@ -90,7 +90,7 @@ export function MemberRow({
                 ))}
               </Select>
               <Button type="submit" variant="ghost" size="sm" disabled={pending}>
-                Save
+                {t.common.save}
               </Button>
             </form>
           ) : (
@@ -103,15 +103,15 @@ export function MemberRow({
             confirming ? (
               <span className="flex items-center gap-2">
                 <Button variant="danger" size="sm" onClick={remove} disabled={pending}>
-                  {pending ? "Removing…" : "Confirm"}
+                  {pending ? t.settings.team.removing : t.common.confirm}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => setConfirming(false)}>
-                  Cancel
+                  {t.common.cancel}
                 </Button>
               </span>
             ) : (
               <Button variant="ghost" size="sm" onClick={() => setConfirming(true)}>
-                Remove
+                {t.common.remove}
               </Button>
             )
           ) : null}
@@ -120,8 +120,7 @@ export function MemberRow({
 
       {isLastOwner ? (
         <p className="mt-2 text-[12px] text-muted">
-          The last owner cannot be removed or demoted — an organization must always have someone
-          who can manage billing and restore access.
+          {t.settings.team.lastOwnerNote}
         </p>
       ) : null}
 

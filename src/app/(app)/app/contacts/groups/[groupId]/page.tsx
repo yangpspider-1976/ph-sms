@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { and, eq } from "drizzle-orm";
 import { requireOrgContext } from "@/server/auth/context";
@@ -18,7 +19,10 @@ import { GroupMembers } from "./group-members";
 import { GroupSettings } from "./group-settings";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Group" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.groups.colGroup };
+}
 export const dynamic = "force-dynamic";
 
 export default async function GroupPage({

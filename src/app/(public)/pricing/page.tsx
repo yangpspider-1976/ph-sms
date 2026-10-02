@@ -1,8 +1,12 @@
+import type { Metadata } from "next";
 import { PageHeader, Card, Notice, ButtonLink } from "@/components/ui";
 import { MOCK_DEFAULTS } from "@/server/config";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Pricing" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.pricing.title };
+}
 
 export default async function PricingPage() {
   const t = await getDictionary();

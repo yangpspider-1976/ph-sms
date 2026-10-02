@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { desc } from "drizzle-orm";
 import { db } from "@/server/db";
 import { inquiries } from "@/server/db/schema";
@@ -8,7 +9,10 @@ import { IconDocument } from "@/components/icons";
 import { InquiryForm } from "./inquiry-form";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Bulk inquiries" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.adminExtra.inquiriesPageTitle };
+}
 export const dynamic = "force-dynamic";
 
 const TONE: Record<string, Tone> = {
@@ -37,9 +41,7 @@ export default async function InquiriesPage() {
 
       <div className="mb-5 max-w-3xl">
         <Notice tone="info" title={t.adminExtra.crmOnlyTitle}>
-          Moving an inquiry through the pipeline never queues an SMS. A contracted campaign is
-          still submitted through the normal reviewed send path, against an approved sender and a
-          funded account.
+          {t.adminExtra.crmOnlyBody}
         </Notice>
       </div>
 

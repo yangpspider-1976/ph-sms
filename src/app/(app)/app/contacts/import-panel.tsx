@@ -129,15 +129,13 @@ export function ImportPanel({
         {needsAcknowledge ? (
           <label className="flex items-start gap-2 text-[13px] text-body">
             <input type="checkbox" name="acknowledgeUnknown" className="mt-0.5 h-4 w-4 accent-brand-600" />
-            <span>
-              Ignore the columns we do not recognise and import the rest.
-            </span>
+            <span>{t.contacts.importPanel.ignoreUnknown}</span>
           </label>
         ) : null}
 
         <div className="flex flex-wrap items-center gap-3">
           <Button type="submit" disabled={pending}>
-            {pending ? "Reading…" : "Upload and preview"}
+            {pending ? t.contacts.importPanel.reading : t.contacts.importPanel.upload}
           </Button>
           <Link
             href="/app/exports?kind=template"

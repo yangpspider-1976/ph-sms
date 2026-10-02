@@ -1,6 +1,7 @@
 import { Scribble } from "@/components/brand";
 import { ButtonLink, Card } from "@/components/ui";
 import { getDictionary } from "@/i18n/server";
+import type { Dictionary } from "@/i18n/dictionaries";
 import {
   IconArrowRight,
   IconCard,
@@ -19,14 +20,14 @@ export default async function HomePage() {
   const t = await getDictionary();
   return (
     <>
-      <Hero />
-      <HowItWorks />
-      <BulkBand />
+      <Hero t={t} />
+      <HowItWorks t={t} />
+      <BulkBand t={t} />
     </>
   );
 }
 
-function Hero() {
+function Hero({ t }: { t: Dictionary }) {
   return (
     <section className="relative overflow-hidden bg-[#eff5fe]">
       {/* Soft background shapes */}
@@ -41,56 +42,51 @@ function Hero() {
 
       <div className="relative mx-auto grid max-w-[1240px] items-center gap-12 px-5 py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:py-20">
         <div>
-          <h1 className="text-[44px] font-extrabold leading-[1.05] tracking-tight text-ink sm:text-[54px]">
-            Business SMS.
-            <br />
-            Made simple.
+          <h1 className="whitespace-pre-line text-[44px] font-extrabold leading-[1.05] tracking-tight text-ink sm:text-[54px]">
+            {t.home.heroTitle}
           </h1>
           <p className="mt-5 max-w-md text-[16px] leading-relaxed text-body">
-            Send to Philippine mobile numbers. Enter recipients manually or upload a CSV.
+            {t.home.heroBody}
           </p>
 
           <div className="mt-7 flex flex-wrap gap-3">
             <ButtonLink href="/signup" size="lg">
-              Start sending <IconArrowRight size={17} />
+              {t.home.startSending} <IconArrowRight size={17} />
             </ButtonLink>
             <ButtonLink href="/bulk" size="lg" variant="ghost">
-              Request bulk quote
+              {t.home.requestBulkQuote}
             </ButtonLink>
           </div>
 
           <ul className="mt-8 flex flex-wrap gap-x-7 gap-y-3">
             <Assurance icon={<IconLocation size={15} />} tint="teal">
-              Philippines only
+              {t.home.philippinesOnly}
             </Assurance>
             <Assurance icon={<IconShield size={15} />} tint="brand">
-              Verified businesses
+              {t.home.verifiedBusinesses}
             </Assurance>
             <Assurance icon={<IconCard size={15} />} tint="brand">
-              Prepaid credits
+              {t.home.prepaidCredits}
             </Assurance>
           </ul>
         </div>
 
         <div className="relative">
-          <Scribble className="absolute -top-8 right-2 z-10 hidden text-right lg:block" rotate={6}>
-            Simple.
-            <br />
-            Reliable.
-            <br />
-            For your business.
+          <Scribble
+            className="absolute -top-8 right-2 z-10 hidden whitespace-pre-line text-right lg:block"
+            rotate={6}
+          >
+            {t.home.scribbleHero}
           </Scribble>
 
           <div className="flex items-start gap-4">
             <UploadPreviewCard />
-            <PhonePreview />
+            <PhonePreview t={t} />
           </div>
 
           <div className="relative mt-3 hidden lg:block">
-            <Scribble className="absolute left-2 top-1" rotate={-5}>
-              Upload your list
-              <br />
-              in seconds
+            <Scribble className="absolute left-2 top-1 whitespace-pre-line" rotate={-5}>
+              {t.home.scribbleUpload}
             </Scribble>
             <svg
               aria-hidden="true"
@@ -196,7 +192,7 @@ async function UploadPreviewCard() {
 }
 
 /** Phone mock showing how a message looks on a handset. */
-function PhonePreview({ compact = false }: { compact?: boolean }) {
+function PhonePreview({ t, compact = false }: { t: Dictionary; compact?: boolean }) {
   return (
     <div
       className={
@@ -215,54 +211,39 @@ function PhonePreview({ compact = false }: { compact?: boolean }) {
           </span>
         </div>
         <p className="border-b border-line pb-2 text-center text-[12px] font-semibold text-ink">
-          New Message
+          {t.home.phoneNewMessage}
         </p>
 
         <div className="py-3">
-          <div className="rounded-[14px] bg-[#f1f3f7] px-3 py-2.5 text-[12.5px] leading-snug text-ink">
-            Hello! This is a sample message from PH SMS. You can customize your message here.
-            <br />
-            <br />
-            Thank you!
+          <div className="whitespace-pre-line rounded-[14px] bg-[#f1f3f7] px-3 py-2.5 text-[12.5px] leading-snug text-ink">
+            {t.home.phoneSample}
           </div>
           <p className="mt-1.5 text-right text-[11px] text-muted">67/160</p>
         </div>
 
         <div className="rounded-[9px] bg-brand-600 py-2.5 text-center text-[13px] font-bold text-white">
-          Send SMS
+          {t.nav.send}
         </div>
       </div>
     </div>
   );
 }
 
-function HowItWorks() {
+function HowItWorks({ t }: { t: Dictionary }) {
   const steps = [
-    {
-      icon: <IconUsers size={20} />,
-      title: "Add recipients",
-      body: "Enter mobile numbers manually or upload a CSV file.",
-    },
-    {
-      icon: <IconDocument size={20} />,
-      title: "Write your message",
-      body: "Create your SMS message and preview how it will look.",
-    },
-    {
-      icon: <IconSend size={20} />,
-      title: "Review & send",
-      body: "Check your list and message, then send when you're ready.",
-    },
+    { icon: <IconUsers size={20} />, title: t.home.step1Title, body: t.home.step1Body },
+    { icon: <IconDocument size={20} />, title: t.home.step2Title, body: t.home.step2Body },
+    { icon: <IconSend size={20} />, title: t.home.step3Title, body: t.home.step3Body },
   ];
 
   return (
     <section className="bg-white py-16">
       <div className="mx-auto max-w-[1240px] px-5">
         <h2 className="text-center text-[30px] font-extrabold tracking-tight text-ink">
-          From your list to their phone
+          {t.home.stepsTitle}
         </h2>
         <p className="mt-2 text-center text-[15px] text-body">
-          A simple process, built for Philippine businesses.
+          {t.home.stepsSubheading}
         </p>
 
         <div className="mt-10 grid items-stretch gap-4 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
@@ -290,7 +271,7 @@ function HowItWorks() {
   );
 }
 
-function BulkBand() {
+function BulkBand({ t }: { t: Dictionary }) {
   return (
     <section className="bg-white pb-16">
       <div className="mx-auto max-w-[1240px] px-5">
@@ -310,10 +291,10 @@ function BulkBand() {
           <div className="relative flex flex-wrap items-center justify-between gap-6">
             <div>
               <h2 className="text-[27px] font-extrabold tracking-tight text-white">
-                Sending at scale?
+                {t.home.bulkTitle}
               </h2>
               <p className="mt-1.5 text-[15px] text-navy-200">
-                Let us help plan your next bulk campaign.
+                {t.home.bulkBody}
               </p>
             </div>
             <div className="flex items-center gap-6">
@@ -321,15 +302,10 @@ function BulkBand() {
                   overriding primary's colours left its white text on a white
                   button and the label disappeared. */}
               <ButtonLink href="/bulk" size="lg" variant="ghost">
-                Talk to our team <IconArrowRight size={17} />
+                {t.home.bulkCta} <IconArrowRight size={17} />
               </ButtonLink>
-              <Scribble className="hidden lg:block" rotate={-6} on="dark">
-                Same people.
-                <br />A more
-                <br />
-                connected
-                <br />
-                Philippines.
+              <Scribble className="hidden whitespace-pre-line lg:block" rotate={-6} on="dark">
+                {t.home.scribbleBulk}
               </Scribble>
             </div>
           </div>

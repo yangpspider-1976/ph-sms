@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { DemoFooterMark, Wordmark } from "@/components/brand";
+import { Wordmark } from "@/components/brand";
+import { DemoFooterMark } from "@/components/demo-mark";
 import { SidebarNav, type NavItem } from "@/components/sidebar";
 import { Pill } from "@/components/ui";
 import {

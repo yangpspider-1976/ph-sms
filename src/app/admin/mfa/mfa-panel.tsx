@@ -71,12 +71,9 @@ export function MfaPanel({
             </li>
           ))}
         </ul>
-        <p className="mt-3 text-[12.5px] text-muted">
-          Each code works once. Store them somewhere separate from your authenticator app —
-          they are the only way back in if you lose the device.
-        </p>
+        <p className="mt-3 text-[12.5px] text-muted">{t.adminExtra.mfaRecoveryNote}</p>
         <ButtonLink href="/admin" className="mt-5 w-full">
-          Continue to the admin console
+          {t.adminExtra.mfaContinue}
         </ButtonLink>
       </div>
     );
@@ -119,7 +116,7 @@ export function MfaPanel({
         </Field>
 
         <Button type="submit" className="w-full" disabled={pending}>
-          {pending ? "Checking…" : "Verify"}
+          {pending ? t.adminExtra.mfaChecking : t.adminExtra.mfaVerify}
         </Button>
       </form>
     );
@@ -130,9 +127,7 @@ export function MfaPanel({
   if (!setup) {
     return (
       <div>
-        <p className="text-[13.5px] text-body">
-          You will need an authenticator app such as Google Authenticator, 1Password or Authy.
-        </p>
+        <p className="text-[13.5px] text-body">{t.adminExtra.mfaNeedApp}</p>
         {result && !result.ok ? (
           <div className="mt-4">
             <Notice tone="danger" title={t.adminExtra.mfaNotEnrolled}>
@@ -141,7 +136,7 @@ export function MfaPanel({
           </div>
         ) : null}
         <Button onClick={begin} className="mt-5 w-full" disabled={pending}>
-          {pending ? "Preparing…" : "Set up two-factor authentication"}
+          {pending ? t.adminExtra.mfaPreparing : t.adminExtra.mfaSetUp}
         </Button>
       </div>
     );
@@ -156,9 +151,7 @@ export function MfaPanel({
         <p className="mt-1 break-all rounded-md border border-line bg-canvas px-3 py-2 font-mono text-[13px] text-ink">
           {setup.secret}
         </p>
-        <p className="mt-1.5 text-[12.5px] text-muted">
-          Most apps also accept the full setup URI:
-        </p>
+        <p className="mt-1.5 text-[12.5px] text-muted">{t.adminExtra.mfaSetupUri}</p>
         <p className="mt-1 break-all text-[11.5px] text-muted">{setup.uri}</p>
       </div>
 
@@ -184,7 +177,7 @@ export function MfaPanel({
       </Field>
 
       <Button type="submit" className="w-full" disabled={pending}>
-        {pending ? "Confirming…" : "Turn on two-factor authentication"}
+        {pending ? t.adminExtra.mfaConfirming : t.adminExtra.mfaTurnOn}
       </Button>
     </form>
   );

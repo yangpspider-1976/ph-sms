@@ -56,8 +56,7 @@ export default async function ImportDetailPage({
       {record.status === "EXPIRED" ? (
         <div className="mb-5 max-w-2xl">
           <Notice tone="neutral" title={t.contacts.imports.expiredTitle}>
-            The uploaded file and its rejected rows were deleted on schedule. Contacts that were
-            imported from it are unaffected.
+            {t.contacts.imports.expiredBody}
           </Notice>
         </div>
       ) : null}
@@ -67,7 +66,7 @@ export default async function ImportDetailPage({
           <CardHeader title={t.contacts.imports.rowsTitle} description={t.contacts.imports.rowsDescription} />
           {rows.length === 0 ? (
             <p className="px-5 py-8 text-center text-[13px] text-muted">
-              No rows are stored for this import any more.
+              {t.contacts.imports.noRowsStored}
             </p>
           ) : (
                           <DataTable>

@@ -42,11 +42,14 @@ export function TemplateForm() {
         <div>
           <div className="flex items-end justify-between">
             <label className="field-label" htmlFor="body">
-              Message
+              {t.templates.messageLabel}
             </label>
             <span className="mb-1.5 text-[12.5px] text-muted">
-              {info.visibleCharacters} characters · {info.segments} segment
-              {info.segments === 1 ? "" : "s"} · {info.encoding === "GSM7" ? "GSM-7" : "Unicode"}
+              {t.templates.counter(
+                info.visibleCharacters,
+                info.segments,
+                info.encoding === "GSM7" ? "GSM-7" : t.common.unicode,
+              )}
             </span>
           </div>
           <Textarea
@@ -59,19 +62,18 @@ export function TemplateForm() {
             placeholder={t.templates.bodyPlaceholder}
           />
           <p className="mt-1.5 text-[12.5px] text-muted">
-            Plain text only. Personalization variables are not available yet, so write the
-            message out in full.
+            {t.templates.plainTextNote}
           </p>
         </div>
 
         {result ? (
-          <Notice tone={result.ok ? "success" : "danger"} title={result.ok ? "Saved" : "Not saved"}>
+          <Notice tone={result.ok ? "success" : "danger"} title={result.ok ? t.templates.saved : t.templates.notSaved}>
             {result.message}
           </Notice>
         ) : null}
 
         <Button type="submit" disabled={pending}>
-          {pending ? "Saving…" : "Save template"}
+          {pending ? t.templates.saving : t.templates.save}
         </Button>
       </form>
     </Card>

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { verifyEmailAction } from "@/server/actions/auth";
 import { Card, Notice, ButtonLink } from "@/components/ui";
@@ -8,7 +9,10 @@ import { demoFeaturesEnabled } from "@/server/env";
 import { getDictionary } from "@/i18n/server";
 import type { Dictionary } from "@/i18n/dictionaries";
 
-export const metadata = { title: "Verify your email" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.verifyEmail.heading };
+}
 
 export default async function VerifyEmailPage({
   searchParams,
@@ -37,7 +41,7 @@ export default async function VerifyEmailPage({
 
         {result?.ok ? (
           <ButtonLink href="/login" className="mt-5 w-full">
-            Continue to log in
+            {t.verifyEmail.continueToLogin}
           </ButtonLink>
         ) : null}
 
@@ -46,7 +50,7 @@ export default async function VerifyEmailPage({
 
       <p className="mt-4 text-center text-[13px] text-muted">
         <Link href="/login" className="font-semibold text-brand-700 hover:underline">
-          Back to log in
+          {t.verifyEmail.backToLogin}
         </Link>
       </p>
     </div>

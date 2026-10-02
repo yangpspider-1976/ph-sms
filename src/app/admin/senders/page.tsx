@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/server/db";
 import { organizations, senderIdentities } from "@/server/db/schema";
@@ -17,7 +18,10 @@ import { IconTag } from "@/components/icons";
 import { SenderDecision } from "./decision-form";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Sender IDs" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.admin.senders.title };
+}
 export const dynamic = "force-dynamic";
 
 const TONE: Record<string, Tone> = {
@@ -62,9 +66,7 @@ export default async function SendersPage() {
 
       <div className="mb-5 max-w-3xl">
         <Notice tone="info" title={t.admin.senders.repliesTitle}>
-          Whether a sender can receive inbound replies decides whether the product may ever tell
-          recipients to reply STOP. Leave it off unless the partner has confirmed an inbound
-          route exists and is ingested.
+          {t.adminExtra.repliesBody}
         </Notice>
       </div>
 
@@ -136,7 +138,7 @@ export default async function SendersPage() {
                     </Pill>
                   </td>
                   <td className="text-muted">
-                    {sender.supportsInboundReplies ? "Can receive" : "One-way"}
+                    {sender.supportsInboundReplies ? t.adminExtra.canReceive : t.adminExtra.oneWay}
                   </td>
                   <td className="text-muted">{sender.decisionReason ?? "—"}</td>
                   <td className="whitespace-nowrap text-muted">

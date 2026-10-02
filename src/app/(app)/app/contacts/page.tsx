@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { requireOrgContext } from "@/server/auth/context";
 import { countContacts, listContacts, listImports } from "@/server/domain/contacts";
@@ -19,7 +20,10 @@ import { IconDownload, IconUsers } from "@/components/icons";
 import { ImportPanel } from "./import-panel";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Contacts" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.contacts.metaTitle };
+}
 export const dynamic = "force-dynamic";
 
 export default async function ContactsPage() {
@@ -147,7 +151,7 @@ export default async function ContactsPage() {
                   </td>
                   <td>
                     <Pill tone={record.status === "EXPIRED" ? "neutral" : "success"}>
-                      {record.status === "EXPIRED" ? "Expired" : "Ready"}
+                      {record.status === "EXPIRED" ? t.status.importFile.EXPIRED : t.status.importFile.READY}
                     </Pill>
                   </td>
                   <td className="whitespace-nowrap text-muted">{formatManila(record.createdAt)}</td>

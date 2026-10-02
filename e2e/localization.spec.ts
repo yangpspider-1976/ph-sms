@@ -41,6 +41,33 @@ test("a visitor can switch the site to Korean and it sticks", async ({ page }) =
   await expect(page.locator("html")).toHaveAttribute("lang", "en-PH");
 });
 
+test("the header, footer and home page follow the language too", async ({ page }) => {
+  // Testing guide, Test 1 steps 4-5. The page body switched while the header
+  // links, the Log in / Get started buttons and the demo line in the footer
+  // stayed in English.
+  await page.goto("/");
+  await page.getByLabel(SWITCHER.en).selectOption("ko");
+
+  const header = page.locator("header");
+  const footer = page.locator("footer");
+  await expect(header.getByRole("link", { name: "기능" })).toBeVisible();
+  await expect(header.getByRole("link", { name: "로그인" })).toBeVisible();
+  await expect(header.getByRole("link", { name: "시작하기" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("기업용 SMS");
+  await expect(footer).toContainText("데모 — 실제 SMS 발송 및 결제 없음");
+
+  for (const english of ["Features", "How it works", "Log in", "Get started"]) {
+    await expect(header).not.toContainText(english);
+  }
+  await expect(footer).not.toContainText("no real SMS or payments");
+
+  // Another page keeps it, browser tab included.
+  await page.goto("/bulk");
+  await expect(header.getByRole("link", { name: "이용 방법" })).toBeVisible();
+  await expect(page).toHaveTitle(/대량 SMS 문의/);
+  await expect(page.getByRole("button", { name: "견적 요청" })).toBeVisible();
+});
+
 test("a Korean-speaking visitor gets Korean on their first visit", async ({ browser }) => {
   // No cookie, only the browser's stated preference.
   const context = await browser.newContext({ locale: "ko-KR" });

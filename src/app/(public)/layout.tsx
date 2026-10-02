@@ -1,25 +1,28 @@
 import Link from "next/link";
-import { DemoFooterMark, Wordmark } from "@/components/brand";
+import { Wordmark } from "@/components/brand";
+import { DemoFooterMark } from "@/components/demo-mark";
 import { ButtonLink } from "@/components/ui";
 import { getDictionary } from "@/i18n/server";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 
-const NAV = [
-  { href: "/features", label: "Features" },
-  { href: "/how-it-works", label: "How it works" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/bulk", label: "Bulk SMS" },
-];
-
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   const t = await getDictionary();
+  const nav = [
+    { href: "/features", label: t.publicSite.linkFeatures },
+    { href: "/how-it-works", label: t.publicSite.linkHowItWorks },
+    { href: "/pricing", label: t.publicSite.linkPricing },
+    { href: "/bulk", label: t.publicSite.linkBulk },
+  ];
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <header className="sticky top-0 z-30 border-b border-line bg-white/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-[1240px] items-center gap-8 px-5">
           <Wordmark />
-          <nav className="hidden flex-1 items-center justify-center gap-8 md:flex">
-            {NAV.map((item) => (
+          <nav
+            aria-label={t.publicSite.navMain}
+            className="hidden flex-1 items-center justify-center gap-8 md:flex"
+          >
+            {nav.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -34,10 +37,10 @@ export default async function PublicLayout({ children }: { children: React.React
               href="/login"
               className="text-[14px] font-semibold text-ink hover:text-brand-700"
             >
-              Log in
+              {t.publicSite.logIn}
             </Link>
             <ButtonLink href="/signup" size="sm" className="px-4 py-2.5">
-              Get started
+              {t.publicSite.getStarted}
             </ButtonLink>
           </div>
         </div>

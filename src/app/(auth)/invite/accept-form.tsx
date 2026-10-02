@@ -62,19 +62,14 @@ export function AcceptInviteForm({
               autoComplete="new-password"
             />
           </Field>
-          <p className="text-[12.5px] text-muted">
-            Accepting this invitation confirms the address, so there is no separate verification
-            email.
-          </p>
+          <p className="text-[12.5px] text-muted">{t.invite.confirmsAddress}</p>
         </>
       ) : (
-        <p className="text-[13px] text-body">
-          You already have an account for this address. Accepting adds this organization to it.
-        </p>
+        <p className="text-[13px] text-body">{t.invite.existingAccount}</p>
       )}
 
       <Button type="submit" className="w-full" disabled={pending}>
-        {pending ? "Joining…" : "Accept invitation"}
+        {pending ? t.invite.joining : t.invite.accept}
       </Button>
     </form>
   );

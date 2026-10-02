@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { requireOrgContext } from "@/server/auth/context";
 import { listGroups } from "@/server/domain/groups";
@@ -14,7 +15,10 @@ import { IconUsers } from "@/components/icons";
 import { CreateGroupForm } from "./create-group-form";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Groups" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.groups.title };
+}
 export const dynamic = "force-dynamic";
 
 export default async function GroupsPage() {

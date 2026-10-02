@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { scan } from "../../scripts/find-hardcoded-strings.mjs";
+import { findInSource, scan } from "../../scripts/find-hardcoded-strings.mjs";
 
 /**
  * Guard against untranslatable text creeping back in.
@@ -49,6 +49,37 @@ describe("no hard-coded UI text", () => {
       .sort();
 
     expect(offenders).toEqual([]);
+  });
+
+  it("sees copy in the shapes Prettier leaves it in", () => {
+    // Every one of these reached a Korean reader in English: the scan only
+    // looked for `>text<` on a single line, and Prettier wraps most copy.
+    const source = [
+      `const NAV = [{ href: "/features", label: "Features" }];`,
+      `export const metadata = { title: "Pricing" };`,
+      `<Link href="/login">`,
+      `  Log in`,
+      `</Link>`,
+      `<p className="x">`,
+      `  Send to Philippine mobile numbers. Enter recipients manually`,
+      `  or upload a CSV.`,
+      `</p>`,
+      `<Button>{pending ? "Stopping…" : "Yes, stop"}</Button>`,
+      `<span>Export report`,
+      `{/* A comment that starts`,
+      `   With a capital is not copy */}`,
+      `const total: Record<string, number> = {};`,
+    ].join("\n");
+
+    expect(findInSource(source).map((f) => f.text)).toEqual([
+      "Features",
+      "Pricing",
+      "Log in",
+      "Send to Philippine mobile numbers. Enter recipients manually",
+      "Stopping…",
+      "Yes, stop",
+      "Export report",
+    ]);
   });
 
   it("the allowlist has no stale entries", () => {

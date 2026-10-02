@@ -87,10 +87,7 @@ export function SignupForm() {
         <Textarea id="intendedUsage" name="intendedUsage" rows={3} required />
       </Field>
 
-      <p className="text-[12.5px] text-muted">
-        We do not ask for personal ID scans. Business registration details are used to verify the
-        organization only.
-      </p>
+      <p className="text-[12.5px] text-muted">{t.auth.signup.noIdScans}</p>
 
       <Button type="submit" className="w-full" disabled={pending}>
         {pending ? t.auth.signup.submitting : t.auth.signup.submit}

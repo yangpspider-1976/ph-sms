@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/server/db";
 import { ledgerEntries, payments } from "@/server/db/schema";
@@ -22,7 +23,10 @@ import {
 import { IconCard } from "@/components/icons";
 import { getDictionary } from "@/i18n/server";
 
-export const metadata = { title: "Credits & billing" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getDictionary();
+  return { title: t.credits.title };
+}
 export const dynamic = "force-dynamic";
 
 /** What each ledger movement means, in the customer's terms. */
@@ -215,10 +219,7 @@ export default async function CreditsPage() {
               </tbody>
             </DataTable>
           )}
-          <p className="px-5 pb-4 text-[12px] text-muted">
-            Credit is added only when the payment provider confirms it. Returning from a payment
-            page does not add credit on its own.
-          </p>
+          <p className="px-5 pb-4 text-[12px] text-muted">{t.credits.confirmedOnlyNote}</p>
         </Card>
       </div>
     </>
