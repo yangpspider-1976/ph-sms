@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { requireOrgContext } from "@/server/auth/context";
+import { dispatchDueOnVisit } from "@/server/jobs/dispatch-after-response";
 import {
   campaignSummaryForOrg,
   getCampaignForOrg,
@@ -18,6 +19,7 @@ import {
   type Tone,
 } from "@/components/ui";
 import { StopCampaignButton } from "./stop-button";
+import { RefreshWhileSending } from "./refresh-while-sending";
 import { getDictionary } from "@/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -52,6 +54,9 @@ export default async function CampaignDetailPage({
 
   const { id } = await params;
   const ctx = await requireOrgContext();
+  // The layout's drain only runs on a full page load; arriving here from the
+  // campaign list is a client-side navigation.
+  dispatchDueOnVisit();
 
   // Scoped by organization: another tenant's id simply does not resolve.
   const campaign = await getCampaignForOrg(id, ctx.org.organizationId);
@@ -65,9 +70,16 @@ export default async function CampaignDetailPage({
   const stoppable = ["SCHEDULED", "QUEUED", "PROCESSING", "PAUSED_REVIEW"].includes(
     campaign.status,
   );
+  const sending =
+    campaign.status === "QUEUED" ||
+    campaign.status === "PROCESSING" ||
+    (campaign.status === "SCHEDULED" &&
+      campaign.scheduledAt !== null &&
+      campaign.scheduledAt <= new Date());
 
   return (
     <>
+      {sending ? <RefreshWhileSending /> : null}
       <PageHeader
         title={campaign.name}
         description={`${campaign.senderValueSnapshot} · ${t.status.purpose[campaign.purpose]} · ${

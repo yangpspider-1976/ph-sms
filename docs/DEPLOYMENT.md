@@ -12,13 +12,13 @@ two processes the [runbook](RUNBOOK.md) calls mandatory are replaced:
 | Locally | On Vercel |
 |---|---|
 | `npm run start` | Vercel functions, region `sin1` (Singapore) |
-| `npm run worker` | **Send now:** dispatched by the web function right after it responds (`DISPATCH_AFTER_RESPONSE`, on by default under Vercel)<br>**Scheduled sends and retries:** `/api/cron/dispatch`, called every 5 minutes by [a GitHub Actions schedule](../.github/workflows/dispatch.yml), plus a daily Vercel Cron sweep as a backstop |
+| `npm run worker` | **Send now:** dispatched by the web function right after it responds (`DISPATCH_AFTER_RESPONSE`, on by default under Vercel)<br>**Scheduled sends and retries:** drained after signed-in page views in the portal and admin console (same flag, at most once per 30 seconds per instance), and by `/api/cron/dispatch`, called by [a GitHub Actions schedule](../.github/workflows/dispatch.yml), plus a daily Vercel Cron sweep as a backstop |
 | `npm run retention`, daily | Vercel Cron → `/api/cron/retention`, 19:00 UTC (03:00 Asia/Manila) |
 | `npm run db:migrate` | Runs automatically in production builds, before `next build` ([scripts/vercel-build.mjs](../scripts/vercel-build.mjs)) |
 | Docker / `npm run db:dev` | Managed PostgreSQL. Neon in Singapore is assumed below |
 
-All three dispatch paths claim jobs with the worker's lease and `SKIP LOCKED`,
-so they can overlap safely. Each one stops starting new messages before
+Every dispatch path claims jobs with the worker's lease and `SKIP LOCKED`, so
+they can overlap safely. Each one stops starting new messages before
 Vercel's 300-second function limit, and the next call carries on from there.
 
 ## 1. Create the database
@@ -112,8 +112,9 @@ Until both values exist, the workflow logs a notice and does nothing.
 - `https://<domain>/api/health` returns `{"status":"ok"}`.
 - Sign in as `owner@demo.test` / `DemoPass123!`, send to `+63 917 000 0001`.
   The campaign shows *Accepted by provider* within a few seconds.
-- Schedule a send a few minutes ahead. It goes out on the first GitHub run
-  after that time.
+- Schedule a send a few minutes ahead. Once that time has passed, open the
+  campaign: the page view starts the dispatch, and the page refreshes itself
+  until the message shows *Accepted by provider*.
 - `curl -H "Authorization: Bearer <CRON_SECRET>" https://<domain>/api/cron/dispatch`
   returns `{"ok":true,"ran":0}`, and returns 401 without the header.
 
@@ -121,10 +122,14 @@ Until both values exist, the workflow logs a notice and does nothing.
 
 These are accepted for a demo. They are not acceptable for a live service.
 
-- **Scheduled sends are late.** GitHub runs schedules on a best-effort basis:
-  nominally every 5 minutes, often 10–20 at busy times. The daily Vercel Cron
-  run is the floor. Transient-failure retries (numbers ending `9003`) wait for
-  the same schedule.
+- **Scheduled sends wait for someone to use the site.** GitHub runs schedules
+  on a best-effort basis, and this repository's five-minute schedule has run
+  every three to seven hours in practice (20 runs from 28 September to
+  2 October 2026). So due work is also drained after signed-in page views:
+  scheduled sends and transient-failure retries (numbers ending `9003`) go out
+  within seconds of anyone opening the portal or admin console. With nobody
+  signed in they wait for the next GitHub run, and the daily Vercel Cron run is
+  the floor.
 - **GitHub disables the schedule after 60 days without repository activity.**
   You get an email. Re-enable it from the Actions tab.
 - **The health check reports the worker as failing between runs.**
@@ -143,7 +148,8 @@ These are accepted for a demo. They are not acceptable for a live service.
 There is no worker process to stop. To halt dispatch:
 
 1. GitHub **Actions → Dispatch due SMS jobs → ⋯ → Disable workflow**.
-2. In Vercel, set `DISPATCH_AFTER_RESPONSE=false` and **delete** `CRON_SECRET`.
+2. In Vercel, set `DISPATCH_AFTER_RESPONSE=false` (this also stops the
+   page-view drain) and **delete** `CRON_SECRET`.
    Changing it would not work, because Vercel Cron sends whatever value is
    current.
 3. **Redeploy.** Environment changes only reach new deployments.

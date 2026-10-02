@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireOrgContext } from "@/server/auth/context";
+import { dispatchDueOnVisit } from "@/server/jobs/dispatch-after-response";
 import { listCampaignsForOrg } from "@/server/domain/campaigns";
 import { formatCentavos, formatManila } from "@/server/config";
 import {
@@ -40,6 +41,7 @@ export default async function CampaignsPage({
   const t = await getDictionary();
 
   const ctx = await requireOrgContext();
+  dispatchDueOnVisit();
   const { filter } = await searchParams;
   const orgId = ctx.org.organizationId;
 

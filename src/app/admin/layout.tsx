@@ -21,6 +21,7 @@ import {
 } from "@/components/icons";
 import { requirePlatformAdmin } from "@/server/auth/context";
 import { env } from "@/server/env";
+import { dispatchDueOnVisit } from "@/server/jobs/dispatch-after-response";
 import { getDictionary } from "@/i18n/server";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { LocaleSwitcher } from "@/components/locale-switcher";
@@ -50,6 +51,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const nav = navFor(t);
 
   const admin = await requirePlatformAdmin();
+  dispatchDueOnVisit();
 
   return (
     <div className="flex min-h-screen bg-canvas">

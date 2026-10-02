@@ -21,6 +21,7 @@ import {
 } from "@/components/icons";
 import { requireOrgContext } from "@/server/auth/context";
 import { env } from "@/server/env";
+import { dispatchDueOnVisit } from "@/server/jobs/dispatch-after-response";
 import { getI18n } from "@/i18n/server";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { LocaleSwitcher } from "@/components/locale-switcher";
@@ -46,6 +47,9 @@ function navFor(t: Dictionary): NavItem[] {
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const ctx = await requireOrgContext({ allowInactive: true });
+  // Signed in, so scheduled sends and retries that are due go out now rather
+  // than on the next scheduled drain.
+  dispatchDueOnVisit();
   const { t } = await getI18n();
   const verified = ctx.org.organizationStatus === "ACTIVE";
 

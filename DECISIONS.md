@@ -27,9 +27,13 @@ multi-connection server won.
 ## Hosting on Vercel
 
 **Dispatch runs where requests run, not in a worker.** Vercel cannot keep `npm run worker` alive.
-On the Hobby plan its cron runs at most once a day. So dispatch happens in three places, all
+On the Hobby plan its cron runs at most once a day. So dispatch happens in four places, all
 through the worker's own claim, `runNextJob`: right after a send or approval responds (`after()`),
-from `/api/cron/dispatch` every five minutes by GitHub Actions, and from a daily Vercel Cron.
+after signed-in page views (`after()` again, at most every 30 seconds per instance), from
+`/api/cron/dispatch` on a GitHub Actions schedule, and from a daily Vercel Cron. The page-view
+drain exists because the GitHub schedule, nominally every five minutes, ran hours apart in
+practice: a tester's scheduled send waited over 40 minutes, and only went out because another
+send happened to drain it.
 The lease and `SKIP LOCKED` already made concurrent workers safe, so none of this needed new
 coordination.
 

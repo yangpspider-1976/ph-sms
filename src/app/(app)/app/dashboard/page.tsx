@@ -3,6 +3,7 @@ import { and, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/server/db";
 import { campaigns, messageItems, senderIdentities } from "@/server/db/schema";
 import { requireOrgContext } from "@/server/auth/context";
+import { dispatchDueOnVisit } from "@/server/jobs/dispatch-after-response";
 import { getWallet } from "@/server/domain/wallet";
 import { limitsFor, quotaUsage } from "@/server/domain/quota";
 import { MOCK_DEFAULTS, formatCentavos, formatManila } from "@/server/config";
@@ -42,6 +43,7 @@ export default async function DashboardPage() {
   const t = await getDictionary();
 
   const ctx = await requireOrgContext();
+  dispatchDueOnVisit();
   const orgId = ctx.org.organizationId;
 
   const [wallet, usage, recent, senders, totals] = await Promise.all([
