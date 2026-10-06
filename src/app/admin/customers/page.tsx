@@ -3,11 +3,12 @@ import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/server/db";
 import { campaigns, memberships, organizations, wallets } from "@/server/db/schema";
 import { requirePlatformAdmin } from "@/server/auth/context";
-import { MOCK_DEFAULTS, formatCentavos, formatManila } from "@/server/config";
+import { MOCK_DEFAULTS, formatCentavos } from "@/server/config";
 import { Card, CardHeader, EmptyState, PageHeader, Pill, type Tone } from "@/components/ui";
 import { IconUsers } from "@/components/icons";
 import { LimitsForm } from "./limits-form";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -24,7 +25,7 @@ const TONE: Record<string, Tone> = {
 };
 
 export default async function CustomersPage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   await requirePlatformAdmin();
 
@@ -62,8 +63,11 @@ export default async function CustomersPage() {
 
       <Card>
         <CardHeader
-          title={`${rows.length} organizations`}
-          description={`Blank limits use the platform defaults of ${MOCK_DEFAULTS.dailyDestinationQuota}/day and ${MOCK_DEFAULTS.monthlyDestinationQuota}/month.`}
+          title={t.adminExtra.organizationCount(rows.length)}
+          description={t.adminExtra.defaultLimitsNote(
+            MOCK_DEFAULTS.dailyDestinationQuota,
+            MOCK_DEFAULTS.monthlyDestinationQuota,
+          )}
         />
         {rows.length === 0 ? (
           <EmptyState
@@ -79,15 +83,19 @@ export default async function CustomersPage() {
                   <div className="min-w-0">
                     <p className="text-[14.5px] font-bold text-ink">{org.name}</p>
                     <p className="mt-0.5 text-[12.5px] text-muted">
-                      {org.members} member{org.members === 1 ? "" : "s"} · {org.campaignCount}{" "}
-                      campaign{org.campaignCount === 1 ? "" : "s"} · joined{" "}
-                      {formatManila(org.createdAt)}
+                      {t.adminExtra.customerLine(
+                        org.members,
+                        org.campaignCount,
+                        formatDateTime(org.createdAt, locale),
+                      )}
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     {org.frozen ? <Pill tone="danger">{t.admin.customers.sendingFrozen}</Pill> : null}
                     <Pill tone="neutral" dot={false}>
-                      {formatCentavos((org.balance ?? 0) - (org.held ?? 0))} available
+                      {t.adminExtra.availableAmount(
+                        formatCentavos((org.balance ?? 0) - (org.held ?? 0)),
+                      )}
                     </Pill>
                     <Pill tone={TONE[org.status] ?? "neutral"}>
                       {t.status.org[org.status]}

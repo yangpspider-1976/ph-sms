@@ -3,7 +3,7 @@ import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/server/db";
 import { ledgerEntries, organizations, paymentEvents, payments, wallets } from "@/server/db/schema";
 import { requirePlatformAdmin } from "@/server/auth/context";
-import { formatCentavos, formatManila } from "@/server/config";
+import { formatCentavos } from "@/server/config";
 import {
   Card,
   CardHeader,
@@ -17,7 +17,8 @@ import {
 } from "@/components/ui";
 import { IconDatabase } from "@/components/icons";
 import { ClearFreezeButton } from "./clear-freeze-button";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -35,7 +36,7 @@ const PAYMENT_TONE: Record<string, Tone> = {
 };
 
 export default async function AdminCreditsPage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   await requirePlatformAdmin();
 
@@ -116,7 +117,7 @@ export default async function AdminCreditsPage() {
       {frozen.length > 0 ? (
         <Card className="mt-5">
           <CardHeader
-            title={`${frozen.length} account(s) frozen`}
+            title={t.adminExtra.frozenCount(frozen.length)}
             description={t.admin.credits.frozenDescription}
           />
           <div className="divide-y divide-line">
@@ -128,7 +129,10 @@ export default async function AdminCreditsPage() {
                 <div>
                   <p className="text-[14px] font-bold text-ink">{wallet.name}</p>
                   <p className="mt-0.5 text-[12.5px] text-muted">
-                    {formatCentavos(wallet.debt)} owed · {formatCentavos(wallet.posted)} balance
+                    {t.adminExtra.owedAndBalance(
+                      formatCentavos(wallet.debt),
+                      formatCentavos(wallet.posted),
+                    )}
                   </p>
                 </div>
                 <ClearFreezeButton organizationId={wallet.organizationId} />
@@ -138,6 +142,8 @@ export default async function AdminCreditsPage() {
         </Card>
       ) : null}
 
+      {/* The two tables share a row from laptop width, so each is a `wrap`
+          table: it fits its half by wrapping rather than scrolling. */}
       <div className="mt-5 grid gap-5 xl:grid-cols-2">
         <Card>
           <CardHeader title={t.admin.credits.recentPayments} />
@@ -148,7 +154,7 @@ export default async function AdminCreditsPage() {
               icon={<IconDatabase size={20} />}
             />
           ) : (
-            <DataTable>
+            <DataTable wrap>
               <thead>
                 <tr>
                   <th>{t.admin.colOrganization}</th>
@@ -164,11 +170,11 @@ export default async function AdminCreditsPage() {
                     <td>{formatCentavos(payment.amount)}</td>
                     <td>
                       <Pill tone={PAYMENT_TONE[payment.status] ?? "neutral"}>
-                        {payment.status.toLowerCase()}
+                        {t.status.payment[payment.status]}
                       </Pill>
                     </td>
                     <td className="whitespace-nowrap text-muted">
-                      {formatManila(payment.createdAt)}
+                      {formatDateTime(payment.createdAt, locale)}
                     </td>
                   </tr>
                 ))}
@@ -189,7 +195,7 @@ export default async function AdminCreditsPage() {
               icon={<IconDatabase size={20} />}
             />
           ) : (
-            <DataTable>
+            <DataTable wrap>
               <thead>
                 <tr>
                   <th>{t.admin.colOrganization}</th>
@@ -202,12 +208,12 @@ export default async function AdminCreditsPage() {
                 {recentLedger.map((entry) => (
                   <tr key={entry.id}>
                     <td>{entry.name}</td>
-                    <td className="text-muted">{entry.type.toLowerCase()}</td>
+                    <td className="text-muted">{t.status.ledger[entry.type]}</td>
                     <td className={entry.amount < 0 ? "text-danger-fg" : undefined}>
                       {formatCentavos(entry.amount)}
                     </td>
                     <td className="whitespace-nowrap text-muted">
-                      {formatManila(entry.createdAt)}
+                      {formatDateTime(entry.createdAt, locale)}
                     </td>
                   </tr>
                 ))}

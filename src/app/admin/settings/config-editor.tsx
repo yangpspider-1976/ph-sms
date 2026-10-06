@@ -29,6 +29,9 @@ type Row = {
 export function ConfigEditor({ rows, mode }: { rows: Row[]; mode: string }) {
   const t = useT();
   const { tag } = useLocale();
+  // The server names each setting in English; the dictionary has both.
+  const labelFor = (row: Row) =>
+    (t.admin.settings.keyLabels as Record<string, string>)[row.key] ?? row.label;
 
   const [result, setResult] = useState<ConfigActionResult | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
@@ -85,7 +88,9 @@ export function ConfigEditor({ rows, mode }: { rows: Row[]; mode: string }) {
             {rows.map((row) => (
               <tr key={row.key}>
                 <td>
-                  <span className="block text-[13px] font-semibold text-ink">{row.label}</span>
+                  <span className="block text-[13px] font-semibold text-ink">
+                    {labelFor(row)}
+                  </span>
                   <span className="block font-mono text-[11.5px] text-muted">{row.key}</span>
                 </td>
                 <td>
@@ -93,7 +98,7 @@ export function ConfigEditor({ rows, mode }: { rows: Row[]; mode: string }) {
                     <form action={save} onSubmit={keepValuesOnSubmit(save)} className="flex flex-wrap items-center gap-2">
                       <input type="hidden" name="key" value={row.key} />
                       <label className="sr-only" htmlFor={`value-${row.key}`}>
-                        {row.label}
+                        {labelFor(row)}
                       </label>
                       <input
                         id={`value-${row.key}`}

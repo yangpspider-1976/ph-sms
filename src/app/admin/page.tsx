@@ -3,8 +3,8 @@ import Link from "next/link";
 import { desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/server/db";
 import { campaigns, inquiries, organizations, senderIdentities } from "@/server/db/schema";
-import { formatManilaDate } from "@/server/config";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDate } from "@/i18n/format";
 import {
   Button,
   ButtonLink,
@@ -61,7 +61,7 @@ const CAMPAIGN_TONE: Record<string, Tone> = {
 };
 
 export default async function AdminOverviewPage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   const [recentInquiries, recentCampaigns, pendingOrgs, pendingSenders] = await Promise.all([
     db.select().from(inquiries).orderBy(desc(inquiries.createdAt)).limit(3),
@@ -100,23 +100,21 @@ export default async function AdminOverviewPage() {
           href="/admin/verification"
           icon={<IconShield size={20} />}
           title={t.adminExtra.tileVerification}
-          subtitle={pendingOrgs.length > 0 ? `${pendingOrgs.length} in review queue` : "Review queue"}
+          subtitle={t.adminExtra.tileVerificationSub(pendingOrgs.length)}
           tint="teal"
         />
         <NavTile
           href="/admin/inquiries"
           icon={<IconDocument size={20} />}
           title={t.adminExtra.tileInquiries}
-          subtitle={newInquiries > 0 ? `${newInquiries} new requests` : "New requests"}
+          subtitle={t.adminExtra.tileInquiriesSub(newInquiries)}
           tint="brand"
         />
         <NavTile
           href="/admin/senders"
           icon={<IconTag size={20} />}
           title={t.adminExtra.tileSenders}
-          subtitle={
-            pendingSenders.length > 0 ? `${pendingSenders.length} awaiting review` : "Awaiting review"
-          }
+          subtitle={t.adminExtra.tileSendersSub(pendingSenders.length)}
           tint="violet"
         />
         <NavTile
@@ -136,7 +134,7 @@ export default async function AdminOverviewPage() {
               action={
                 <Link
                   href="/admin/inquiries"
-                  className="text-[13px] font-semibold text-brand-600 hover:underline"
+                  className="-my-1 py-1 text-[13px] font-semibold text-brand-600 hover:underline"
                 >
                   {t.adminExtra.viewAll}
                 </Link>
@@ -149,7 +147,7 @@ export default async function AdminOverviewPage() {
                 icon={<IconDocument size={20} />}
               />
             ) : (
-              <DataTable>
+              <DataTable wrap>
                 <thead>
                   <tr>
                     <th>{t.adminExtra.colCompany}</th>
@@ -197,7 +195,7 @@ export default async function AdminOverviewPage() {
               title={t.adminExtra.campaignsTitle}
               action={
                 <Button variant="ghost" size="sm" className="gap-1.5">
-                  <IconDownload size={15} /> Export report
+                  <IconDownload size={15} /> {t.adminExtra.exportReport}
                 </Button>
               }
             />
@@ -208,7 +206,7 @@ export default async function AdminOverviewPage() {
                 icon={<IconChat size={20} />}
               />
             ) : (
-              <DataTable>
+              <DataTable wrap>
                 <thead>
                   <tr>
                     <th>{t.admin.colCampaign}</th>
@@ -235,7 +233,10 @@ export default async function AdminOverviewPage() {
                         </Pill>
                       </td>
                       <td className="text-muted">
-                        {campaign.includedCount} recipients · {campaign.purpose.toLowerCase()}
+                        {t.adminExtra.campaignDetails(
+                          campaign.includedCount,
+                          t.status.purpose[campaign.purpose],
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -252,7 +253,7 @@ export default async function AdminOverviewPage() {
               action={
                 <Link
                   href="/admin/verification"
-                  className="text-[13px] font-semibold text-brand-600 hover:underline"
+                  className="-my-1 py-1 text-[13px] font-semibold text-brand-600 hover:underline"
                 >
                   {t.adminExtra.viewAll}
                 </Link>
@@ -265,7 +266,7 @@ export default async function AdminOverviewPage() {
                 icon={<IconShield size={20} />}
               />
             ) : (
-              <DataTable>
+              <DataTable wrap>
                 <thead>
                   <tr>
                     <th>{t.adminExtra.colBusiness}</th>
@@ -283,7 +284,7 @@ export default async function AdminOverviewPage() {
                         </span>
                       </td>
                       <td className="whitespace-nowrap text-muted">
-                        {formatManilaDate(org.createdAt)}
+                        {formatDate(org.createdAt, locale)}
                       </td>
                       <td className="text-right">
                         <ButtonLink

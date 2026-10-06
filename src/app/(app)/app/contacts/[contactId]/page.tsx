@@ -5,11 +5,11 @@ import { requireOrgContext } from "@/server/auth/context";
 import { db } from "@/server/db";
 import { contactGroupMembers, contactGroups } from "@/server/db/schema";
 import { getContact } from "@/server/domain/contacts";
-import { formatManila } from "@/server/config";
 import { ButtonLink, Card, DetailRow, PageHeader, Pill } from "@/components/ui";
 import Link from "next/link";
 import { ContactForm } from "./contact-form";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -22,7 +22,7 @@ export default async function ContactPage({
 }: {
   params: Promise<{ contactId: string }>;
 }) {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   const { contactId } = await params;
   const ctx = await requireOrgContext();
@@ -61,10 +61,10 @@ export default async function ContactPage({
             <DetailRow label={t.contacts.detail.mobileNumber} value={contact.masked} />
             <DetailRow
               label={t.contacts.detail.consentRecorded}
-              value={contact.consentDate ? formatManila(contact.consentDate) : t.common.notRecorded}
+              value={contact.consentDate ? formatDateTime(contact.consentDate, locale) : t.common.notRecorded}
             />
-            <DetailRow label={t.contacts.detail.added} value={formatManila(contact.createdAt)} />
-            <DetailRow label={t.contacts.detail.lastUpdated} value={formatManila(contact.updatedAt)} />
+            <DetailRow label={t.contacts.detail.added} value={formatDateTime(contact.createdAt, locale)} />
+            <DetailRow label={t.contacts.detail.lastUpdated} value={formatDateTime(contact.updatedAt, locale)} />
             <DetailRow
               label={t.contacts.detail.groups}
               value={

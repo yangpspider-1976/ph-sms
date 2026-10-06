@@ -27,7 +27,7 @@ export default async function SignupPage() {
 
       <p className="mt-4 text-center text-[13px] text-muted">
         {t.auth.signup.alreadyRegistered}{" "}
-        <Link href="/login" className="font-semibold text-brand-700 hover:underline">
+        <Link href="/login" className="py-1 font-semibold text-brand-700 hover:underline">
           {t.auth.signup.logIn}
         </Link>
       </p>

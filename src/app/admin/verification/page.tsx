@@ -3,7 +3,6 @@ import { desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/server/db";
 import { organizations } from "@/server/db/schema";
 import { requirePlatformAdmin } from "@/server/auth/context";
-import { formatManila } from "@/server/config";
 import {
   Card,
   CardHeader,
@@ -16,7 +15,8 @@ import {
 } from "@/components/ui";
 import { IconShield } from "@/components/icons";
 import { VerificationDecision } from "./decision-form";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -39,7 +39,7 @@ export default async function VerificationPage({
 }: {
   searchParams: Promise<{ decided?: string }>;
 }) {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   await requirePlatformAdmin();
 
@@ -87,7 +87,7 @@ export default async function VerificationPage({
 
       <Card>
         <CardHeader
-          title={`Review queue (${queue.length})`}
+          title={t.adminExtra.reviewQueueCount(queue.length)}
           description={t.admin.verification.queueDescription}
         />
         {queue.length === 0 ? (
@@ -104,7 +104,7 @@ export default async function VerificationPage({
                   <div className="min-w-0">
                     <p className="text-[15px] font-bold text-ink">{org.name}</p>
                     <p className="mt-0.5 text-[12.5px] text-muted">
-                      Submitted {formatManila(org.createdAt)}
+                      {t.adminExtra.submittedAt(formatDateTime(org.createdAt, locale))}
                     </p>
                   </div>
                   <Pill tone={TONE[org.status] ?? "neutral"}>
@@ -162,15 +162,17 @@ export default async function VerificationPage({
             <tbody>
               {decided.map((org) => (
                 <tr key={org.id}>
-                  <td>{org.name}</td>
+                  <td className="cell-title" title={org.name}>
+                    {org.name}
+                  </td>
                   <td>
                     <Pill tone={TONE[org.status] ?? "neutral"}>
                       {t.status.org[org.status]}
                     </Pill>
                   </td>
-                  <td className="text-muted">{org.statusReason ?? "—"}</td>
+                  <td className="cell-text text-muted">{org.statusReason ?? "—"}</td>
                   <td className="whitespace-nowrap text-muted">
-                    {org.statusChangedAt ? formatManila(org.statusChangedAt) : "—"}
+                    {org.statusChangedAt ? formatDateTime(org.statusChangedAt, locale) : "—"}
                   </td>
                 </tr>
               ))}

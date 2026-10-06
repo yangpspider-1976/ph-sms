@@ -35,7 +35,7 @@ export default async function PublicLayout({ children }: { children: React.React
           <div className="ml-auto flex items-center gap-3 md:ml-0">
             <Link
               href="/login"
-              className="text-[14px] font-semibold text-ink hover:text-brand-700"
+              className="py-1.5 text-[14px] font-semibold text-ink hover:text-brand-700"
             >
               {t.publicSite.logIn}
             </Link>
@@ -108,10 +108,12 @@ function FooterColumn({
   return (
     <div>
       <p className="text-[13px] font-bold text-ink">{title}</p>
-      <ul className="mt-3 space-y-2">
+      {/* The gap between links is their own padding, so each is a 27px
+          target rather than 17px of text with dead space around it. */}
+      <ul className="mt-2">
         {links.map((l) => (
           <li key={l.href + l.label}>
-            <Link href={l.href} className="text-[13px] text-muted hover:text-brand-700">
+            <Link href={l.href} className="block w-fit py-1 text-[13px] text-muted hover:text-brand-700">
               {l.label}
             </Link>
           </li>

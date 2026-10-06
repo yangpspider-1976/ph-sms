@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { addOptOutsAction, type OptOutResult } from "@/server/actions/contacts";
-import { Button, Card, Field, Input, Notice, Textarea } from "@/components/ui";
+import { Button, Field, FormCard, Input, Notice, Textarea } from "@/components/ui";
 import { useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
@@ -33,11 +33,8 @@ export function OptOutForm() {
   }
 
   return (
-    <Card className="max-w-2xl p-5">
-      <h2 className="card-title">{t.contacts.optOuts.formTitle}</h2>
-      <p className="mt-1 text-[13px] text-muted">{t.contacts.optOuts.formIntro}</p>
-
-      <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="mt-4 space-y-4">
+    <FormCard title={t.contacts.optOuts.formTitle} description={t.contacts.optOuts.formIntro}>
+      <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="space-y-4">
         <Field label={t.contacts.optOuts.numbersLabel} htmlFor="numbers" required>
           <Textarea
             id="numbers"
@@ -69,6 +66,6 @@ export function OptOutForm() {
           {pending ? t.contacts.optOuts.adding : t.contacts.optOuts.add}
         </Button>
       </form>
-    </Card>
+    </FormCard>
   );
 }

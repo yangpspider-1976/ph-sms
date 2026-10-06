@@ -98,11 +98,7 @@ export function MfaPanel({
         <Field
           label={t.adminExtra.mfaCodeLabel}
           htmlFor="code"
-          hint={
-            remainingRecoveryCodes > 0
-              ? `A recovery code also works. You have ${remainingRecoveryCodes} left.`
-              : "You have no recovery codes left."
-          }
+          hint={t.adminExtra.recoveryCodesLeft(remainingRecoveryCodes)}
         >
           <Input
             id="code"

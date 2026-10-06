@@ -3,10 +3,10 @@ import { eq } from "drizzle-orm";
 import { requireOrgContext } from "@/server/auth/context";
 import { db } from "@/server/db";
 import { users } from "@/server/db/schema";
-import { formatManila } from "@/server/config";
 import { Card, DetailRow, PageHeader, Pill } from "@/components/ui";
 import { MobileVerification } from "./mobile-verification";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 
 export default async function ProfilePage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   const ctx = await requireOrgContext({ allowInactive: true });
 
@@ -70,14 +70,14 @@ export default async function ProfilePage() {
               }
             />
             {row?.createdAt ? (
-              <DetailRow label={t.settings.profile.memberSince} value={formatManila(row.createdAt)} />
+              <DetailRow label={t.settings.profile.memberSince} value={formatDateTime(row.createdAt, locale)} />
             ) : null}
           </dl>
         </Card>
 
         <MobileVerification
           mask={row?.mask ?? null}
-          verifiedAt={row?.verifiedAt ? formatManila(row.verifiedAt) : null}
+          verifiedAt={row?.verifiedAt ? formatDateTime(row.verifiedAt, locale) : null}
         />
       </div>
     </>

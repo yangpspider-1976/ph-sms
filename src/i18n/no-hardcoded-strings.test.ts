@@ -82,6 +82,48 @@ describe("no hard-coded UI text", () => {
     ]);
   });
 
+  it("sees copy that shares its line with a value", () => {
+    // About fifty strings got past the shapes above, because the text sat next
+    // to an icon or an expression, inside a template literal, or was a stored
+    // value printed as it is. The lines after the gap are the same shapes in
+    // code that is not copy, and must stay quiet.
+    const source = [
+      "<IconDownload size={15} /> Export report",
+      "{campaign.includedCount} recipients · {campaign.purpose.toLowerCase()}",
+      "Version {template.version} · saved {when}",
+      "<CardHeader title={`${rows.length} opted out`} />",
+      'subtitle={count > 0 ? `${count} in review queue` : "Review queue"}',
+      '  ? "There is one owner. The last owner cannot be removed or demoted."',
+      "  : `${owners} owners.`",
+      'setFileError("That file is empty.");',
+      '"Partner request, response and error schemas, with sample payloads",',
+      "<td>{entry.type.toLowerCase()}</td>",
+      "",
+      "const key = `test-${id}-${to}`;",
+      "transform: `rotate(${rotate}deg)`,",
+      "filled: sql<number>`count(*) filter (where ${x} = 'ACCEPTED')::int`,",
+      "const describedBy = chosen ? `${id}-detail` : undefined;",
+      "href={archived ? `/app/campaigns/${id}/archive` : `/app/campaigns/${id}`}",
+      "{open ? <IconX size={18} /> : <IconMenu size={18} />}",
+      "} satisfies Config;",
+    ].join("\n");
+
+    expect(findInSource(source).map((f) => `${f.line} ${f.text}`)).toEqual([
+      "1 Export report",
+      "2 recipients ·",
+      "2 campaign.purpose.toLowerCase()",
+      "3 · saved",
+      "3 Version",
+      "4 ${rows.length} opted out",
+      "5 ${count} in review queue",
+      "6 There is one owner. The last owner cannot be removed or demoted.",
+      "7 ${owners} owners.",
+      "8 That file is empty.",
+      "9 Partner request, response and error schemas, with sample payloads",
+      "10 entry.type.toLowerCase()",
+    ]);
+  });
+
   it("the allowlist has no stale entries", () => {
     // An allowlist that outlives the line it excused quietly widens over time.
     const present = new Set(

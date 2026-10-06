@@ -72,8 +72,10 @@ function Hero({ t }: { t: Dictionary }) {
         </div>
 
         <div className="relative">
+          {/* Sits in the gap above the phone, which is set lower to make
+              one: level with the card, the note lay across the phone's frame. */}
           <Scribble
-            className="absolute -top-8 right-2 z-10 hidden whitespace-pre-line text-right lg:block"
+            className="absolute -top-10 right-2 z-10 hidden whitespace-pre-line text-right lg:block"
             rotate={6}
           >
             {t.home.scribbleHero}
@@ -198,7 +200,7 @@ function PhonePreview({ t, compact = false }: { t: Dictionary; compact?: boolean
       className={
         compact
           ? "w-[236px] shrink-0"
-          : "hidden w-[250px] shrink-0 sm:block"
+          : "hidden w-[250px] shrink-0 sm:block lg:mt-10"
       }
     >
       <div className="rounded-[26px] border-[6px] border-navy-900 bg-white p-3 shadow-[0_22px_45px_-26px_rgba(15,34,68,0.5)]">

@@ -6,7 +6,7 @@ import { requireOrgContext } from "@/server/auth/context";
 import { getWallet } from "@/server/domain/wallet";
 import { DEMO_PACKAGES } from "@/server/providers/payments";
 import { startTopUpAction } from "@/server/actions/billing";
-import { formatCentavos, formatManila } from "@/server/config";
+import { formatCentavos } from "@/server/config";
 import { demoFeaturesEnabled } from "@/server/env";
 import {
   Button,
@@ -21,7 +21,8 @@ import {
   type Tone,
 } from "@/components/ui";
 import { IconCard } from "@/components/icons";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -49,7 +50,7 @@ const PAYMENT_TONE: Record<string, Tone> = {
 };
 
 export default async function CreditsPage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   const ctx = await requireOrgContext();
   const orgId = ctx.org.organizationId;
@@ -80,8 +81,7 @@ export default async function CreditsPage() {
       {wallet.sendingFrozen ? (
         <div className="mb-5">
           <Notice tone="danger" title={t.credits.frozenTitle}>
-            {formatCentavos(wallet.debtCentavos)} is owed after a reversed payment. Sending stays
-            disabled until the balance is settled. Contact support to resolve it.
+            {t.creditsExtra.frozenBody(formatCentavos(wallet.debtCentavos))}
           </Notice>
         </div>
       ) : null}
@@ -119,7 +119,9 @@ export default async function CreditsPage() {
                 <input type="hidden" name="packageCode" value={pkg.code} />
                 <Button type="submit" variant="secondary" className="flex-col items-start gap-0.5 py-3">
                   <span className="text-[14px] font-bold">{formatCentavos(pkg.creditCentavos)}</span>
-                  <span className="text-[12px] font-medium opacity-80">{pkg.label}</span>
+                  <span className="text-[12px] font-medium opacity-80">
+                    {(t.creditsExtra.packageLabels as Record<string, string>)[pkg.code] ?? pkg.label}
+                  </span>
                 </Button>
               </form>
             ))}
@@ -162,12 +164,14 @@ export default async function CreditsPage() {
                 <tbody>
                   {entries.map((entry) => (
                     <tr key={entry.id}>
-                      <td>
+                      {/* The note sits under the pill, not beside it: inline, it
+                          broke after its first word whenever the column was tight. */}
+                      <td className="cell-text">
                         <Pill tone={LEDGER_TONE[entry.type] ?? "neutral"}>
                           {t.status.ledger[entry.type]}
                         </Pill>
                         {entry.reason ? (
-                          <span className="ml-2 text-[12px] font-normal text-muted">
+                          <span className="mt-1 block text-[12px] font-normal text-muted">
                             {entry.reason}
                           </span>
                         ) : null}
@@ -178,7 +182,7 @@ export default async function CreditsPage() {
                       <td>{formatCentavos(entry.postedBalanceAfter)}</td>
                       <td className="text-muted">{formatCentavos(entry.heldAfter)}</td>
                       <td className="whitespace-nowrap text-muted">
-                        {formatManila(entry.createdAt)}
+                        {formatDateTime(entry.createdAt, locale)}
                       </td>
                     </tr>
                   ))}
@@ -211,7 +215,7 @@ export default async function CreditsPage() {
                     <td>{formatCentavos(payment.amountCentavos)}</td>
                     <td>
                       <Pill tone={PAYMENT_TONE[payment.status] ?? "neutral"}>
-                        {payment.status.charAt(0) + payment.status.slice(1).toLowerCase()}
+                        {t.status.payment[payment.status]}
                       </Pill>
                     </td>
                   </tr>

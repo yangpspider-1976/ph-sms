@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { inviteMemberAction, type TeamResult } from "@/server/actions/team";
-import { Button, Card, Field, Input, Notice, Select } from "@/components/ui";
+import { Button, Field, FormCard, Input, Notice, Select } from "@/components/ui";
 import { ROLE_ORDER } from "@/server/auth/rbac";
 import { useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
@@ -27,11 +27,8 @@ export function InviteForm() {
   }
 
   return (
-    <Card className="max-w-2xl p-5">
-      <h2 className="card-title">{t.settings.team.inviteTitle}</h2>
-      <p className="mt-1 text-[13px] text-muted">{t.settings.team.inviteIntro}</p>
-
-      <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="mt-4 space-y-4">
+    <FormCard title={t.settings.team.inviteTitle} description={t.settings.team.inviteIntro}>
+      <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,200px)]">
           <Field label={t.settings.team.emailLabel} htmlFor="invite-email" required>
             <Input id="invite-email" name="email" type="email" required placeholder={t.settings.team.emailPlaceholder} />
@@ -60,6 +57,6 @@ export function InviteForm() {
           {pending ? t.settings.team.sendingInvite : t.settings.team.sendInvite}
         </Button>
       </form>
-    </Card>
+    </FormCard>
   );
 }

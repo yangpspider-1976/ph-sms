@@ -16,7 +16,9 @@ import {
   Notice,
   Pill,
 } from "@/components/ui";
-import { IconDocument, IconFile } from "@/components/icons";
+import { IconDocument } from "@/components/icons";
+import { FileDrop } from "@/components/file-drop";
+import { ScrollRegion } from "@/components/scroll-region";
 import { useLocale, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
@@ -79,10 +81,7 @@ export function ImportPanel({
       const outcome = await commitImportAction(preview.importId);
       if (outcome.ok) {
         setCommitted(
-          `${outcome.added} added, ${outcome.updated} updated` +
-            (outcome.skippedSuppressed > 0
-              ? `, ${outcome.skippedSuppressed} skipped because they opted out`
-              : ""),
+          t.contactsExtra.importCommitted(outcome.added, outcome.updated, outcome.skippedSuppressed),
         );
         setPreview(null);
         setResult(null);
@@ -101,34 +100,18 @@ export function ImportPanel({
       </p>
 
       <form ref={formRef} action={upload} onSubmit={keepValuesOnSubmit(upload)} className="mt-4 space-y-3">
-        {/* flex-wrap and a width cap on the input: a file input has a wide
-            intrinsic size and pushed the page sideways on a phone. */}
-        <label
-          htmlFor="contacts-file"
-          className="flex cursor-pointer flex-wrap items-center gap-3 rounded-[10px] border border-dashed border-brand-200 bg-brand-50/40 px-4 py-5"
-        >
-          <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-muted">
-            <IconFile size={20} />
-          </span>
-          <span>
-            <span className="block text-[13.5px] font-semibold text-ink">{t.contacts.importPanel.chooseFile}</span>
-            <span className="block text-[12.5px] text-muted">
-              {t.contactsExtra.fileLimits(maxMiB, maxDataRows.toLocaleString(tag))}
-            </span>
-          </span>
-          <input
-            id="contacts-file"
-            type="file"
-            name="file"
-            accept=".csv,text/csv"
-            required
-            className="ml-auto max-w-full text-[12.5px] text-muted"
-          />
-        </label>
+        <FileDrop
+          id="contacts-file"
+          name="file"
+          accept=".csv,text/csv"
+          required
+          title={t.contacts.importPanel.chooseFile}
+          hint={t.contactsExtra.fileLimits(maxMiB, maxDataRows.toLocaleString(tag))}
+        />
 
         {needsAcknowledge ? (
           <label className="flex items-start gap-2 text-[13px] text-body">
-            <input type="checkbox" name="acknowledgeUnknown" className="mt-0.5 h-4 w-4 accent-brand-600" />
+            <input type="checkbox" name="acknowledgeUnknown" className="mt-0.5 h-4 w-4 shrink-0 accent-brand-600" />
             <span>{t.contacts.importPanel.ignoreUnknown}</span>
           </label>
         ) : null}
@@ -140,9 +123,9 @@ export function ImportPanel({
           <Link
             href="/app/exports?kind=template"
             prefetch={false}
-            className="flex items-center gap-1.5 text-[13px] font-semibold text-brand-600 hover:underline"
+            className="flex items-center gap-1.5 py-1 text-[13px] font-semibold text-brand-600 hover:underline"
           >
-            <IconDocument size={15} /> Download template
+            <IconDocument size={15} /> {t.send.downloadTemplate}
           </Link>
         </div>
       </form>
@@ -232,7 +215,9 @@ function Preview({
         ) : null}
       </div>
 
-      <div className="max-h-72 overflow-auto border-t border-line">
+      {/* The preview scrolls down as well as sideways, and has nothing in it
+          to tab to. */}
+      <ScrollRegion className="max-h-72 overflow-auto border-t border-line">
         <DataTable>
           <thead>
             <tr>
@@ -246,10 +231,16 @@ function Preview({
             {preview.sample.map((row) => (
               <tr key={row.sourceRowNumber}>
                 <td>{row.sourceRowNumber}</td>
-                <td className="font-mono text-[12px]">{row.masked ?? (row.raw || "—")}</td>
+                <td
+                  className="cell-title font-mono text-[12px]"
+                  title={row.masked ? undefined : row.raw || undefined}
+                >
+                  {row.masked ?? (row.raw || "—")}
+                </td>
                 <td>
                   <Pill tone={row.status === "ELIGIBLE" ? "success" : "neutral"}>
-                    {row.status.toLowerCase()}
+                    {(t.status.importRow as Record<string, string>)[row.status] ??
+                      t.status.unknown(row.status)}
                   </Pill>
                 </td>
                 <td className="text-muted">{row.reason ?? "—"}</td>
@@ -257,7 +248,7 @@ function Preview({
             ))}
           </tbody>
         </DataTable>
-      </div>
+      </ScrollRegion>
 
       <div className="flex flex-wrap items-center gap-3 border-t border-line px-4 py-3">
         <Button onClick={onCommit} disabled={pending || counts.eligible === 0}>

@@ -26,13 +26,13 @@ import { TestSendPanel } from "./test-send-panel";
 import type { TestRecipient } from "@/server/domain/test-send";
 import { loadGroupRecipientsAction } from "@/server/actions/groups";
 import { useT } from "@/i18n/client";
+import { FileDrop } from "@/components/file-drop";
 import type { Dictionary } from "@/i18n/dictionaries";
 import {
   IconArrowRight,
   IconCalculator,
   IconCheck,
   IconDocument,
-  IconFile,
   IconInfo,
   IconX,
 } from "@/components/icons";
@@ -219,7 +219,7 @@ export function SendWizard({
     const text = await file.text();
     const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
     if (lines.length === 0) {
-      setFileError("That file is empty.");
+      setFileError(t.send.fileEmpty);
       return;
     }
     // Client-side preview only. The server re-parses the upload with a real CSV
@@ -227,7 +227,7 @@ export function SendWizard({
     const header = lines[0]!.toLowerCase();
     const hasHeader = header.includes("phone_number");
     if (!hasHeader) {
-      setFileError("The file needs a phone_number column.");
+      setFileError(t.send.fileNeedsColumn("phone_number"));
       return;
     }
     const index = header.split(",").findIndex((h) => h.trim() === "phone_number");
@@ -286,30 +286,20 @@ export function SendWizard({
               </div>
             ) : (
               <div className="mt-4">
-                <label
-                  htmlFor="csv"
-                  className="block cursor-pointer rounded-[10px] border border-dashed border-brand-200 bg-brand-50/40 px-4 py-10 text-center"
-                >
-                  <span className="mx-auto mb-2 flex h-9 w-9 items-center justify-center text-muted">
-                    <IconFile size={26} />
-                  </span>
-                  <span className="block text-[13.5px] text-body">{t.send.dropCsv}</span>
-                  <span className="mt-1 block text-[13px] text-muted">{t.send.or}</span>
-                  <span className="mt-2 inline-flex items-center justify-center rounded-lg bg-brand-600 px-4 py-2 text-[13px] font-semibold text-white">
-                    {t.send.browseFiles}
-                  </span>
-                  <input
-                    id="csv"
-                    type="file"
-                    accept=".csv,text/csv"
-                    className="sr-only"
-                    onChange={(e) => handleFile(e.target.files?.[0])}
-                  />
-                </label>
+                {/* The wizard reads the file itself and lists the result below,
+                    so the box does not hold on to it. */}
+                <FileDrop
+                  id="csv"
+                  accept=".csv,text/csv"
+                  layout="stack"
+                  title={t.send.dropCsv}
+                  keepSelection={false}
+                  onFile={handleFile}
+                />
 
                 <Link
                   href="/app/contacts/template.csv"
-                  className="mt-3 flex items-center gap-2 text-[13px] font-semibold text-brand-600 hover:underline"
+                  className="mt-2 flex items-center gap-2 py-1 text-[13px] font-semibold text-brand-600 hover:underline"
                 >
                   <IconDocument size={15} /> {t.send.downloadTemplate}
                   <span className="font-normal text-muted">
@@ -551,7 +541,7 @@ export function SendWizard({
                 type="checkbox"
                 checked={authorized}
                 onChange={(e) => setAuthorized(e.target.checked)}
-                className="mt-0.5 h-4 w-4 accent-brand-600"
+                className="mt-0.5 h-4 w-4 shrink-0 accent-brand-600"
               />
               <span>
                 <span className="block text-[13.5px] font-semibold text-ink">
@@ -628,7 +618,7 @@ export function SendWizard({
               <p className="mt-2 text-[15px] font-extrabold text-ink">
                 {peso(estimatedCost)}
                 <span className="ml-1 text-[12px] font-medium text-muted">
-                  ({includedCount} × {info.segments} segment{info.segments === 1 ? "" : "s"})
+                  ({includedCount} × {t.common.segments(info.segments)})
                 </span>
               </p>
             ) : null}
@@ -903,8 +893,7 @@ function RecipientSummary({
       {overCeiling > 0 ? (
         <div className="mt-3">
           <Notice tone="warning" title={t.send.aboveCeiling(ceiling)}>
-            {overCeiling} recipients are over the limit for self-service sending. Request a bulk
-            quote for the full list.
+            {t.send.aboveCeilingBody(overCeiling)}
           </Notice>
         </div>
       ) : null}

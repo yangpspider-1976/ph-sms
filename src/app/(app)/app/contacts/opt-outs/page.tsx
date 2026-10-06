@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { requireOrgContext } from "@/server/auth/context";
 import { listOrganizationSuppressions } from "@/server/domain/suppression";
-import { formatManila } from "@/server/config";
 import {
   ButtonLink,
   Card,
@@ -13,7 +12,8 @@ import {
 } from "@/components/ui";
 import { IconBlock, IconDownload } from "@/components/icons";
 import { OptOutForm } from "./opt-out-form";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 
 export default async function OptOutsPage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   const ctx = await requireOrgContext();
   const rows = await listOrganizationSuppressions(ctx.org.organizationId, 200);
@@ -36,7 +36,7 @@ export default async function OptOutsPage() {
         action={
           ctx.can("reports.export.masked") ? (
             <ButtonLink href="/app/exports?kind=suppression" variant="ghost" prefetch={false}>
-              <IconDownload size={15} /> Export
+              <IconDownload size={15} /> {t.common.export}
             </ButtonLink>
           ) : null
         }
@@ -55,7 +55,7 @@ export default async function OptOutsPage() {
       ) : null}
 
       <Card>
-        <CardHeader title={`${rows.length} opted out`} />
+        <CardHeader title={t.contactsExtra.countOptedOut(rows.length)} />
         {rows.length === 0 ? (
           <EmptyState
             title={t.contacts.optOuts.emptyTitle}
@@ -76,9 +76,9 @@ export default async function OptOutsPage() {
               {rows.map((row) => (
                 <tr key={row.id}>
                   <td className="font-mono text-[12.5px]">{row.numberMasked}</td>
-                  <td>{row.reason}</td>
+                  <td className="cell-text">{row.reason}</td>
                   <td className="text-muted">{sourceLabel(t, row.source)}</td>
-                  <td className="whitespace-nowrap text-muted">{formatManila(row.createdAt)}</td>
+                  <td className="whitespace-nowrap text-muted">{formatDateTime(row.createdAt, locale)}</td>
                 </tr>
               ))}
             </tbody>

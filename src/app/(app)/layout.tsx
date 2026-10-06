@@ -14,7 +14,6 @@ import {
   IconSettings,
   IconUser,
   IconUsers,
-  IconChevronDown,
   IconBuilding,
   IconCheckCircle,
   IconShield,
@@ -98,6 +97,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 </span>
               ) : null}
 
+              {/* A link to the organization's settings, so no down-arrow: that
+                  promised a menu of organizations and opened a page instead. */}
               <Link
                 href="/app/settings"
                 className="flex min-w-0 items-center gap-2 rounded-lg border border-line px-3 py-1.5 text-[13px] font-semibold text-ink hover:bg-navy-50"
@@ -106,7 +107,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 <span className="max-w-[110px] truncate sm:max-w-[160px]">
                   {ctx.org.organizationName}
                 </span>
-                <IconChevronDown size={13} className="text-muted" />
               </Link>
 
               {verified ? (
@@ -143,14 +143,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <DemoFooterMark />
             </div>
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+              {/* The padding is tap area: the text alone is 19px tall. The
+                  negative margin keeps the row where it was. */}
               <div className="flex gap-5 text-[12.5px] text-muted">
-                <Link href="/legal/privacy" className="hover:text-brand-700">
+                <Link href="/legal/privacy" className="-my-1 py-1 hover:text-brand-700">
                   {t.nav.privacy}
                 </Link>
-                <Link href="/legal/terms" className="hover:text-brand-700">
+                <Link href="/legal/terms" className="-my-1 py-1 hover:text-brand-700">
                   {t.nav.terms}
                 </Link>
-                <Link href="/app/support" className="hover:text-brand-700">
+                <Link href="/app/support" className="-my-1 py-1 hover:text-brand-700">
                   {t.nav.help}
                 </Link>
               </div>

@@ -25,7 +25,7 @@ export default async function LoginPage() {
 
       <p className="mt-4 text-center text-[13px] text-muted">
         {t.auth.login.noAccount}{" "}
-        <Link href="/signup" className="font-semibold text-brand-700 hover:underline">
+        <Link href="/signup" className="py-1 font-semibold text-brand-700 hover:underline">
           {t.auth.login.createOne}
         </Link>
       </p>

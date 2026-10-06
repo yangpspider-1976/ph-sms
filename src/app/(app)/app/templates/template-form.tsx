@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { saveTemplateAction, type TemplateResult } from "@/server/actions/templates";
 import { analyzeMessage } from "@/server/domain/segments";
-import { Button, Card, Field, Input, Notice, Textarea } from "@/components/ui";
+import { Button, Field, FormCard, Input, Notice, Textarea } from "@/components/ui";
 import { useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
@@ -31,10 +31,8 @@ export function TemplateForm() {
   }
 
   return (
-    <Card className="max-w-2xl p-5">
-      <h2 className="card-title">{t.templates.newTemplate}</h2>
-
-      <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="mt-4 space-y-4">
+    <FormCard title={t.templates.newTemplate}>
+      <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="space-y-4">
         <Field label={t.common.name} htmlFor="name" required>
           <Input id="name" name="name" required placeholder={t.templates.namePlaceholder} />
         </Field>
@@ -76,6 +74,6 @@ export function TemplateForm() {
           {pending ? t.templates.saving : t.templates.save}
         </Button>
       </form>
-    </Card>
+    </FormCard>
   );
 }

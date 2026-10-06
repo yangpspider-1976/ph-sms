@@ -13,6 +13,7 @@ export const ko: Dictionary = {
   },
 
   common: {
+    scrollableTable: "스크롤 가능한 표",
     save: "저장",
     saving: "저장 중…",
     cancel: "취소",
@@ -97,6 +98,11 @@ export const ko: Dictionary = {
 
   components: {
     demoMark: "디자인 미리보기 • 샘플 콘텐츠 • 데모 — 실제 SMS 발송 및 결제 없음",
+    fileDrop: {
+      browse: "파일 찾기",
+      change: "다른 파일 선택",
+      or: "또는",
+    },
     notifications: {
       title: "알림",
       description: "앱 안에서만 표시됩니다.",
@@ -409,6 +415,9 @@ export const ko: Dictionary = {
   },
 
   contactsExtra: {
+    importCommitted: (added: number, updated: number, skipped: number) =>
+      `${added}건 추가, ${updated}건 업데이트` +
+      (skipped > 0 ? `, 수신 거부로 ${skipped}건 제외` : ""),
     csvNote: "CSV 가능, UTF-8 인코딩, 다음 열 필수:",
     csvNoteColumn: "열이 있어야 합니다.",
     fileLimits: (mib: number, rows: string) =>
@@ -426,6 +435,8 @@ export const ko: Dictionary = {
   },
 
   send: {
+    fileEmpty: "파일이 비어 있습니다.",
+    fileNeedsColumn: (column: string) => `파일에 ${column} 열이 있어야 합니다.`,
     title: "SMS 보내기",
     subheading: "필리핀 휴대폰 번호만 가능",
     deniedTitle: "현재 역할로는 메시지를 보낼 수 없습니다",
@@ -444,8 +455,6 @@ export const ko: Dictionary = {
     numbersHint:
       "한 줄에 하나씩, 또는 쉼표나 세미콜론으로 구분합니다. 가능한 형식: 09171234567, 9171234567, 639171234567, +639171234567.",
     dropCsv: "여기에 CSV 파일을 놓으세요",
-    or: "또는",
-    browseFiles: "파일 찾기",
     downloadTemplate: "템플릿 다운로드",
     templateHint: "올바른 형식을 위해 제공된 CSV 템플릿을 사용하세요.",
     fileUnreadable: "파일을 읽지 못했습니다",
@@ -540,7 +549,7 @@ export const ko: Dictionary = {
       "형식만 확인하며 소유 여부는 확인하지 않습니다. 형식이 맞다고 해서 사용 중이거나 수신 가능하다는 보장은 아닙니다. 수신 거부는 발송 전 서버에서 적용됩니다.",
     aboveCeiling: (ceiling: number) => `자가 발송 한도 ${ceiling}건을 초과`,
     aboveCeilingBody: (over: number) =>
-      `${over}명이 자가 발송 한도를 초과합니다. 대량 발송 견적을 요청하세요.`,
+      `${over}명이 자가 발송 한도를 초과합니다. 전체 명단은 대량 발송 견적을 요청하세요.`,
     phoneTextMessage: "문자 메시지",
     phonePlaceholder: "메시지가 여기에 표시됩니다.",
     testSendTitle: "먼저 본인에게 테스트 발송해 볼까요?",
@@ -619,6 +628,9 @@ export const ko: Dictionary = {
       emptyTitle: "등록된 발신자 ID가 없습니다",
       emptyBody: "수신자에게 보일 이름을 신청하세요.",
       applyTitle: "발신자 ID 신청",
+      count: (n: number) => `발신자 ID ${n}개`,
+      timeline: (applied: string, decided: string | null) =>
+        decided ? `신청 ${applied} · 결정 ${decided}` : `신청 ${applied}`,
       senderIdLabel: "발신자 ID",
       senderIdHint: "수신자 휴대폰에 발신자로 표시됩니다.",
       relationLabel: "사업과 어떤 관계가 있나요?",
@@ -643,6 +655,14 @@ export const ko: Dictionary = {
         "이 발신자는 회신을 받을 수 없으므로, 메시지에서 STOP으로 회신하라고 안내하면 안 됩니다. 수신 거부 요청은 수신 거부 목록에 기록하세요.",
     },
     team: {
+      memberCount: (n: number) => `구성원 ${n}명`,
+      oneOwner: "소유자가 한 명입니다. 마지막 소유자는 제거하거나 역할을 낮출 수 없습니다.",
+      ownerCount: (n: number) => `소유자 ${n}명.`,
+      pendingInvites: (n: number) => `대기 중인 초대 ${n}건`,
+      you: "(나)",
+      memberLine: (email: string, joined: string, verified: boolean) =>
+        `${email} · ${joined} 가입${verified ? "" : " · 이메일 미인증"}`,
+      roleFor: (name: string) => `${name}의 역할`,
       title: "팀",
       subheading: "이 조직에서 누가 무엇을 할 수 있는지 관리합니다.",
       deniedTitle: "현재 역할로는 팀을 관리할 수 없습니다",
@@ -675,6 +695,9 @@ export const ko: Dictionary = {
   },
 
   templates: {
+    count: (n: number) => `템플릿 ${n}개`,
+    versionSaved: (version: number, when: string) => `버전 ${version} · ${when} 저장`,
+    costEach: (amount: string) => `건당 ${amount}`,
     title: "템플릿",
     subheading: "다시 사용할 수 있는 일반 텍스트 메시지입니다. 수정하면 새 버전으로 저장됩니다.",
     segmentNote:
@@ -756,6 +779,12 @@ export const ko: Dictionary = {
   },
 
   creditsExtra: {
+    packageLabels: {
+      "demo-500": "데모 충전 — 소액",
+      "demo-1000": "데모 충전 — 일반",
+    },
+    frozenBody: (amount: string) =>
+      `결제가 취소되어 ${amount}의 미지급금이 발생했습니다. 잔액이 정산될 때까지 발송이 중지됩니다. 해결하려면 고객 지원에 문의하세요.`,
     demoPackages: "데모 패키지 전용입니다. 카드 정보를 수집하지 않으며 실제 결제도 이루어지지 않습니다.",
     choosePackage: "충전할 패키지를 선택하세요.",
     prepaidNote:
@@ -768,15 +797,15 @@ export const ko: Dictionary = {
   campaignDetail: {
     finishedNote: "\uc644\ub8cc\ub294 \ubc1c\uc1a1 \uc791\uc5c5\uc774 \ub0a8\uc9c0 \uc54a\uc558\ub2e4\ub294 \ub73b\uc774\uba70, \ubaa8\ub4e0 \uba54\uc2dc\uc9c0\uac00 \uc804\ub2ec\ub418\uc5c8\ub2e4\ub294 \ub73b\uc740 \uc544\ub2d9\ub2c8\ub2e4.",
     heldTitle: "\uc2b9\uc778 \ub300\uae30 \uc911",
-    heldFallback: "\ucf58\ud150\uce20 \uac80\uc0ac\uc5d0\uc11c \uc774 \uce90\ud398\uc778\uc774 \ud0d0\uc9c0\ub418\uc5c8\uc2b5\ub2c8\ub2e4.",
+    heldFallback: "\ucf58\ud150\uce20 \uac80\uc0ac\uc5d0\uc11c \uc774 \ucea0\ud398\uc778\uc774 \ud0d0\uc9c0\ub418\uc5c8\uc2b5\ub2c8\ub2e4.",
     heldBody:
       "\uc544\uc9c1 \uc544\ubb34\uac83\ub3c4 \ubc1c\uc1a1\ub418\uc9c0 \uc54a\uc558\uc2b5\ub2c8\ub2e4. \uc18c\uc720\uc790 \ub610\ub294 \uc2b9\uc778\uc790\uac00 \uc2b9\uc778\ud574\uc57c \ud558\uba70, \uadf8\ub54c\uae4c\uc9c0 \ube44\uc6a9\uc740 \uc608\uce58\ub41c \uc0c1\ud0dc\ub85c \uc720\uc9c0\ub429\ub2c8\ub2e4.",
     rejectedTitle: "\uc2b9\uc778 \ub2e8\uacc4\uc5d0\uc11c \uac70\ubd80\ub428",
     rejectedBody: "\uc544\ubb34\uac83\ub3c4 \ubc1c\uc1a1\ub418\uc9c0 \uc54a\uc558\uc73c\uba70 \uc608\uce58\ub41c \ud06c\ub808\ub527\uc740 \ubc18\ud658\ub418\uc5c8\uc2b5\ub2c8\ub2e4.",
     pausedTitle: "\uac80\ud1a0\ub97c \uc704\ud574 \uc77c\uc2dc \uc911\uc9c0\ub428",
     pausedFallback: "\uacb0\uc815\uc774 \ud544\uc694\ud55c \ubcc0\ud654\uac00 \uc0dd\uacbc\uc2b5\ub2c8\ub2e4.",
-    pausedBody: "\uc6b4\uc601\uc790\uac00 \uce90\ud398\uc778\uc744 \ub2e4\uc2dc \uc2dc\uc791\ud560 \ub54c\uae4c\uc9c0 \ub0a8\uc740 \uba54\uc2dc\uc9c0\ub294 \ubc1c\uc1a1\ub418\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
-    stoppedTitle: "\uce90\ud398\uc778\uc774 \uc911\ub2e8\ub418\uc5c8\uc2b5\ub2c8\ub2e4",
+    pausedBody: "\uc6b4\uc601\uc790\uac00 \ucea0\ud398\uc778\uc744 \ub2e4\uc2dc \uc2dc\uc791\ud560 \ub54c\uae4c\uc9c0 \ub0a8\uc740 \uba54\uc2dc\uc9c0\ub294 \ubc1c\uc1a1\ub418\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
+    stoppedTitle: "\ucea0\ud398\uc778\uc774 \uc911\ub2e8\ub418\uc5c8\uc2b5\ub2c8\ub2e4",
     stoppedPrevented: (n: number) => `\uba54\uc2dc\uc9c0 ${n}\uac74\uc744 \ub9c9\uc558\uc2b5\ub2c8\ub2e4.`,
     stoppedAccepted: (n: number) =>
       ` ${n}\uac74\uc740 \uc774\ubbf8 \ud1b5\uc2e0\uc0ac\uc5d0 \uc811\uc218\ub418\uc5b4 \ud68c\uc218\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.`,
@@ -1304,6 +1333,40 @@ export const ko: Dictionary = {
       rowContacts: "연락처",
       rowSuppression: "수신 거부",
       beforeLiveTitle: "정식 운영 전환 전 확인 사항",
+      beforeLiveItems: {
+        partnerSchemas: "제휴사 요청·응답·오류 스키마와 샘플 페이로드",
+        partnerSenderRules: "제휴사 발신자 ID 규칙과 승인 절차",
+        partnerEncoding: "모의 값을 대체할 제휴사 인코딩 및 세그먼트 과금 규칙",
+        partnerIdempotency: "제휴사 멱등성 및 제출 조회 방식",
+        throughput: "처리량 한도, 타임아웃, 점검 시간대",
+        deliveryAuth: "전달 이벤트 인증 방식",
+        charging: "과금 시점과 실패한 메시지의 환불 규칙",
+        pricing: "승인된 요금, 세금 처리, 청구서 정책",
+        paymentProvider: "계약된 결제 대행사와 인증 정보",
+        emailTransport: "실제 이메일 발송 수단",
+        legalWording: "DPO 또는 법률 자문이 승인한 개인정보·동의·보관 관련 문구",
+        adminMfa: "운영 환경 관리자 MFA 등록",
+        workerHosting: "웹 프로세스와 분리된 안정적인 워커 호스팅",
+        tests: "샌드박스, UAT, 복원 테스트 통과",
+      },
+      keyLabels: {
+        selfServiceCeiling: "자가 발송 수신자 한도",
+        dailyDestinationQuota: "조직별 일일 발송 대상 수",
+        monthlyDestinationQuota: "조직별 월간 발송 대상 수",
+        maxSegmentsPerMessage: "메시지당 최대 세그먼트 수",
+        maxScheduleDays: "예약 가능한 최대 기간(일)",
+        dailySegmentQuota: "조직별 일일 세그먼트 수",
+        dailySpendCapCentavos: "일일 지출 한도(센타보)",
+        maxCampaignsPerHour: "조직별 시간당 캠페인 수",
+        unitPriceCentavos: "세그먼트당 요금(센타보)",
+        quoteValiditySeconds: "견적 유효 시간(초)",
+        uploadRetentionHours: "업로드 파일 보관 기간(시간)",
+        messageDetailRetentionDays: "메시지 상세 보관 기간(일)",
+        auditRetentionDays: "감사 로그 보관 기간(일)",
+        contactRetentionDays: "연락처 보관 기간(일)",
+        suppressionRetentionDays: "수신 거부 보관 기간(일)",
+        maxDispatchAttempts: "포기 전 발송 시도 횟수",
+      },
       beforeLiveDescription: "문서로 정리된 내용이며 애플리케이션이 검증하지는 않습니다.",
       editableTitle: "편집 가능한 한도",
       colSetting: "설정",
@@ -1355,6 +1418,42 @@ export const ko: Dictionary = {
   },
 
   adminExtra: {
+    tileVerificationSub: (n: number) => (n > 0 ? `심사 대기 ${n}건` : "심사 대기열"),
+    tileInquiriesSub: (n: number) => (n > 0 ? `신규 문의 ${n}건` : "신규 문의"),
+    tileSendersSub: (n: number) => (n > 0 ? `심사 대기 ${n}건` : "심사 대기"),
+    exportReport: "보고서 내보내기",
+    campaignDetails: (recipients: number, purpose: string) => `수신자 ${recipients}명 · ${purpose}`,
+    unresolvedNotice: (n: number) =>
+      `제출 ${n}건이 미확정 상태입니다. 전송 직후 연결이 끊겨 통신사가 접수했는지 알 수 없습니다. 자동으로 재시도하지 않습니다.`,
+    quarantinedNotice: (n: number) =>
+      `전달 이벤트 ${n}건이 알려진 메시지와 일치하지 않아 격리되었습니다.`,
+    eventCount: (n: number) => `이벤트 ${n}건`,
+    actorKinds: {
+      USER: "사용자",
+      PLATFORM_ADMIN: "플랫폼 관리자",
+      SYSTEM: "시스템",
+    },
+    frozenCount: (n: number) => `발송이 중지된 계정 ${n}개`,
+    owedAndBalance: (owed: string, balance: string) => `미지급금 ${owed} · 잔액 ${balance}`,
+    organizationCount: (n: number) => `조직 ${n}개`,
+    defaultLimitsNote: (daily: number, monthly: number) =>
+      `한도를 비워 두면 플랫폼 기본값(일 ${daily}건, 월 ${monthly}건)이 적용됩니다.`,
+    customerLine: (members: number, campaigns: number, joined: string) =>
+      `구성원 ${members}명 · 캠페인 ${campaigns}건 · ${joined} 가입`,
+    availableAmount: (amount: string) => `사용 가능 ${amount}`,
+    recoveryCodesLeft: (n: number) =>
+      n > 0
+        ? `복구 코드도 사용할 수 있습니다. ${n}개 남았습니다.`
+        : "남은 복구 코드가 없습니다.",
+    awaitingReviewCount: (n: number) => `심사 대기 (${n})`,
+    senderLine: (organization: string, applied: string) => `${organization} · ${applied} 신청`,
+    perSegment: (amount: string) => `세그먼트당 ${amount}`,
+    platformBlockNotice:
+      "여기에서 차단하면 모든 조직이 해당 번호로 메시지를 보낼 수 없습니다. 고객사의 자체 수신 거부 목록은 해당 고객사에만 적용되고 다른 고객사에는 보이지 않으며, 이 화면에서는 수정할 수 없습니다. 플랫폼 차원의 안전 또는 악용 방지 사유가 있을 때만 사용하세요.",
+    blockedCount: (n: number) => `플랫폼 전체 차단 ${n}건`,
+    reviewQueueCount: (n: number) => `심사 대기열 (${n})`,
+    submittedAt: (when: string) => `${when} 제출`,
+    inquiryCount: (n: number) => `문의 ${n}건`,
     mfaTitle: "2단계 인증",
     adminSubtitle: "\uad00\ub9ac\uc790",
     modeMock: "\ub370\ubaa8 \ubaa8\ub4dc",
@@ -1367,15 +1466,15 @@ export const ko: Dictionary = {
     tileSenders: "\ubc1c\uc2e0\uc790 ID",
     tileActivity: "SMS \ubc1c\uc1a1 \ub0b4\uc5ed",
     tileActivitySub: "\ubc1c\uc1a1 \ud604\ud669 \ubaa8\ub2c8\ud130\ub9c1",
-    inquiriesTitle: "\ub300\ub7c9 \uce90\ud398\uc778 \ubb38\uc758",
+    inquiriesTitle: "\ub300\ub7c9 \ucea0\ud398\uc778 \ubb38\uc758",
     inquiriesEmptyTitle: "\ubb38\uc758\uac00 \uc544\uc9c1 \uc5c6\uc2b5\ub2c8\ub2e4",
     inquiriesEmptyBody: "\uacf5\uac1c \uc0ac\uc774\ud2b8\uc5d0\uc11c \uc811\uc218\ub41c \ub300\ub7c9 \ubc1c\uc1a1 \uc2e0\uccad\uc774 \uac80\ud1a0\ub97c \uc704\ud574 \uc5ec\uae30\uc5d0 \ud45c\uc2dc\ub429\ub2c8\ub2e4.",
     colCompany: "\uc5c5\uccb4\uba85",
     colPurpose: "\ubaa9\uc801",
     colAction: "\uc791\uc5c5",
-    campaignsTitle: "\ucd5c\uadfc SMS \uce90\ud398\uc778",
-    campaignsEmptyTitle: "\uce90\ud398\uc778\uc774 \uc544\uc9c1 \uc5c6\uc2b5\ub2c8\ub2e4",
-    campaignsEmptyBody: "\uace0\uac1d\uc774 \uc81c\ucd9c\ud55c \uce90\ud398\uc778\uc774 \ub300\uae30\uc5f4\uc5d0 \ub4e4\uc5b4\uac00 \ubc1c\uc1a1\ub418\uba74 \uc5ec\uae30\uc5d0 \ud45c\uc2dc\ub429\ub2c8\ub2e4.",
+    campaignsTitle: "\ucd5c\uadfc SMS \ucea0\ud398\uc778",
+    campaignsEmptyTitle: "\ucea0\ud398\uc778\uc774 \uc544\uc9c1 \uc5c6\uc2b5\ub2c8\ub2e4",
+    campaignsEmptyBody: "\uace0\uac1d\uc774 \uc81c\ucd9c\ud55c \ucea0\ud398\uc778\uc774 \ub300\uae30\uc5f4\uc5d0 \ub4e4\uc5b4\uac00 \ubc1c\uc1a1\ub418\uba74 \uc5ec\uae30\uc5d0 \ud45c\uc2dc\ub429\ub2c8\ub2e4.",
     colAccount: "\uacc4\uc815",
     colDetails: "\uc0c1\uc138",
     verificationQueue: "\uc778\uc99d \uc2ec\uc0ac \ub300\uae30\uc5f4",

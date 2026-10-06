@@ -16,6 +16,7 @@ export const en = {
   },
 
   common: {
+    scrollableTable: "Scrollable table",
     save: "Save",
     saving: "Saving…",
     cancel: "Cancel",
@@ -99,6 +100,11 @@ export const en = {
 
   components: {
     demoMark: "Design preview • Sample content • Demo — no real SMS or payments",
+    fileDrop: {
+      browse: "Browse files",
+      change: "Choose a different file",
+      or: "or",
+    },
     notifications: {
       title: "Notifications",
       description: "Shown in the app only.",
@@ -413,6 +419,9 @@ export const en = {
   },
 
   contactsExtra: {
+    importCommitted: (added: number, updated: number, skipped: number) =>
+      `${added} added, ${updated} updated` +
+      (skipped > 0 ? `, ${skipped} skipped because they opted out` : ""),
     csvNote: "CSV only, UTF-8, with a",
     csvNoteColumn: "column.",
     fileLimits: (mib: number, rows: string) =>
@@ -430,6 +439,8 @@ export const en = {
   },
 
   send: {
+    fileEmpty: "That file is empty.",
+    fileNeedsColumn: (column: string) => `The file needs a ${column} column.`,
     title: "Send SMS",
     subheading: "Philippine mobile numbers only",
     deniedTitle: "Your role cannot send messages",
@@ -448,8 +459,6 @@ export const en = {
     numbersHint:
       "One per line, or separated by commas or semicolons. Accepted: 09171234567, 9171234567, 639171234567, +639171234567.",
     dropCsv: "Drop your CSV here",
-    or: "or",
-    browseFiles: "Browse files",
     downloadTemplate: "Download template",
     templateHint: "Use our CSV template to ensure the correct format.",
     fileUnreadable: "That file could not be read",
@@ -546,7 +555,7 @@ export const en = {
       "Format is checked, not ownership: a well-formed number is not proof that it is active or reachable. Opt-outs are applied by the server before sending.",
     aboveCeiling: (ceiling: number) => `Above the self-service limit of ${ceiling}`,
     aboveCeilingBody: (over: number) =>
-      `${over} recipients are over the limit for self-service sending. Request a bulk quote instead.`,
+      `${over} recipients are over the limit for self-service sending. Request a bulk quote for the full list.`,
     phoneTextMessage: "Text Message",
     phonePlaceholder: "Your message will appear here.",
     testSendTitle: "Send yourself a test first?",
@@ -626,6 +635,9 @@ export const en = {
       emptyTitle: "No sender identities yet",
       emptyBody: "Apply for the name you want recipients to see.",
       applyTitle: "Apply for a sender identity",
+      count: (n: number) => `${n} sender identit${n === 1 ? "y" : "ies"}`,
+      timeline: (applied: string, decided: string | null) =>
+        decided ? `Applied ${applied} · decided ${decided}` : `Applied ${applied}`,
       senderIdLabel: "Sender ID",
       senderIdHint: "Shown as the sender on the recipient's handset.",
       relationLabel: "How does this relate to your business?",
@@ -651,6 +663,14 @@ export const en = {
         "This sender cannot receive replies, so your messages must not tell recipients to reply STOP. Record opt-out requests on your opt-out list instead.",
     },
     team: {
+      memberCount: (n: number) => `${n} member${n === 1 ? "" : "s"}`,
+      oneOwner: "There is one owner. The last owner cannot be removed or demoted.",
+      ownerCount: (n: number) => `${n} owners.`,
+      pendingInvites: (n: number) => `${n} pending invitation${n === 1 ? "" : "s"}`,
+      you: "(you)",
+      memberLine: (email: string, joined: string, verified: boolean) =>
+        `${email} · joined ${joined}${verified ? "" : " · email not verified"}`,
+      roleFor: (name: string) => `Role for ${name}`,
       title: "Team",
       subheading: "Who can do what in this organization.",
       deniedTitle: "Your role cannot manage the team",
@@ -683,6 +703,9 @@ export const en = {
   },
 
   templates: {
+    count: (n: number) => `${n} template${n === 1 ? "" : "s"}`,
+    versionSaved: (version: number, when: string) => `Version ${version} · saved ${when}`,
+    costEach: (amount: string) => `${amount} each`,
     title: "Templates",
     subheading: "Reusable plain-text messages. Editing one saves a new version.",
     segmentNote:
@@ -765,6 +788,12 @@ export const en = {
   },
 
   creditsExtra: {
+    packageLabels: {
+      "demo-500": "Demo top-up — small",
+      "demo-1000": "Demo top-up — standard",
+    },
+    frozenBody: (amount: string) =>
+      `${amount} is owed after a reversed payment. Sending stays disabled until the balance is settled. Contact support to resolve it.`,
     demoPackages: "Demo packages only. No card details are collected and no real payment is taken.",
     choosePackage: "Choose a package to top up.",
     prepaidNote:
@@ -1320,6 +1349,42 @@ export const en = {
       rowContacts: "Contacts",
       rowSuppression: "Suppression",
       beforeLiveTitle: "Before switching to LIVE",
+      beforeLiveItems: {
+        partnerSchemas: "Partner request, response and error schemas, with sample payloads",
+        partnerSenderRules: "Partner sender-identity rules and approval process",
+        partnerEncoding:
+          "Partner encoding and segment charging rules, which override the mock values",
+        partnerIdempotency: "Partner idempotency and submission-query semantics",
+        throughput: "Throughput limits, timeouts and maintenance windows",
+        deliveryAuth: "Delivery-event authentication scheme",
+        charging: "Charging point and refund rules for failed messages",
+        pricing: "Approved pricing, tax treatment and invoice policy",
+        paymentProvider: "A contracted payment provider and its credentials",
+        emailTransport: "A real email transport",
+        legalWording:
+          "Approved privacy, consent and retention wording from the DPO or legal adviser",
+        adminMfa: "Production admin MFA enrolment",
+        workerHosting: "Durable worker hosting, separate from the web process",
+        tests: "Successful sandbox, UAT and restore tests",
+      },
+      keyLabels: {
+        selfServiceCeiling: "Self-service recipient ceiling",
+        dailyDestinationQuota: "Daily destinations per organization",
+        monthlyDestinationQuota: "Monthly destinations per organization",
+        maxSegmentsPerMessage: "Maximum segments per message",
+        maxScheduleDays: "Furthest a send may be scheduled (days)",
+        dailySegmentQuota: "Daily segments per organization",
+        dailySpendCapCentavos: "Daily spend cap (centavos)",
+        maxCampaignsPerHour: "Campaigns per hour per organization",
+        unitPriceCentavos: "Price per segment (centavos)",
+        quoteValiditySeconds: "How long a quote stays valid (seconds)",
+        uploadRetentionHours: "Uploaded file retention (hours)",
+        messageDetailRetentionDays: "Message detail retention (days)",
+        auditRetentionDays: "Audit log retention (days)",
+        contactRetentionDays: "Contact retention (days)",
+        suppressionRetentionDays: "Opt-out retention (days)",
+        maxDispatchAttempts: "Delivery attempts before giving up",
+      },
       beforeLiveDescription: "Documented here, not verified by the application.",
       editableTitle: "Editable limits",
       colSetting: "Setting",
@@ -1372,6 +1437,43 @@ export const en = {
   },
 
   adminExtra: {
+    tileVerificationSub: (n: number) => (n > 0 ? `${n} in review queue` : "Review queue"),
+    tileInquiriesSub: (n: number) => (n > 0 ? `${n} new requests` : "New requests"),
+    tileSendersSub: (n: number) => (n > 0 ? `${n} awaiting review` : "Awaiting review"),
+    exportReport: "Export report",
+    campaignDetails: (recipients: number, purpose: string) =>
+      `${recipients} recipient${recipients === 1 ? "" : "s"} · ${purpose}`,
+    unresolvedNotice: (n: number) =>
+      `${n} submission(s) are unresolved: the connection dropped after they were sent, so the provider may or may not have accepted them. They are never retried automatically.`,
+    quarantinedNotice: (n: number) =>
+      `${n} delivery event(s) are quarantined because they did not match a known message.`,
+    eventCount: (n: number) => `${n} event${n === 1 ? "" : "s"}`,
+    actorKinds: {
+      USER: "user",
+      PLATFORM_ADMIN: "platform admin",
+      SYSTEM: "system",
+    },
+    frozenCount: (n: number) => `${n} account(s) frozen`,
+    owedAndBalance: (owed: string, balance: string) => `${owed} owed · ${balance} balance`,
+    organizationCount: (n: number) => `${n} organization${n === 1 ? "" : "s"}`,
+    defaultLimitsNote: (daily: number, monthly: number) =>
+      `Blank limits use the platform defaults of ${daily}/day and ${monthly}/month.`,
+    customerLine: (members: number, campaigns: number, joined: string) =>
+      `${members} member${members === 1 ? "" : "s"} · ${campaigns} campaign${campaigns === 1 ? "" : "s"} · joined ${joined}`,
+    availableAmount: (amount: string) => `${amount} available`,
+    recoveryCodesLeft: (n: number) =>
+      n > 0
+        ? `A recovery code also works. You have ${n} left.`
+        : "You have no recovery codes left.",
+    awaitingReviewCount: (n: number) => `Awaiting review (${n})`,
+    senderLine: (organization: string, applied: string) => `${organization} · applied ${applied}`,
+    perSegment: (amount: string) => `${amount} per segment`,
+    platformBlockNotice:
+      "A block here stops every organization from messaging that number. A customer's own opt-out list only affects that customer, is invisible to others, and cannot be edited from this screen. Use this only where a platform-level safety or abuse reason applies.",
+    blockedCount: (n: number) => `${n} blocked platform-wide`,
+    reviewQueueCount: (n: number) => `Review queue (${n})`,
+    submittedAt: (when: string) => `Submitted ${when}`,
+    inquiryCount: (n: number) => `${n} inquir${n === 1 ? "y" : "ies"}`,
     mfaTitle: "Two-factor authentication",
     adminSubtitle: "Admin",
     modeMock: "Demo mode",

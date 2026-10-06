@@ -2,12 +2,10 @@ import Link from "next/link";
 import { PRODUCT_NAME, Wordmark } from "@/components/brand";
 import { SidebarNav, type NavItem } from "@/components/sidebar";
 import { Pill } from "@/components/ui";
-import { formatManilaDate } from "@/server/config";
 import {
   IconBlock,
   IconCard,
   IconChat,
-  IconChevronDown,
   IconDatabase,
   IconDocument,
   IconHome,
@@ -22,7 +20,8 @@ import {
 import { requirePlatformAdmin } from "@/server/auth/context";
 import { env } from "@/server/env";
 import { dispatchDueOnVisit } from "@/server/jobs/dispatch-after-response";
-import { getDictionary } from "@/i18n/server";
+import { getI18n } from "@/i18n/server";
+import { formatDate } from "@/i18n/format";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { LogoutButton } from "@/components/logout-button";
@@ -47,7 +46,7 @@ function navFor(t: Dictionary): NavItem[] {
 }
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
   const nav = navFor(t);
 
   const admin = await requirePlatformAdmin();
@@ -93,7 +92,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
             <div className="ml-auto flex items-center gap-2 sm:gap-3">
               <span className="hidden text-[13px] font-medium text-body sm:block">
-                {formatManilaDate(new Date())}
+                {formatDate(new Date(), locale)}
               </span>
 
               {env.APP_MODE === "MOCK" ? <Pill tone="info">{t.adminExtra.modeMock}</Pill> : null}
@@ -116,7 +115,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                   <IconUser size={16} />
                 </span>
                 <span className="hidden sm:inline">{admin.fullName.split(" ")[0] ?? "Admin"}</span>
-                <IconChevronDown size={13} className="text-muted" />
               </Link>
 
               <LogoutButton label={t.nav.logOut} />
@@ -134,7 +132,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               {t.adminExtra.footerTagline}
             </p>
           </div>
-          <p className="mt-2 text-right text-[11.5px] text-muted">{t.adminExtra.designPreview}</p>
+          {/* Sample content is only what a demo shows; see DemoFooterMark. */}
+          {env.APP_MODE === "MOCK" ? (
+            <p className="mt-2 text-right text-[11.5px] text-muted">{t.adminExtra.designPreview}</p>
+          ) : null}
         </footer>
       </div>
     </div>

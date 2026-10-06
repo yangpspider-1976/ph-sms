@@ -105,7 +105,9 @@ export function GroupMembers({
                   />
                 </td>
                 <td className="font-mono text-[12.5px]">{member.masked}</td>
-                <td>{[member.firstName, member.lastName].filter(Boolean).join(" ") || "—"}</td>
+                <td className="cell-title">
+                  {[member.firstName, member.lastName].filter(Boolean).join(" ") || "—"}
+                </td>
               </tr>
             ))}
           </tbody>

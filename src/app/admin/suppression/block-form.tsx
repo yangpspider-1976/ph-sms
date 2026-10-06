@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { addPlatformSuppressionAction, type AdminResult } from "@/server/actions/admin";
-import { Button, Card, Field, Input, Notice, Textarea } from "@/components/ui";
+import { Button, Field, FormCard, Input, Notice, Textarea } from "@/components/ui";
 import { useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
@@ -26,11 +26,8 @@ export function PlatformBlockForm() {
   }
 
   return (
-    <Card className="max-w-2xl p-5">
-      <h2 className="card-title">{t.admin.suppression.addTitle}</h2>
-      <p className="mt-1 text-[13px] text-muted">{t.adminExtra.blockIntro}</p>
-
-      <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="mt-4 space-y-4">
+    <FormCard title={t.admin.suppression.addTitle} description={t.adminExtra.blockIntro}>
+      <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="space-y-4">
         <Field label={t.admin.suppression.numbersLabel} htmlFor="numbers" required>
           <Textarea id="numbers" name="numbers" rows={3} required placeholder="09171234567" />
         </Field>
@@ -52,6 +49,6 @@ export function PlatformBlockForm() {
           {pending ? t.adminExtra.blocking : t.adminExtra.block}
         </Button>
       </form>
-    </Card>
+    </FormCard>
   );
 }

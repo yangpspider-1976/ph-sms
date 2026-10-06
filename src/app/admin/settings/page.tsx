@@ -3,12 +3,12 @@ import { requirePlatformAdmin } from "@/server/auth/context";
 import { env, liveReadinessGaps } from "@/server/env";
 import { formatCentavos, liveConfigGaps } from "@/server/config";
 import { getEffectiveConfig, listConfig } from "@/server/domain/app-config";
-import { formatManila } from "@/server/config";
 import { ConfigEditor } from "./config-editor";
 import { getSmsProvider } from "@/server/providers/sms";
 import { getPaymentProvider } from "@/server/providers/payments";
 import { Card, CardHeader, DetailRow, Notice, PageHeader, Pill } from "@/components/ui";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -24,7 +24,7 @@ export const dynamic = "force-dynamic";
  * for someone to discover after switching modes.
  */
 export default async function AdminSettingsPage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   await requirePlatformAdmin();
 
@@ -72,7 +72,7 @@ export default async function AdminSettingsPage() {
             value: row.value,
             defaultValue: row.defaultValue,
             overridden: row.overridden,
-            updatedAt: row.updatedAt ? formatManila(row.updatedAt) : null,
+            updatedAt: row.updatedAt ? formatDateTime(row.updatedAt, locale) : null,
           }))}
         />
       </div>
@@ -136,7 +136,7 @@ export default async function AdminSettingsPage() {
           <dl className="mt-3">
             <DetailRow
               label={t.admin.settings.rowUnitPrice}
-              value={`${formatCentavos(config.unitPriceCentavos)} per segment`}
+              value={t.adminExtra.perSegment(formatCentavos(config.unitPriceCentavos))}
             />
             <DetailRow
               label={t.admin.settings.rowPricingApproved}
@@ -174,22 +174,7 @@ export default async function AdminSettingsPage() {
           description={t.admin.settings.beforeLiveDescription}
         />
         <ul className="space-y-2 px-5 pb-5 text-[13px] text-body">
-          {[
-            "Partner request, response and error schemas, with sample payloads",
-            "Partner sender-identity rules and approval process",
-            "Partner encoding and segment charging rules, which override the mock values",
-            "Partner idempotency and submission-query semantics",
-            "Throughput limits, timeouts and maintenance windows",
-            "Delivery-event authentication scheme",
-            "Charging point and refund rules for failed messages",
-            "Approved pricing, tax treatment and invoice policy",
-            "A contracted payment provider and its credentials",
-            "A real email transport",
-            "Approved privacy, consent and retention wording from the DPO or legal adviser",
-            "Production admin MFA enrolment",
-            "Durable worker hosting, separate from the web process",
-            "Successful sandbox, UAT and restore tests",
-          ].map((item) => (
+          {Object.values(t.admin.settings.beforeLiveItems).map((item) => (
             <li key={item} className="flex gap-2">
               <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-muted" />
               {item}

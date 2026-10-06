@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { applyForSenderAction, type SenderResult } from "@/server/actions/senders";
-import { Button, Card, Field, Input, Notice, Textarea } from "@/components/ui";
+import { Button, Field, FormCard, Input, Notice, Textarea } from "@/components/ui";
 import { useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
@@ -26,11 +26,8 @@ export function SenderApplicationForm() {
   }
 
   return (
-    <Card className="max-w-2xl p-5">
-      <h2 className="card-title">{t.settings.senders.applyTitle}</h2>
-      <p className="mt-1 text-[13px] text-muted">{t.settings.senders.applyIntro}</p>
-
-      <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="mt-4 space-y-4">
+    <FormCard title={t.settings.senders.applyTitle} description={t.settings.senders.applyIntro}>
+      <form action={submit} onSubmit={keepValuesOnSubmit(submit)} className="space-y-4">
         <Field
           label={t.settings.senders.senderIdLabel}
           htmlFor="value"
@@ -76,6 +73,6 @@ export function SenderApplicationForm() {
           {pending ? t.settings.senders.applying : t.settings.senders.apply}
         </Button>
       </form>
-    </Card>
+    </FormCard>
   );
 }

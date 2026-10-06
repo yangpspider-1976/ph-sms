@@ -159,4 +159,27 @@ test.describe("phone usability", () => {
     const { overflows } = await bodyOverflows(page);
     expect(overflows).toBe(false);
   });
+
+  test("a table that scrolls sideways keeps its rows whole and can be scrolled by keyboard", async ({
+    page,
+  }) => {
+    await login(page, "owner@demo.test");
+    await page.goto("/app/contacts");
+    await page.locator("h1").first().waitFor({ state: "visible" });
+
+    // Squeezed to fit, a masked number used to break across three lines in a
+    // table that had to be scrolled anyway. An inline box has one rectangle for
+    // each line it runs over.
+    const number = page.locator("table td.font-mono a").first();
+    await expect(number).toHaveText(/^\+63 \d{3} \*\*\* \d{4}$/);
+    expect(await number.evaluate((el) => el.getClientRects().length)).toBe(1);
+
+    // Arrow keys only scroll what has focus, and nothing in this table may be
+    // focusable except its links — so the scrolling box itself is a tab stop.
+    const region = page.getByRole("group", { name: "Scrollable table" }).first();
+    await expect(region).toHaveAttribute("tabindex", "0");
+    await region.focus();
+    await page.keyboard.press("ArrowRight");
+    await expect.poll(() => region.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+  });
 });

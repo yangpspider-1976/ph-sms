@@ -3,10 +3,11 @@ import { and, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/server/db";
 import { campaigns, messageItems, senderIdentities } from "@/server/db/schema";
 import { requireOrgContext } from "@/server/auth/context";
+import { demoFeaturesEnabled } from "@/server/env";
 import { dispatchDueOnVisit } from "@/server/jobs/dispatch-after-response";
 import { getWallet } from "@/server/domain/wallet";
 import { limitsFor, quotaUsage } from "@/server/domain/quota";
-import { MOCK_DEFAULTS, formatCentavos, formatManila } from "@/server/config";
+import { MOCK_DEFAULTS, formatCentavos } from "@/server/config";
 import {
   ButtonLink,
   Card,
@@ -20,7 +21,8 @@ import {
 } from "@/components/ui";
 import { IconMegaphone, IconSend } from "@/components/icons";
 import { NotificationsPanel } from "@/components/notifications";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata() {
   const t = await getDictionary();
@@ -40,7 +42,7 @@ const CAMPAIGN_TONE: Record<string, Tone> = {
 };
 
 export default async function DashboardPage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   const ctx = await requireOrgContext();
   dispatchDueOnVisit();
@@ -93,7 +95,10 @@ export default async function DashboardPage() {
           hint={
             wallet.heldCentavos > 0
               ? t.dashboard.heldForSends(formatCentavos(wallet.heldCentavos))
-              : t.dashboard.demoCredit
+              : // Demo funding exists only outside LIVE; there the credit is real.
+                demoFeaturesEnabled()
+                ? t.dashboard.demoCredit
+                : undefined
           }
         />
         <Stat
@@ -130,7 +135,7 @@ export default async function DashboardPage() {
           action={
             <Link
               href="/app/campaigns"
-              className="text-[13px] font-semibold text-brand-600 hover:underline"
+              className="-my-1 py-1 text-[13px] font-semibold text-brand-600 hover:underline"
             >
               {t.dashboard.viewAll}
             </Link>
@@ -162,7 +167,7 @@ export default async function DashboardPage() {
             <tbody>
               {recent.map((campaign) => (
                 <tr key={campaign.id}>
-                  <td>
+                  <td className="cell-title" title={campaign.name}>
                     <Link href={`/app/campaigns/${campaign.id}`} className="hover:text-brand-700">
                       {campaign.name}
                     </Link>
@@ -173,7 +178,7 @@ export default async function DashboardPage() {
                     </Pill>
                   </td>
                   <td>{campaign.includedCount}</td>
-                  <td className="text-muted">{formatManila(campaign.createdAt)}</td>
+                  <td className="text-muted">{formatDateTime(campaign.createdAt, locale)}</td>
                 </tr>
               ))}
             </tbody>

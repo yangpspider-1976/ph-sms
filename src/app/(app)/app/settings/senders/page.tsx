@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { requireOrgContext } from "@/server/auth/context";
 import { listSenders } from "@/server/actions/senders";
-import { formatManila } from "@/server/config";
 import { demoFeaturesEnabled } from "@/server/env";
 import {
   Card,
@@ -15,7 +14,8 @@ import {
 import { IconTag } from "@/components/icons";
 import { SenderApplicationForm } from "./application-form";
 import { DemoApproveButton } from "./demo-approve-button";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -32,7 +32,7 @@ const TONE: Record<string, Tone> = {
 };
 
 export default async function SenderIdentitiesPage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   const ctx = await requireOrgContext();
   const rows = await listSenders(ctx.org.organizationId);
@@ -61,7 +61,7 @@ export default async function SenderIdentitiesPage() {
 
       <Card>
         <CardHeader
-          title={`${rows.length} sender identit${rows.length === 1 ? "y" : "ies"}`}
+          title={t.settings.senders.count(rows.length)}
           description={t.settings.senders.approvalNote}
         />
         {rows.length === 0 ? (
@@ -78,8 +78,10 @@ export default async function SenderIdentitiesPage() {
                   <div className="min-w-0">
                     <p className="text-[15px] font-bold text-ink">{sender.value}</p>
                     <p className="mt-0.5 text-[12.5px] text-muted">
-                      Applied {formatManila(sender.createdAt)}
-                      {sender.decidedAt ? ` · decided ${formatManila(sender.decidedAt)}` : ""}
+                      {t.settings.senders.timeline(
+                        formatDateTime(sender.createdAt, locale),
+                        sender.decidedAt ? formatDateTime(sender.decidedAt, locale) : null,
+                      )}
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">

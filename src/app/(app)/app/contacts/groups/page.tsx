@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireOrgContext } from "@/server/auth/context";
 import { listGroups } from "@/server/domain/groups";
-import { formatManila } from "@/server/config";
 import {
   ButtonLink,
   Card,
@@ -13,7 +12,8 @@ import {
 } from "@/components/ui";
 import { IconUsers } from "@/components/icons";
 import { CreateGroupForm } from "./create-group-form";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 
 export default async function GroupsPage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   const ctx = await requireOrgContext();
   const groups = await listGroups(ctx.org.organizationId);
@@ -69,7 +69,7 @@ export default async function GroupsPage() {
             <tbody>
               {groups.map((group) => (
                 <tr key={group.id}>
-                  <td>
+                  <td className="cell-title" title={group.name}>
                     <Link
                       href={`/app/contacts/groups/${group.id}`}
                       className="font-semibold text-ink hover:text-brand-700"
@@ -78,9 +78,9 @@ export default async function GroupsPage() {
                     </Link>
                   </td>
                   <td>{group.memberCount}</td>
-                  <td className="text-muted">{group.description ?? "—"}</td>
+                  <td className="cell-text text-muted">{group.description ?? "—"}</td>
                   <td className="whitespace-nowrap text-muted">
-                    {formatManila(group.updatedAt)}
+                    {formatDateTime(group.updatedAt, locale)}
                   </td>
                 </tr>
               ))}

@@ -3,7 +3,6 @@ import { desc, eq, ilike, and, type SQL } from "drizzle-orm";
 import { db } from "@/server/db";
 import { auditEvents, organizations, users } from "@/server/db/schema";
 import { requirePlatformAdmin } from "@/server/auth/context";
-import { formatManila } from "@/server/config";
 import {
   Button,
   Card,
@@ -16,7 +15,8 @@ import {
   Pill,
 } from "@/components/ui";
 import { IconList } from "@/components/icons";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -32,7 +32,7 @@ export default async function AuditPage({
 }: {
   searchParams: Promise<{ action?: string }>;
 }) {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   await requirePlatformAdmin();
   const { action } = await searchParams;
@@ -90,7 +90,7 @@ export default async function AuditPage({
       </Card>
 
       <Card>
-        <CardHeader title={`${rows.length} events`} description={t.admin.audit.mostRecentFirst} />
+        <CardHeader title={t.adminExtra.eventCount(rows.length)} description={t.admin.audit.mostRecentFirst} />
         {rows.length === 0 ? (
           <EmptyState
             title={t.admin.audit.emptyTitle}
@@ -118,14 +118,18 @@ export default async function AuditPage({
                       </Pill>
                     </td>
                     <td className="text-muted">
-                      {row.actorEmail ?? row.actorKind.toLowerCase()}
+                      {row.actorEmail ??
+                        (t.adminExtra.actorKinds as Record<string, string>)[row.actorKind] ??
+                        t.status.unknown(row.actorKind)}
                     </td>
-                    <td className="text-muted">{row.organizationName ?? "—"}</td>
+                    <td className="cell-title text-muted" title={row.organizationName ?? undefined}>
+                      {row.organizationName ?? "—"}
+                    </td>
                     <td className="text-muted">{row.objectType ?? "—"}</td>
                     <td className="max-w-[280px] truncate text-muted" title={summarize(row.metadata)}>
                       {summarize(row.metadata)}
                     </td>
-                    <td className="whitespace-nowrap text-muted">{formatManila(row.createdAt)}</td>
+                    <td className="whitespace-nowrap text-muted">{formatDateTime(row.createdAt, locale)}</td>
                   </tr>
                 ))}
               </tbody>

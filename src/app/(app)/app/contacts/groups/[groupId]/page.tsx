@@ -105,7 +105,7 @@ export default async function GroupPage({
                 {members.map((member) => (
                   <tr key={member.contactId}>
                     <td className="font-mono text-[12.5px]">{member.masked}</td>
-                    <td>
+                    <td className="cell-title">
                       {[member.firstName, member.lastName].filter(Boolean).join(" ") || "—"}
                     </td>
                   </tr>

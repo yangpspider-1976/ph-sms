@@ -4,8 +4,8 @@ import { healthReport } from "@/server/domain/health";
 import { getSmsProvider } from "@/server/providers/sms";
 import { getPaymentProvider } from "@/server/providers/payments";
 import { env } from "@/server/env";
-import { formatManila } from "@/server/config";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 import type { Dictionary } from "@/i18n/dictionaries";
 import {
   Card,
@@ -32,7 +32,7 @@ export const dynamic = "force-dynamic";
  * to see which check failed without reading JSON.
  */
 export default async function HealthPage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   await requirePlatformAdmin();
 
@@ -51,7 +51,7 @@ export default async function HealthPage() {
       <div className="mb-5 max-w-3xl">
         {report.status === "ok" ? (
           <Notice tone="success" title={t.admin.health.healthyTitle}>
-            {t.admin.health.healthyBody(formatManila(new Date()))}
+            {t.admin.health.healthyBody(formatDateTime(new Date(), locale))}
           </Notice>
         ) : report.status === "failing" ? (
           <Notice tone="danger" title={t.admin.health.failingTitle}>
@@ -86,7 +86,7 @@ export default async function HealthPage() {
                   <Pill tone={toneFor(check.status)}>{statusLabel(check.status, t)}</Pill>
                 </td>
                 <td className="font-mono text-[12.5px]">{check.value}</td>
-                <td className="max-w-md text-muted">{check.detail}</td>
+                <td className="cell-text max-w-md text-muted">{check.detail}</td>
               </tr>
             ))}
           </tbody>

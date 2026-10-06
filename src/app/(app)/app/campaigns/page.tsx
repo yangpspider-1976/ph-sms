@@ -3,7 +3,7 @@ import Link from "next/link";
 import { requireOrgContext } from "@/server/auth/context";
 import { dispatchDueOnVisit } from "@/server/jobs/dispatch-after-response";
 import { listCampaignsForOrg } from "@/server/domain/campaigns";
-import { formatCentavos, formatManila } from "@/server/config";
+import { formatCentavos } from "@/server/config";
 import {
   ButtonLink,
   Card,
@@ -14,7 +14,8 @@ import {
   type Tone,
 } from "@/components/ui";
 import { IconMegaphone } from "@/components/icons";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -38,7 +39,7 @@ export default async function CampaignsPage({
 }: {
   searchParams: Promise<{ filter?: string }>;
 }) {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   const ctx = await requireOrgContext();
   dispatchDueOnVisit();
@@ -97,7 +98,7 @@ export default async function CampaignsPage({
             <tbody>
               {rows.map((row) => (
                 <tr key={row.id}>
-                  <td>
+                  <td className="cell-title" title={row.name}>
                     <Link href={`/app/campaigns/${row.id}`} className="hover:text-brand-700">
                       {row.name}
                     </Link>
@@ -110,7 +111,7 @@ export default async function CampaignsPage({
                   <td>{row.delivered}</td>
                   <td>{formatCentavos(row.cost)}</td>
                   <td className="whitespace-nowrap text-muted">
-                    {formatManila(row.scheduledAt ?? row.createdAt)}
+                    {formatDateTime(row.scheduledAt ?? row.createdAt, locale)}
                   </td>
                 </tr>
               ))}

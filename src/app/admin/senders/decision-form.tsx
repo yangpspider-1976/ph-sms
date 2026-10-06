@@ -52,7 +52,7 @@ export function SenderDecision({ senderId, value }: { senderId: string; value: s
         </div>
 
         <Button type="submit" disabled={pending}>
-          {pending ? "Saving…" : `Record for ${value}`}
+          {pending ? t.common.saving : t.adminExtra.recordFor(value)}
         </Button>
       </div>
 
@@ -61,7 +61,7 @@ export function SenderDecision({ senderId, value }: { senderId: string; value: s
           <input
             type="checkbox"
             name="supportsInboundReplies"
-            className="mt-0.5 h-4 w-4 accent-brand-600"
+            className="mt-0.5 h-4 w-4 shrink-0 accent-brand-600"
           />
           <span>
             {t.adminExtra.inboundRepliesLabel}

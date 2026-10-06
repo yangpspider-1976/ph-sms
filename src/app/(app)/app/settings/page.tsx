@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { requireOrgContext } from "@/server/auth/context";
-import { formatManila } from "@/server/config";
 import { Card, DetailRow, NavTile, Notice, PageHeader, Pill } from "@/components/ui";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 import {
   IconBuilding,
   IconShield,
@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   const ctx = await requireOrgContext({ allowInactive: true });
   const verified = ctx.org.organizationStatus === "ACTIVE";
@@ -111,7 +111,7 @@ export default async function SettingsPage() {
           />
           <DetailRow label={t.settings.timesShownIn} value={t.settings.timezoneValue} />
           <DetailRow label={t.settings.currency} value={t.settings.currencyValue} />
-          <DetailRow label={t.settings.viewed} value={formatManila(new Date())} />
+          <DetailRow label={t.settings.viewed} value={formatDateTime(new Date(), locale)} />
         </dl>
       </Card>
     </>

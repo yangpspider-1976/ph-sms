@@ -4,8 +4,8 @@ import { db } from "@/server/db";
 import { imports } from "@/server/db/schema";
 import { requireOrgContext } from "@/server/auth/context";
 import { getImportRows } from "@/server/domain/contacts";
-import { formatManila } from "@/server/config";
-import { getDictionary } from "@/i18n/server";
+import { getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 import {
   Card,
   CardHeader,
@@ -33,7 +33,7 @@ export default async function ImportDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   const { id } = await params;
   const ctx = await requireOrgContext();
@@ -82,7 +82,10 @@ export default async function ImportDetailPage({
                   {rows.map((row) => (
                     <tr key={row.id}>
                       <td>{row.sourceRowNumber}</td>
-                      <td className="font-mono text-[12px]">
+                      <td
+                        className="cell-title font-mono text-[12px]"
+                        title={row.numberMasked ? undefined : (row.rawValue ?? undefined)}
+                      >
                         {row.numberMasked ?? row.rawValue ?? "—"}
                       </td>
                       <td>
@@ -107,10 +110,10 @@ export default async function ImportDetailPage({
             <DetailRow label={t.contacts.imports.invalid} value={record.invalidCount} />
             <DetailRow label={t.contacts.imports.duplicate} value={record.duplicateCount} />
             <DetailRow label={t.contacts.imports.optedOut} value={record.suppressedCount} />
-            <DetailRow label={t.contacts.imports.uploaded} value={formatManila(record.createdAt)} />
+            <DetailRow label={t.contacts.imports.uploaded} value={formatDateTime(record.createdAt, locale)} />
             <DetailRow
               label={t.contacts.imports.originalDeleted}
-              value={record.expiresAt ? formatManila(record.expiresAt) : "—"}
+              value={record.expiresAt ? formatDateTime(record.expiresAt, locale) : "—"}
             />
           </dl>
         </Card>

@@ -3,11 +3,11 @@ import { desc } from "drizzle-orm";
 import { db } from "@/server/db";
 import { inquiries } from "@/server/db/schema";
 import { requirePlatformAdmin } from "@/server/auth/context";
-import { formatManila } from "@/server/config";
 import { Card, CardHeader, EmptyState, Notice, PageHeader, Pill, type Tone } from "@/components/ui";
 import { IconDocument } from "@/components/icons";
 import { InquiryForm } from "./inquiry-form";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -26,7 +26,7 @@ const TONE: Record<string, Tone> = {
 };
 
 export default async function InquiriesPage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   await requirePlatformAdmin();
 
@@ -46,7 +46,7 @@ export default async function InquiriesPage() {
       </div>
 
       <Card>
-        <CardHeader title={`${rows.length} inquiries`} />
+        <CardHeader title={t.adminExtra.inquiryCount(rows.length)} />
         {rows.length === 0 ? (
           <EmptyState
             title={t.adminExtra.inquiriesPageEmptyTitle}
@@ -67,7 +67,7 @@ export default async function InquiriesPage() {
                     <p className="text-[15px] font-bold text-ink">{inquiry.company}</p>
                     <p className="mt-0.5 text-[12.5px] text-muted">
                       {inquiry.contactName} · {inquiry.contactEmail} ·{" "}
-                      {formatManila(inquiry.createdAt)}
+                      {formatDateTime(inquiry.createdAt, locale)}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">

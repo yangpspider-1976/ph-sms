@@ -146,11 +146,63 @@
     white-space: nowrap;
   }
 
+  /* A cell holds one value — a number, a date, a status — and stays on one
+     line. A table too wide for its card scrolls sideways inside it (see
+     DataTable) instead of being squeezed first: auto layout shrinks every
+     column to its longest word before it overflows, so "+63 917 *** 0001"
+     ran to three lines in a table that had to be scrolled anyway. */
   .data-table tbody td {
     padding: 14px 16px;
     border-bottom: 1px solid var(--color-line);
     color: var(--color-body);
     vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  /* A name someone typed (a campaign, a group, a file) has no upper limit, so
+     it cannot be held to one line: it wraps, which also lets the table still
+     fit its card, but not below a few words per line. */
+  .data-table tbody td.cell-title {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    min-width: 9rem;
+  }
+
+  /* On a phone the table scrolls whatever happens, so the name does stay on
+     one line there and ends in an ellipsis past a point. Put the full value in
+     `title`. */
+  @media (width < 48rem) {
+    .data-table tbody td.cell-title {
+      white-space: nowrap;
+      min-width: 0;
+      max-width: 60vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  /* Running text has to be readable where it is: a reason, a description. It
+     wraps, but never narrower than a readable line. `anywhere` lets a URL with
+     no spaces break at that width too. */
+  .data-table tbody td.cell-text {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    min-width: 13rem;
+  }
+
+  /* A summary table in a narrow dashboard card fits by wrapping rather than
+     scrolling: there the whole row, action button included, has to be visible
+     at a glance. */
+  .data-table-wrap tbody td {
+    white-space: normal;
+  }
+
+  /* A link in a row is only as tall as its text — 14px for a masked number,
+     which is hard to hit with a thumb. Padding on an inline box widens the tap
+     area without moving anything, and unlike inline-block it leaves the
+     ellipsis on the text. A button's own padding utilities still win. */
+  .data-table tbody td > a {
+    padding-block: 6px;
   }
 
   .data-table tbody tr:last-child td {

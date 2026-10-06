@@ -4,11 +4,12 @@ import { db } from "@/server/db";
 import { campaigns } from "@/server/db/schema";
 import { requireOrgContext } from "@/server/auth/context";
 import { listPendingApproval } from "@/server/domain/approval";
-import { formatCentavos, formatManila } from "@/server/config";
+import { formatCentavos } from "@/server/config";
 import { Card, CardHeader, EmptyState, Notice, PageHeader } from "@/components/ui";
 import { IconShield } from "@/components/icons";
 import { ApprovalDecision } from "./decision-form";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -29,7 +30,7 @@ export default async function ApprovalsPage({
 }: {
   searchParams: Promise<{ decided?: string }>;
 }) {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   const ctx = await requireOrgContext();
 
@@ -74,7 +75,7 @@ export default async function ApprovalsPage({
       ? t.approvalsExtra.rejectedNotice(decided.name)
       : decided.approvedAt
         ? decided.scheduledAt
-          ? t.approvalsExtra.approvedScheduledNotice(decided.name, formatManila(decided.scheduledAt))
+          ? t.approvalsExtra.approvedScheduledNotice(decided.name, formatDateTime(decided.scheduledAt, locale))
           : t.approvalsExtra.approvedNotice(decided.name)
         : null;
 
@@ -124,7 +125,7 @@ export default async function ApprovalsPage({
                         campaign.senderValue,
                         campaign.includedCount,
                         formatCentavos(campaign.maxAuthorizedCostCentavos),
-                        formatManila(campaign.createdAt),
+                        formatDateTime(campaign.createdAt, locale),
                       )}
                     </p>
                   </div>
@@ -147,7 +148,7 @@ export default async function ApprovalsPage({
 
                 {campaign.scheduledAt ? (
                   <p className="mt-2 text-[12.5px] text-muted">
-                    {t.approvalsExtra.scheduledNote(formatManila(campaign.scheduledAt))}
+                    {t.approvalsExtra.scheduledNote(formatDateTime(campaign.scheduledAt, locale))}
                   </p>
                 ) : null}
 

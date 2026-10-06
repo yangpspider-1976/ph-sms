@@ -4,7 +4,6 @@ import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/server/db";
 import { campaigns, dispatchJobs, messageItems, organizations, providerEvents } from "@/server/db/schema";
 import { requirePlatformAdmin } from "@/server/auth/context";
-import { formatManila } from "@/server/config";
 import {
   Card,
   CardHeader,
@@ -17,7 +16,8 @@ import {
   type Tone,
 } from "@/components/ui";
 import { IconChat } from "@/components/icons";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -37,7 +37,7 @@ const TONE: Record<string, Tone> = {
 };
 
 export default async function ActivityPage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   await requirePlatformAdmin();
 
@@ -114,12 +114,8 @@ export default async function ActivityPage() {
       {counts.unresolved > 0 || quarantinedCount > 0 ? (
         <div className="mt-5 max-w-3xl">
           <Notice tone="warning" title={t.admin.activity.needsOperator}>
-            {counts.unresolved > 0
-              ? `${counts.unresolved} submission(s) are unresolved: the connection dropped after they were sent, so the provider may or may not have accepted them. They are never retried automatically. `
-              : ""}
-            {quarantinedCount > 0
-              ? `${quarantinedCount} delivery event(s) are quarantined because they did not match a known message.`
-              : ""}
+            {counts.unresolved > 0 ? `${t.adminExtra.unresolvedNotice(counts.unresolved)} ` : ""}
+            {quarantinedCount > 0 ? t.adminExtra.quarantinedNotice(quarantinedCount) : ""}
           </Notice>
         </div>
       ) : null}
@@ -151,8 +147,12 @@ export default async function ActivityPage() {
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.id}>
-                    <td>{row.name}</td>
-                    <td className="text-muted">{row.organizationName}</td>
+                    <td className="cell-title" title={row.name}>
+                      {row.name}
+                    </td>
+                    <td className="cell-title text-muted" title={row.organizationName}>
+                      {row.organizationName}
+                    </td>
                     <td>
                       <Pill tone={TONE[row.status] ?? "neutral"}>
                         {t.status.campaign[row.status]}
@@ -163,7 +163,7 @@ export default async function ActivityPage() {
                     <td className={row.unresolved > 0 ? "font-semibold text-warning-fg" : "text-muted"}>
                       {row.unresolved}
                     </td>
-                    <td className="whitespace-nowrap text-muted">{formatManila(row.createdAt)}</td>
+                    <td className="whitespace-nowrap text-muted">{formatDateTime(row.createdAt, locale)}</td>
                   </tr>
                 ))}
               </tbody>

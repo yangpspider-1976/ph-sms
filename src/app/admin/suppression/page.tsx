@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { requirePlatformAdmin } from "@/server/auth/context";
 import { listPlatformSuppressions } from "@/server/domain/suppression";
-import { formatManila } from "@/server/config";
 import {
   Card,
   CardHeader,
@@ -12,7 +11,8 @@ import {
 } from "@/components/ui";
 import { IconBlock } from "@/components/icons";
 import { PlatformBlockForm } from "./block-form";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 
 export default async function AdminSuppressionPage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   await requirePlatformAdmin();
   const rows = await listPlatformSuppressions(200);
@@ -35,9 +35,7 @@ export default async function AdminSuppressionPage() {
 
       <div className="mb-5 max-w-3xl">
         <Notice tone="warning" title={t.admin.suppression.notSameTitle}>
-          A block here stops every organization from messaging that number. A customer&apos;s own
-          opt-out list only affects that customer, is invisible to others, and cannot be edited
-          from this screen. Use this only where a platform-level safety or abuse reason applies.
+          {t.adminExtra.platformBlockNotice}
         </Notice>
       </div>
 
@@ -47,7 +45,7 @@ export default async function AdminSuppressionPage() {
 
       <Card>
         <CardHeader
-          title={`${rows.length} blocked platform-wide`}
+          title={t.adminExtra.blockedCount(rows.length)}
           description={t.admin.suppression.maskedNote}
         />
         {rows.length === 0 ? (
@@ -70,9 +68,12 @@ export default async function AdminSuppressionPage() {
               {rows.map((row) => (
                 <tr key={row.id}>
                   <td className="font-mono text-[12.5px]">{row.numberMasked}</td>
-                  <td>{row.reason}</td>
-                  <td className="text-muted">{row.source.toLowerCase()}</td>
-                  <td className="whitespace-nowrap text-muted">{formatManila(row.createdAt)}</td>
+                  <td className="cell-text">{row.reason}</td>
+                  <td className="text-muted">
+                    {(t.status.suppressionSource as Record<string, string>)[row.source] ??
+                      t.status.unknown(row.source)}
+                  </td>
+                  <td className="whitespace-nowrap text-muted">{formatDateTime(row.createdAt, locale)}</td>
                 </tr>
               ))}
             </tbody>

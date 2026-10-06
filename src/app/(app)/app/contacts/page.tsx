@@ -5,7 +5,6 @@ import { countContacts, listContacts, listImports } from "@/server/domain/contac
 import { listGroups } from "@/server/domain/groups";
 import { listOrganizationSuppressions } from "@/server/domain/suppression";
 import { getEffectiveConfig } from "@/server/domain/app-config";
-import { formatManila } from "@/server/config";
 import {
   ButtonLink,
   Card,
@@ -18,7 +17,8 @@ import {
 } from "@/components/ui";
 import { IconDownload, IconUsers } from "@/components/icons";
 import { ImportPanel } from "./import-panel";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -27,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 
 export default async function ContactsPage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   const ctx = await requireOrgContext();
   const orgId = ctx.org.organizationId;
@@ -104,9 +104,11 @@ export default async function ContactsPage() {
                         {row.numberMasked}
                       </Link>
                     </td>
-                    <td>{[row.firstName, row.lastName].filter(Boolean).join(" ") || "—"}</td>
-                    <td className="text-muted">{row.consentSource ?? "—"}</td>
-                    <td className="whitespace-nowrap text-muted">{formatManila(row.createdAt)}</td>
+                    <td className="cell-title">
+                      {[row.firstName, row.lastName].filter(Boolean).join(" ") || "—"}
+                    </td>
+                    <td className="cell-text text-muted">{row.consentSource ?? "—"}</td>
+                    <td className="whitespace-nowrap text-muted">{formatDateTime(row.createdAt, locale)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -114,7 +116,7 @@ export default async function ContactsPage() {
         )}
         {total > rows.length ? (
           <p className="px-5 pb-4 text-[12.5px] text-muted">
-            Showing {rows.length} of {total}.
+            {t.common.of(rows.length, total)}
           </p>
         ) : null}
       </Card>
@@ -123,7 +125,7 @@ export default async function ContactsPage() {
         <Card className="mt-5">
           <CardHeader
             title={t.contacts.recentImports}
-            description={`Uploaded files and rejected rows are deleted automatically after the retention window.`}
+            description={t.contacts.recentImportsHint}
           />
           <DataTable>
             <thead>
@@ -139,7 +141,7 @@ export default async function ContactsPage() {
             <tbody>
               {recentImports.map((record) => (
                 <tr key={record.id}>
-                  <td>
+                  <td className="cell-title" title={record.filename}>
                     <Link href={`/app/contacts/imports/${record.id}`} className="hover:text-brand-700">
                       {record.filename}
                     </Link>
@@ -154,7 +156,7 @@ export default async function ContactsPage() {
                       {record.status === "EXPIRED" ? t.status.importFile.EXPIRED : t.status.importFile.READY}
                     </Pill>
                   </td>
-                  <td className="whitespace-nowrap text-muted">{formatManila(record.createdAt)}</td>
+                  <td className="whitespace-nowrap text-muted">{formatDateTime(record.createdAt, locale)}</td>
                 </tr>
               ))}
             </tbody>

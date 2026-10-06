@@ -3,7 +3,6 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "@/server/db";
 import { organizations, senderIdentities } from "@/server/db/schema";
 import { requirePlatformAdmin } from "@/server/auth/context";
-import { formatManila } from "@/server/config";
 import {
   Card,
   CardHeader,
@@ -16,7 +15,8 @@ import {
 } from "@/components/ui";
 import { IconTag } from "@/components/icons";
 import { SenderDecision } from "./decision-form";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -33,7 +33,7 @@ const TONE: Record<string, Tone> = {
 };
 
 export default async function SendersPage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   await requirePlatformAdmin();
 
@@ -71,7 +71,7 @@ export default async function SendersPage() {
       </div>
 
       <Card>
-        <CardHeader title={`Awaiting review (${pending.length})`} />
+        <CardHeader title={t.adminExtra.awaitingReviewCount(pending.length)} />
         {pending.length === 0 ? (
           <EmptyState
             title={t.admin.senders.emptyQueueTitle}
@@ -86,7 +86,10 @@ export default async function SendersPage() {
                   <div>
                     <p className="text-[15px] font-bold text-ink">{sender.value}</p>
                     <p className="mt-0.5 text-[12.5px] text-muted">
-                      {sender.organizationName} · applied {formatManila(sender.createdAt)}
+                      {t.adminExtra.senderLine(
+                        sender.organizationName,
+                        formatDateTime(sender.createdAt, locale),
+                      )}
                     </p>
                   </div>
                   <Pill tone="warning">{t.admin.senders.pending}</Pill>
@@ -131,18 +134,20 @@ export default async function SendersPage() {
               {decided.map((sender) => (
                 <tr key={sender.id}>
                   <td>{sender.value}</td>
-                  <td className="text-muted">{sender.organizationName}</td>
+                  <td className="cell-title text-muted" title={sender.organizationName}>
+                    {sender.organizationName}
+                  </td>
                   <td>
                     <Pill tone={TONE[sender.status] ?? "neutral"}>
-                      {sender.status.toLowerCase()}
+                      {t.status.sender[sender.status]}
                     </Pill>
                   </td>
                   <td className="text-muted">
                     {sender.supportsInboundReplies ? t.adminExtra.canReceive : t.adminExtra.oneWay}
                   </td>
-                  <td className="text-muted">{sender.decisionReason ?? "—"}</td>
+                  <td className="cell-text text-muted">{sender.decisionReason ?? "—"}</td>
                   <td className="whitespace-nowrap text-muted">
-                    {sender.decidedAt ? formatManila(sender.decidedAt) : "—"}
+                    {sender.decidedAt ? formatDateTime(sender.decidedAt, locale) : "—"}
                   </td>
                 </tr>
               ))}

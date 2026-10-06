@@ -113,7 +113,7 @@ export function PolicyEditor({ policy }: { policy: StoredContentPolicy }) {
             <tbody>
               {policy.rules.map((rule) => (
                 <tr key={rule.id}>
-                  <td>
+                  <td className="cell-text">
                     <span className="block text-[13px] font-semibold text-ink">
                       {rule.description}
                     </span>
@@ -124,7 +124,7 @@ export function PolicyEditor({ policy }: { policy: StoredContentPolicy }) {
                       {rule.severity === "BLOCK" ? t.admin.abuse.outcomeRefuse : t.admin.abuse.outcomeHold}
                     </Pill>
                   </td>
-                  <td className="max-w-sm break-all font-mono text-[11.5px] text-muted">
+                  <td className="cell-text max-w-sm break-all font-mono text-[11.5px] text-muted">
                     /{rule.pattern}/{rule.flags}
                   </td>
                 </tr>

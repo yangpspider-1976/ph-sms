@@ -1,6 +1,7 @@
 import { cloneElement, isValidElement, type ComponentProps, type ReactNode } from "react";
 import Link from "next/link";
 import { IconChevronRight, IconInfo } from "./icons";
+import { ScrollRegion } from "./scroll-region";
 
 export function cx(...parts: Array<string | false | null | undefined>): string {
   return parts.filter(Boolean).join(" ");
@@ -76,14 +77,53 @@ export function Card({ className, ...props }: ComponentProps<"div">) {
  * `relative` matters too: a visually hidden header (`sr-only` is absolutely
  * positioned) otherwise takes its position from an ancestor outside the scroll
  * container, escapes it, and widens the page — /admin/settings by 64px.
+ *
+ * Cells stay on one line and the table scrolls when it is too wide. The two
+ * kinds of cell with no natural limit opt out by class (see globals.css):
+ * `cell-title` for a name someone typed, `cell-text` for a reason or a
+ * description. `wrap` is for a summary table in a narrow card, which should fit
+ * rather than scroll.
  */
-export function DataTable({ className, children, ...props }: ComponentProps<"table">) {
+export function DataTable({
+  className,
+  children,
+  wrap = false,
+  ...props
+}: ComponentProps<"table"> & { wrap?: boolean }) {
   return (
-    <div className="relative min-w-0 overflow-x-auto">
-      <table className={cx("data-table", className)} {...props}>
+    <ScrollRegion className="relative min-w-0 overflow-x-auto">
+      <table className={cx("data-table", wrap && "data-table-wrap", className)} {...props}>
         {children}
       </table>
-    </div>
+    </ScrollRegion>
+  );
+}
+
+/**
+ * A form in a card. The card spans the page like the cards around it; from
+ * laptop width the heading and guidance sit on the left and the fields on the
+ * right, at a width a form is comfortable at. Capping the card itself to that
+ * width left it ending two-thirds of the way across, short of its neighbours.
+ */
+export function FormCard({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <Card className="p-5">
+      <div className="grid gap-x-8 gap-y-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+        <div>
+          <h2 className="card-title">{title}</h2>
+          {description ? <p className="mt-1 text-[13px] text-muted">{description}</p> : null}
+        </div>
+        <div className="max-w-2xl">{children}</div>
+      </div>
+    </Card>
   );
 }
 

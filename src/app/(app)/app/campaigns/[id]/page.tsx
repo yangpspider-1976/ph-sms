@@ -6,7 +6,7 @@ import {
   getCampaignForOrg,
   listCampaignItemsForOrg,
 } from "@/server/domain/campaigns";
-import { formatCentavos, formatManila } from "@/server/config";
+import { formatCentavos } from "@/server/config";
 import {
   Card,
   CardHeader,
@@ -20,7 +20,8 @@ import {
 } from "@/components/ui";
 import { StopCampaignButton } from "./stop-button";
 import { RefreshWhileSending } from "./refresh-while-sending";
-import { getDictionary } from "@/i18n/server";
+import { getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export const dynamic = "force-dynamic";
 
@@ -50,7 +51,7 @@ export default async function CampaignDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   const { id } = await params;
   const ctx = await requireOrgContext();
@@ -234,10 +235,10 @@ export default async function CampaignDetailPage({
               />
               <DetailRow
                 label={campaign.scheduledAt ? t.campaignDetail.rowScheduledFor : t.common.created}
-                value={formatManila(campaign.scheduledAt ?? campaign.createdAt)}
+                value={formatDateTime(campaign.scheduledAt ?? campaign.createdAt, locale)}
               />
               {campaign.finishedAt ? (
-                <DetailRow label={t.campaignDetail.rowFinished} value={formatManila(campaign.finishedAt)} />
+                <DetailRow label={t.campaignDetail.rowFinished} value={formatDateTime(campaign.finishedAt, locale)} />
               ) : null}
             </dl>
             <p className="mt-3 text-[12px] text-muted">

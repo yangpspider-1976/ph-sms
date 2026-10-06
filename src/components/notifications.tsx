@@ -2,9 +2,9 @@ import Link from "next/link";
 import { and, desc, eq, isNull, or } from "drizzle-orm";
 import { db } from "@/server/db";
 import { notifications } from "@/server/db/schema";
-import { formatManila } from "@/server/config";
 import { Card, CardHeader } from "./ui";
-import { getDictionary } from "@/i18n/server";
+import { getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 /**
  * In-app notifications.
@@ -37,7 +37,7 @@ export async function NotificationsPanel({
 
   if (rows.length === 0) return null;
 
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   return (
     <Card className="mt-5">
@@ -51,7 +51,7 @@ export async function NotificationsPanel({
                 <p className="mt-0.5 text-[13px] text-body">{notification.body}</p>
               </div>
               <span className="whitespace-nowrap text-[12px] text-muted">
-                {formatManila(notification.createdAt)}
+                {formatDateTime(notification.createdAt, locale)}
               </span>
             </div>
             {notification.href ? (

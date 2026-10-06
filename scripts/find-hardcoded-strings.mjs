@@ -190,6 +190,74 @@ export function findInSource(source) {
       if (!/[a-z]/.test(text)) continue;
       findings.push({ line: index + 1, kind: prop, text });
     }
+
+    // Everything below is copy that shares its line with a value. The patterns
+    // above want the text to stand alone, so some fifty strings got past them
+    // and reached a Korean reader in English — "Export report" after an icon,
+    // "{n} recipients · {purpose}", a heading built in a template literal.
+
+    // Words after a self-closing tag or an expression: <Icon /> Export report,
+    // {count} recipients · {purpose}. Only on a line that is plainly markup,
+    // because `} else {` and `} from "x"` have the same shape in code.
+    if (/^[<{]/.test(trimmed) || /^[A-Z·(]/.test(trimmed)) {
+      for (const match of trimmed.matchAll(
+        /(?:\/>|\})\s*([^<>{}=;"`[\]|&]*[A-Za-z]{3,}[^<>{}=;"`[\]|&]*?)\s*(?=$|<|\{)/g,
+      )) {
+        const text = match[1].trim();
+        if (/^(as|satisfies|else|catch|finally|from|of|in)\b/.test(text)) continue;
+        if (/^[,.)\]:?]/.test(text)) continue;
+        findings.push({ line: index + 1, kind: "text", text });
+      }
+    }
+
+    // One capitalised word, then a value: Version {x}. A lone word before `<`
+    // is skipped above as a generic type; before `{` on a line with no code in
+    // front of it, it is copy.
+    const lead = trimmed.match(/^([A-Z][a-z]+)\s+\{[A-Za-z(]/);
+    if (lead && !/[=;(]/.test(trimmed.slice(0, trimmed.indexOf("{")))) {
+      findings.push({ line: index + 1, kind: "text", text: lead[1] });
+    }
+
+    // A template literal that is rendered: the value of a text prop, or a
+    // branch of a ternary. SQL fragments, keys, paths and CSS values are
+    // template literals as well, so the context decides, not the backticks.
+    for (const match of line.matchAll(/`([^`\n]*)`/g)) {
+      const words = match[1].replace(/\$\{[^}]*\}/g, " ").trim();
+      // A word standing free, not part of an id such as `${id}-error`.
+      if (!/(?<![-_\w])[A-Za-z]{3,}(?![-_\w])/.test(words)) continue;
+      if (/^[/#.]|^https?:/.test(words)) continue;
+      const before = line.slice(0, match.index);
+      if (/\b(className|href|key|id|htmlFor|src|style)=\{[^}]*$/.test(before)) continue;
+      const inTextProp = new RegExp(`\\b(${TEXT_PROPS.join("|")})=\\{[^}]*$`).test(before);
+      const isBranch = /[?:]\s*$/.test(before) && (before.includes("?") || /^[?:]/.test(trimmed));
+      if (inTextProp || isBranch) {
+        findings.push({ line: index + 1, kind: "template", text: match[1] });
+      }
+    }
+
+    // Either branch of a ternary, on a line of its own.
+    const branch = trimmed.match(/^[?:]\s*"([A-Z][^"\n]{3,})"/);
+    if (branch && isProse(branch[1])) {
+      findings.push({ line: index + 1, kind: "expression", text: branch[1] });
+    }
+
+    // A message handed to a state setter is on screen a moment later.
+    const setter = trimmed.match(/\bset[A-Z]\w*\(\s*"([A-Z][^"\n]{3,})"/);
+    if (setter && isProse(setter[1])) {
+      findings.push({ line: index + 1, kind: "expression", text: setter[1] });
+    }
+
+    // A sentence on a line of its own: an item in a list that is mapped to markup.
+    const item = trimmed.match(/^"([A-Z][^"\n]{11,})",?$/);
+    if (item && /\s/.test(item[1]) && isProse(item[1])) {
+      findings.push({ line: index + 1, kind: "expression", text: item[1] });
+    }
+
+    // A stored value printed as it is: {row.status.toLowerCase()} shows
+    // "pending_review" in every language. A label map in the dictionary does not.
+    for (const match of line.matchAll(/\{\s*([\w.?]+\.toLowerCase\(\))\s*\}/g)) {
+      findings.push({ line: index + 1, kind: "raw-value", text: match[1] });
+    }
   });
 
   return findings;

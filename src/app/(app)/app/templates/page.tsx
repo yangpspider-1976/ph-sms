@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { requireOrgContext } from "@/server/auth/context";
 import { listTemplates } from "@/server/actions/templates";
 import { analyzeMessage } from "@/server/domain/segments";
-import { formatCentavos, formatManila, MOCK_DEFAULTS } from "@/server/config";
+import { formatCentavos, MOCK_DEFAULTS } from "@/server/config";
 import { Card, CardHeader, EmptyState, PageHeader, Pill } from "@/components/ui";
 import { IconDocument } from "@/components/icons";
 import { TemplateForm } from "./template-form";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -15,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 
 export default async function TemplatesPage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   const ctx = await requireOrgContext();
   const rows = await listTemplates(ctx.org.organizationId);
@@ -36,7 +37,7 @@ export default async function TemplatesPage() {
 
       <Card>
         <CardHeader
-          title={`${active.length} templates`}
+          title={t.templates.count(active.length)}
           description={t.templates.segmentNote}
         />
         {active.length === 0 ? (
@@ -56,7 +57,10 @@ export default async function TemplatesPage() {
                     <div className="min-w-0">
                       <p className="text-[14.5px] font-bold text-ink">{template.name}</p>
                       <p className="mt-0.5 text-[12px] text-muted">
-                        Version {template.version} · saved {formatManila(template.createdAt)}
+                        {t.templates.versionSaved(
+                          template.version,
+                          formatDateTime(template.createdAt, locale),
+                        )}
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
@@ -67,7 +71,7 @@ export default async function TemplatesPage() {
                         {t.common.segments(info.segments)}
                       </Pill>
                       <Pill tone="neutral" dot={false}>
-                        {formatCentavos(cost)} each
+                        {t.templates.costEach(formatCentavos(cost))}
                       </Pill>
                     </div>
                   </div>

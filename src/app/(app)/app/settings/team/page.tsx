@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { requireOrgContext } from "@/server/auth/context";
 import { listMembers, listPendingInvites } from "@/server/domain/team";
 import { ROLE_ORDER, ROLE_TONES } from "@/server/auth/rbac";
-import { formatManila } from "@/server/config";
 import { demoFeaturesEnabled } from "@/server/env";
 import { Card, CardHeader, Notice, PageHeader, Pill } from "@/components/ui";
 import { InviteForm } from "./invite-form";
 import { MemberRow } from "./member-row";
 import { InviteRow } from "./invite-row";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 
 export default async function TeamPage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   const ctx = await requireOrgContext();
   const orgId = ctx.org.organizationId;
@@ -54,7 +54,11 @@ export default async function TeamPage() {
                       {t.roles.labels[role]}
                     </Pill>
                   </dt>
-                  <dd className="flex-1 text-[13px] text-body">{t.roles.descriptions[role]}</dd>
+                  {/* The basis sends the description under its pill on a phone,
+                      where beside it there is room for three words a line. */}
+                  <dd className="flex-1 basis-56 text-[13px] text-body">
+                    {t.roles.descriptions[role]}
+                  </dd>
                 </div>
               ))}
             </dl>
@@ -68,11 +72,9 @@ export default async function TeamPage() {
 
           <Card>
             <CardHeader
-              title={`${members.length} member${members.length === 1 ? "" : "s"}`}
+              title={t.settings.team.memberCount(members.length)}
               description={
-                owners === 1
-                  ? "There is one owner. The last owner cannot be removed or demoted."
-                  : `${owners} owners.`
+                owners === 1 ? t.settings.team.oneOwner : t.settings.team.ownerCount(owners)
               }
             />
             <div className="divide-y divide-line">
@@ -84,7 +86,7 @@ export default async function TeamPage() {
                   fullName={member.fullName}
                   role={member.role}
                   verified={Boolean(member.emailVerifiedAt)}
-                  joinedAt={formatManila(member.joinedAt)}
+                  joinedAt={formatDateTime(member.joinedAt, locale)}
                   isSelf={member.userId === ctx.user.id}
                   isLastOwner={member.role === "OWNER" && owners === 1}
                   canManage={ctx.can("team.manage")}
@@ -96,7 +98,7 @@ export default async function TeamPage() {
           {ctx.can("team.manage") && invites.length > 0 ? (
             <Card className="mt-5">
               <CardHeader
-                title={`${invites.length} pending invitation${invites.length === 1 ? "" : "s"}`}
+                title={t.settings.team.pendingInvites(invites.length)}
                 description={t.settings.team.invitesNote}
               />
               <div className="divide-y divide-line">
@@ -106,7 +108,7 @@ export default async function TeamPage() {
                     inviteId={invite.id}
                     email={invite.email}
                     role={invite.role ?? "VIEWER"}
-                    expiresAt={formatManila(invite.expiresAt)}
+                    expiresAt={formatDateTime(invite.expiresAt, locale)}
                     expired={invite.expiresAt.getTime() <= Date.now()}
                   />
                 ))}

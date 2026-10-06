@@ -4,7 +4,6 @@ import { requirePlatformAdmin } from "@/server/auth/context";
 import { db } from "@/server/db";
 import { campaigns, organizations } from "@/server/db/schema";
 import { getEditableContentPolicy } from "@/server/domain/app-config";
-import { formatManila } from "@/server/config";
 import {
   Card,
   CardHeader,
@@ -18,7 +17,8 @@ import {
 import { IconShield } from "@/components/icons";
 import Link from "next/link";
 import { PolicyEditor } from "./policy-editor";
-import { getDictionary } from "@/i18n/server";
+import { getDictionary, getI18n } from "@/i18n/server";
+import { formatDateTime } from "@/i18n/format";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -34,7 +34,7 @@ export const dynamic = "force-dynamic";
  * tends to drift.
  */
 export default async function AbusePage() {
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
 
   await requirePlatformAdmin();
 
@@ -117,7 +117,7 @@ export default async function AbusePage() {
             <tbody>
               {held.map((campaign) => (
                 <tr key={campaign.id}>
-                  <td>
+                  <td className="cell-title" title={campaign.name}>
                     <Link
                       href={`/admin/activity?campaignId=${campaign.id}`}
                       className="font-semibold text-ink hover:text-brand-700"
@@ -125,15 +125,17 @@ export default async function AbusePage() {
                       {campaign.name}
                     </Link>
                   </td>
-                  <td className="text-muted">{campaign.organizationName}</td>
-                  <td className="max-w-md text-muted">{campaign.reason}</td>
+                  <td className="cell-title text-muted" title={campaign.organizationName}>
+                    {campaign.organizationName}
+                  </td>
+                  <td className="cell-text max-w-md text-muted">{campaign.reason}</td>
                   <td>
                     <Pill tone={toneFor(campaign.status)}>
                       {t.status.campaign[campaign.status]}
                     </Pill>
                   </td>
                   <td className="whitespace-nowrap text-muted">
-                    {formatManila(campaign.createdAt)}
+                    {formatDateTime(campaign.createdAt, locale)}
                   </td>
                 </tr>
               ))}

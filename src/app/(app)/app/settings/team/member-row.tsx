@@ -65,11 +65,12 @@ export function MemberRow({
         <div className="min-w-0">
           <p className="text-[14px] font-bold text-ink">
             {fullName}
-            {isSelf ? <span className="ml-2 text-[12px] font-normal text-muted">(you)</span> : null}
+            {isSelf ? (
+              <span className="ml-2 text-[12px] font-normal text-muted">{t.settings.team.you}</span>
+            ) : null}
           </p>
           <p className="mt-0.5 text-[12.5px] text-muted">
-            {email} · joined {joinedAt}
-            {verified ? "" : " · email not verified"}
+            {t.settings.team.memberLine(email, joinedAt, verified)}
           </p>
         </div>
 
@@ -81,7 +82,7 @@ export function MemberRow({
                 name="role"
                 defaultValue={role}
                 className="py-1.5 text-[13px]"
-                aria-label={`Role for ${fullName}`}
+                aria-label={t.settings.team.roleFor(fullName)}
               >
                 {ROLE_ORDER.map((role) => (
                   <option key={role} value={role}>
