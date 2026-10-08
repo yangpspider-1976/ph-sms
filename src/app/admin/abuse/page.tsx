@@ -19,6 +19,7 @@ import Link from "next/link";
 import { PolicyEditor } from "./policy-editor";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
+import { localizeServerText } from "@/i18n/server-text";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -128,7 +129,7 @@ export default async function AbusePage() {
                   <td className="cell-title text-muted" title={campaign.organizationName}>
                     {campaign.organizationName}
                   </td>
-                  <td className="cell-text max-w-md text-muted">{campaign.reason}</td>
+                  <td className="cell-text max-w-md text-muted">{localizeServerText(campaign.reason, t)}</td>
                   <td>
                     <Pill tone={toneFor(campaign.status)}>
                       {t.status.campaign[campaign.status]}

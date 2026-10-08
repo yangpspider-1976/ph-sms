@@ -16,6 +16,7 @@ import {
   Pill,
   type Tone,
 } from "@/components/ui";
+import { localizeServerText } from "@/i18n/server-text";
 
 export const dynamic = "force-dynamic";
 
@@ -93,7 +94,7 @@ export default async function ImportDetailPage({
                           {t.status.importRow[row.status]}
                         </Pill>
                       </td>
-                      <td className="text-muted">{row.reasonDetail ?? "—"}</td>
+                      <td className="text-muted">{localizeServerText(row.reasonDetail, t) ?? "—"}</td>
                     </tr>
                   ))}
                 </tbody>

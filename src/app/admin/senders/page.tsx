@@ -17,6 +17,7 @@ import { IconTag } from "@/components/icons";
 import { SenderDecision } from "./decision-form";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
+import { localizeServerText } from "@/i18n/server-text";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -145,7 +146,7 @@ export default async function SendersPage() {
                   <td className="text-muted">
                     {sender.supportsInboundReplies ? t.adminExtra.canReceive : t.adminExtra.oneWay}
                   </td>
-                  <td className="cell-text text-muted">{sender.decisionReason ?? "—"}</td>
+                  <td className="cell-text text-muted">{localizeServerText(sender.decisionReason, t) ?? "—"}</td>
                   <td className="whitespace-nowrap text-muted">
                     {sender.decidedAt ? formatDateTime(sender.decidedAt, locale) : "—"}
                   </td>

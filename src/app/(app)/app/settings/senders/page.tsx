@@ -16,6 +16,7 @@ import { SenderApplicationForm } from "./application-form";
 import { DemoApproveButton } from "./demo-approve-button";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
+import { localizeServerText } from "@/i18n/server-text";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -99,7 +100,7 @@ export default async function SenderIdentitiesPage() {
                 </div>
 
                 {sender.decisionReason ? (
-                  <p className="mt-2 text-[13px] text-body">{sender.decisionReason}</p>
+                  <p className="mt-2 text-[13px] text-body">{localizeServerText(sender.decisionReason, t)}</p>
                 ) : null}
 
                 {sender.status === "APPROVED" && !sender.supportsInboundReplies ? (

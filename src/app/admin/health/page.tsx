@@ -17,6 +17,7 @@ import {
   Pill,
   type Tone,
 } from "@/components/ui";
+import { localizeServerText } from "@/i18n/server-text";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -85,8 +86,8 @@ export default async function HealthPage() {
                 <td>
                   <Pill tone={toneFor(check.status)}>{statusLabel(check.status, t)}</Pill>
                 </td>
-                <td className="font-mono text-[12.5px]">{check.value}</td>
-                <td className="cell-text max-w-md text-muted">{check.detail}</td>
+                <td className="font-mono text-[12.5px]">{typeof check.value === "string" ? localizeServerText(check.value, t) : check.value}</td>
+                <td className="cell-text max-w-md text-muted">{localizeServerText(check.detail, t)}</td>
               </tr>
             ))}
           </tbody>

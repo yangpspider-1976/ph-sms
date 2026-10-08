@@ -23,6 +23,7 @@ import {
 import { IconCard } from "@/components/icons";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
+import { localizeServerText } from "@/i18n/server-text";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -172,7 +173,7 @@ export default async function CreditsPage() {
                         </Pill>
                         {entry.reason ? (
                           <span className="mt-1 block text-[12px] font-normal text-muted">
-                            {entry.reason}
+                            {localizeServerText(entry.reason, t)}
                           </span>
                         ) : null}
                       </td>

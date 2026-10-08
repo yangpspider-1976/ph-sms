@@ -9,6 +9,7 @@ import {
 import type { StoredContentPolicy } from "@/server/domain/content-checks";
 import { Button, Card, DataTable, Notice, Pill } from "@/components/ui";
 import { useLocale, useT } from "@/i18n/client";
+import { localizeServerText } from "@/i18n/server-text";
 
 /**
  * The content policy.
@@ -115,7 +116,7 @@ export function PolicyEditor({ policy }: { policy: StoredContentPolicy }) {
                 <tr key={rule.id}>
                   <td className="cell-text">
                     <span className="block text-[13px] font-semibold text-ink">
-                      {rule.description}
+                      {localizeServerText(rule.description, t)}
                     </span>
                     <span className="block font-mono text-[11.5px] text-muted">{rule.id}</span>
                   </td>

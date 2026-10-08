@@ -10,6 +10,7 @@ import { IconShield } from "@/components/icons";
 import { ApprovalDecision } from "./decision-form";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
+import { localizeServerText } from "@/i18n/server-text";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -134,7 +135,7 @@ export default async function ApprovalsPage({
                 {campaign.approvalReason ? (
                   <div className="mt-3">
                     <Notice tone="warning" title={t.approvals.whyHeld}>
-                      {campaign.approvalReason}
+                      {localizeServerText(campaign.approvalReason, t)}
                     </Notice>
                   </div>
                 ) : null}

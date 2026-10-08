@@ -21,6 +21,7 @@ import { FileDrop } from "@/components/file-drop";
 import { ScrollRegion } from "@/components/scroll-region";
 import { useLocale, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
+import { localizeServerText } from "@/i18n/server-text";
 
 /**
  * CSV import.
@@ -243,7 +244,7 @@ function Preview({
                       t.status.unknown(row.status)}
                   </Pill>
                 </td>
-                <td className="text-muted">{row.reason ?? "—"}</td>
+                <td className="text-muted">{localizeServerText(row.reason, t) ?? "—"}</td>
               </tr>
             ))}
           </tbody>

@@ -9,6 +9,7 @@ import { getPaymentProvider } from "@/server/providers/payments";
 import { Card, CardHeader, DetailRow, Notice, PageHeader, Pill } from "@/components/ui";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
+import { localizeServerText } from "@/i18n/server-text";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -56,7 +57,7 @@ export default async function AdminSettingsPage() {
             {t.adminExtra.gapsBody}
             <ul className="mt-2 list-disc space-y-0.5 pl-4">
               {gaps.map((gap) => (
-                <li key={gap}>{gap}</li>
+                <li key={gap}>{localizeServerText(gap, t)}</li>
               ))}
             </ul>
           </Notice>

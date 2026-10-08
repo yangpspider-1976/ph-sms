@@ -22,6 +22,7 @@ import { StopCampaignButton } from "./stop-button";
 import { RefreshWhileSending } from "./refresh-while-sending";
 import { getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
+import { localizeServerText } from "@/i18n/server-text";
 
 export const dynamic = "force-dynamic";
 
@@ -107,7 +108,7 @@ export default async function CampaignDetailPage({
       {campaign.status === "PENDING_APPROVAL" ? (
         <div className="mb-5">
           <Notice tone="warning" title={t.campaignDetail.heldTitle}>
-            {campaign.approvalReason ?? t.campaignDetail.heldFallback}{" "}
+            {localizeServerText(campaign.approvalReason, t) ?? t.campaignDetail.heldFallback}{" "}
             {t.campaignDetail.heldBody}
           </Notice>
         </div>
@@ -124,7 +125,7 @@ export default async function CampaignDetailPage({
       {campaign.status === "PAUSED_REVIEW" ? (
         <div className="mb-5">
           <Notice tone="warning" title={t.campaignDetail.pausedTitle}>
-            {campaign.pausedReason ?? t.campaignDetail.pausedFallback}{" "}
+            {localizeServerText(campaign.pausedReason, t) ?? t.campaignDetail.pausedFallback}{" "}
             {t.campaignDetail.pausedBody}
           </Notice>
         </div>
