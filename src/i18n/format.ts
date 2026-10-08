@@ -46,6 +46,45 @@ export function formatDate(
   }).format(value);
 }
 
+/**
+ * Manila's offset from UTC. The Philippines has no daylight saving, so one
+ * constant is the whole rule; a test holds it against PLATFORM_TIME_ZONE.
+ */
+const PLATFORM_UTC_OFFSET_MINUTES = 8 * 60;
+
+/**
+ * The moment a `datetime-local` value names, read as platform time.
+ *
+ * Such a value carries no time zone, and `new Date(value)` fills one in from
+ * the browser. A field labelled Asia/Manila then meant Seoul time on a computer
+ * in Seoul: 14:00 typed there was scheduled for 13:00 in Manila.
+ *
+ * Returns null unless the value is a complete, real date and time.
+ */
+export function platformWallTimeToDate(value: string): Date | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,3})?)?$/.exec(value);
+  if (!match) return null;
+
+  const [, y, mo, d, h, mi, s = "0"] = match;
+  const month = Number(mo);
+  const day = Number(d);
+  const hour = Number(h);
+  const minute = Number(mi);
+  const wall = new Date(Date.UTC(Number(y), month - 1, day, hour, minute, Number(s)));
+  // Date.UTC rolls an impossible date forward (31 February becomes 3 March).
+  // Sending on a day nobody asked for is worse than refusing the value.
+  if (
+    wall.getUTCMonth() !== month - 1 ||
+    wall.getUTCDate() !== day ||
+    wall.getUTCHours() !== hour ||
+    wall.getUTCMinutes() !== minute
+  ) {
+    return null;
+  }
+
+  return new Date(wall.getTime() - PLATFORM_UTC_OFFSET_MINUTES * 60_000);
+}
+
 export function formatNumber(value: number, locale: Locale): string {
   return new Intl.NumberFormat(LOCALE_TAGS[locale]).format(value);
 }

@@ -26,6 +26,7 @@ import { TestSendPanel } from "./test-send-panel";
 import type { TestRecipient } from "@/server/domain/test-send";
 import { loadGroupRecipientsAction } from "@/server/actions/groups";
 import { useT } from "@/i18n/client";
+import { platformWallTimeToDate } from "@/i18n/format";
 import { FileDrop } from "@/components/file-drop";
 import type { Dictionary } from "@/i18n/dictionaries";
 import {
@@ -36,6 +37,7 @@ import {
   IconInfo,
   IconX,
 } from "@/components/icons";
+import { localizeServerText } from "@/i18n/server-text";
 
 type Sender = { id: string; value: string; supportsInboundReplies: boolean };
 type Template = { id: string; name: string; body: string };
@@ -153,6 +155,11 @@ export function SendWizard({
 
   const recipientsReady = includedCount > 0;
   const messageReady = body.trim().length > 0 && bodyCheck.ok && Boolean(senderId);
+  // The field is labelled Asia/Manila, so the value is read as Manila time
+  // whatever the computer's own clock is set to.
+  const scheduledFor = timing === "later" ? platformWallTimeToDate(scheduledAt) : null;
+  // "Schedule for later" with no time must not quietly become "send now".
+  const scheduleReady = timing === "now" || scheduledFor !== null;
 
   /** Asks the server to price the send. The result, not the preview, is binding. */
   function loadGroup(nextGroupId: string) {
@@ -176,13 +183,14 @@ export function SendWizard({
   }
 
   function requestQuote() {
+    if (!scheduleReady) return;
     setError(null);
     startTransition(async () => {
       const result = await createQuoteAction({
         senderIdentityId: senderId,
         body,
         recipients: rawEntries,
-        scheduledAt: timing === "later" && scheduledAt ? new Date(scheduledAt).toISOString() : null,
+        scheduledAt: scheduledFor ? scheduledFor.toISOString() : null,
       });
       if (!result.ok) {
         setError({ message: result.error, code: result.code });
@@ -564,7 +572,9 @@ export function SendWizard({
                 </Button>
               ) : (
                 <Button
-                  disabled={!recipientsReady || !messageReady || !authorized || pending}
+                  disabled={
+                    !recipientsReady || !messageReady || !authorized || !scheduleReady || pending
+                  }
                   onClick={requestQuote}
                 >
                   {pending ? t.send.pricing : quote ? t.send.reprice : t.send.reviewMessage}
@@ -748,7 +758,7 @@ function ReviewPanel({
           <Notice tone="warning" title={t.send.approvalNeededTitle}>
             {t.send.approvalNeededBody}
             {quote.approvalReason ? (
-              <span className="mt-1 block">{quote.approvalReason}</span>
+              <span className="mt-1 block">{localizeServerText(quote.approvalReason, t)}</span>
             ) : null}
           </Notice>
         </div>

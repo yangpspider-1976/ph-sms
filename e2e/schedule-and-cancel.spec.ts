@@ -19,27 +19,36 @@ async function login(page: Page, email: string) {
   await expect(page).toHaveURL(/\/app\/dashboard/);
 }
 
-/** A local datetime string a few hours ahead, in the shape the input expects. */
-function laterToday(): string {
-  const at = new Date(Date.now() + 6 * 3600_000);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}T${pad(at.getHours())}:${pad(at.getMinutes())}`;
+/**
+ * What a clock in Manila reads `hours` from now, in the shape the input
+ * expects. The field takes Manila time whatever zone this machine is in, and
+ * Manila is UTC+8 all year, so shifting by eight hours and reading the UTC
+ * fields gives its wall clock.
+ */
+function manilaInput(hours: number): string {
+  return new Date(Date.now() + (hours + 8) * 3600_000).toISOString().slice(0, 16);
+}
+
+/** Fills the wizard as far as the send-time choice. */
+async function composeUpToSendTime(page: Page, numbers: string[], message: string) {
+  await page.goto("/app/send");
+  await page.getByLabel("Mobile numbers").fill(numbers.join("\n"));
+  await page.getByRole("button", { name: "Continue to message" }).click();
+  await page.getByLabel("Message").fill(message);
 }
 
 test("a scheduled campaign waits, and stopping it reports truthfully", async ({ page }) => {
   await login(page, OWNER);
 
-  await page.goto("/app/send");
-  await page
-    .getByLabel("Mobile numbers")
-    .fill(["+639170000701", "+639170000702", "+639170000703"].join("\n"));
-  await page.getByRole("button", { name: "Continue to message" }).click();
-
-  await page.getByLabel("Message").fill("Reminder: your appointment is tomorrow at 10am.");
+  await composeUpToSendTime(
+    page,
+    ["+639170000701", "+639170000702", "+639170000703"],
+    "Reminder: your appointment is tomorrow at 10am.",
+  );
 
   // Schedule rather than send now.
   await page.getByLabel("Schedule for later").check();
-  await page.getByLabel("Scheduled date and time").fill(laterToday());
+  await page.getByLabel("Scheduled date and time").fill(manilaInput(6));
 
   await page.getByLabel("I am authorized to contact these recipients.").check();
   await page.getByRole("button", { name: "Review message" }).click();
@@ -82,4 +91,48 @@ test("a scheduled campaign waits, and stopping it reports truthfully", async ({ 
 
   await page.goto("/app/credits");
   await expect(page.getByText("Hold released").first()).toBeVisible();
+});
+
+for (const timezoneId of ["Asia/Seoul", "America/Los_Angeles"]) {
+  test(`a time typed on a computer set to ${timezoneId} is still Manila time`, async ({ browser }) => {
+    // The field is labelled Asia/Manila but used to take the computer's own
+    // zone: 2:00 PM typed in Seoul was scheduled for 1:00 PM in Manila, and
+    // from Los Angeles for 5:00 the next morning.
+    const context = await browser.newContext({ timezoneId });
+    const page = await context.newPage();
+    await login(page, OWNER);
+
+    await composeUpToSendTime(page, ["+639170000704"], "Your order is ready for pickup.");
+    await page.getByLabel("Schedule for later").check();
+    await page.getByLabel("Scheduled date and time").fill(`${manilaInput(24).slice(0, 10)}T14:00`);
+    await page.getByLabel("I am authorized to contact these recipients.").check();
+    await page.getByRole("button", { name: "Review message" }).click();
+
+    await expect(page.getByRole("heading", { name: "Review and confirm" })).toBeVisible();
+    await expect(page.getByText(/2:00\sPM \(Asia\/Manila\)/).first()).toBeVisible();
+    await context.close();
+  });
+}
+
+test("scheduling for later needs a time before it can be reviewed", async ({ page }) => {
+  // With the box ticked and the time left empty, the review used to open as an
+  // immediate send: the choice to schedule was dropped without a word.
+  await login(page, OWNER);
+
+  await composeUpToSendTime(page, ["+639170000704"], "Your order is ready for pickup.");
+  await page.getByLabel("I am authorized to contact these recipients.").check();
+  const review = page.getByRole("button", { name: "Review message" });
+  await expect(review).toBeEnabled();
+
+  await page.getByLabel("Schedule for later").check();
+  await expect(review).toBeDisabled();
+
+  await page.getByLabel("Scheduled date and time").fill(manilaInput(6));
+  await expect(review).toBeEnabled();
+
+  // Sending now never needed one.
+  await page.getByLabel("Scheduled date and time").fill("");
+  await expect(review).toBeDisabled();
+  await page.getByLabel("Send now").check();
+  await expect(review).toBeEnabled();
 });

@@ -52,11 +52,14 @@ async function sendAndSettle(page: Page, numbers: string[], message: string) {
   }).toPass({ timeout: 45_000 });
 }
 
-/** A datetime-local value some hours ahead. */
+/**
+ * A datetime-local value some hours ahead, as a clock in Manila reads. The
+ * field takes Manila time whatever zone this machine is in, and Manila is
+ * UTC+8 all year, so shifting by eight hours and reading the UTC fields gives
+ * its wall clock.
+ */
 function hoursAhead(hours: number): string {
-  const at = new Date(Date.now() + hours * 3600_000);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}T${pad(at.getHours())}:${pad(at.getMinutes())}`;
+  return new Date(Date.now() + (hours + 8) * 3600_000).toISOString().slice(0, 16);
 }
 
 /** Fails if a page rendered an error screen instead of its content. */
