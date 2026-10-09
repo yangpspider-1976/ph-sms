@@ -174,8 +174,11 @@ export default async function AdminOverviewPage() {
                         </Pill>
                       </td>
                       <td>
+                        {/* The inquiries queue handles each one inline; there is
+                            no per-id route, so link to the queue rather than to a
+                            path that 404s (and prefetches a 404). */}
                         <ButtonLink
-                          href={`/admin/inquiries/${inquiry.id}`}
+                          href="/admin/inquiries"
                           size="sm"
                           variant={inquiry.status === "NEW" ? "primary" : "secondary"}
                           className="w-[104px] justify-center py-2"
@@ -219,10 +222,9 @@ export default async function AdminOverviewPage() {
                   {recentCampaigns.map((campaign) => (
                     <tr key={campaign.id}>
                       <td>
-                        <Link
-                          href={`/admin/activity/${campaign.id}`}
-                          className="hover:text-brand-700"
-                        >
+                        {/* Activity is a single feed with no per-campaign route;
+                            link to the feed rather than a 404 path. */}
+                        <Link href="/admin/activity" className="hover:text-brand-700">
                           {campaign.name}
                         </Link>
                       </td>
@@ -287,8 +289,11 @@ export default async function AdminOverviewPage() {
                         {formatDate(org.createdAt, locale)}
                       </td>
                       <td className="text-right">
+                        {/* The pending org is handled inline in the verification
+                            queue; there is no per-org route, so link to the queue
+                            instead of a path that 404s. */}
                         <ButtonLink
-                          href={`/admin/verification/${org.id}`}
+                          href="/admin/verification"
                           size="sm"
                           variant="secondary"
                           className="py-2"
