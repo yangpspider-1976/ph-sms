@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { cookies, headers } from "next/headers";
 import { and, eq, gt, lt } from "drizzle-orm";
 import bcrypt from "bcryptjs";
@@ -70,8 +71,16 @@ export async function destroySession(): Promise<void> {
   store.delete(SESSION_COOKIE);
 }
 
-/** Current user, or null. Expired sessions are treated as absent. */
-export async function getSessionUser(): Promise<SessionUser | null> {
+/**
+ * Current user, or null. Expired sessions are treated as absent.
+ *
+ * Wrapped in `React.cache`: a single request renders the layout and the page,
+ * and both resolve the auth context, so without this the session lookup ran
+ * once per guard call — twice on every signed-in page. `cache` dedupes it to
+ * one query per request (the scope React.cache guarantees), and the cookie it
+ * reads cannot change within a request.
+ */
+export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   const store = await cookies();
   const token = store.get(SESSION_COOKIE)?.value;
   if (!token) return null;
@@ -104,13 +113,17 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     adminMfaAt: row.adminMfaAt,
     sessionId: row.sessionId,
   };
-}
+});
 
 /**
  * Organizations the user actually belongs to. Authorized scope always comes
  * from here — a request-supplied organization_id is never trusted.
+ *
+ * `React.cache` again: the layout and the page each resolve the context for
+ * the same user in one request, so this is deduped to a single query per
+ * request, keyed by `userId`.
  */
-export async function getMemberships(userId: string): Promise<OrgContext[]> {
+export const getMemberships = cache(async (userId: string): Promise<OrgContext[]> => {
   const rows = await db
     .select({
       organizationId: organizations.id,
@@ -122,7 +135,7 @@ export async function getMemberships(userId: string): Promise<OrgContext[]> {
     .innerJoin(organizations, eq(organizations.id, memberships.organizationId))
     .where(eq(memberships.userId, userId));
   return rows;
-}
+});
 
 /** Marks the current session as having completed admin MFA. */
 export async function markAdminMfa(sessionId: string): Promise<void> {
