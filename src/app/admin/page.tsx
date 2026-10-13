@@ -3,6 +3,7 @@ import Link from "next/link";
 import { desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/server/db";
 import { campaigns, inquiries, organizations, senderIdentities } from "@/server/db/schema";
+import { requirePlatformAdmin } from "@/server/auth/context";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDate } from "@/i18n/format";
 import {
@@ -62,6 +63,12 @@ const CAMPAIGN_TONE: Record<string, Tone> = {
 
 export default async function AdminOverviewPage() {
   const { t, locale } = await getI18n();
+
+  // The page checks for itself, like every other admin page. The layout's
+  // check is not enough: a layout and its page render independently, and an
+  // in-app navigation can request the page without re-running the layout.
+  // The session lookup is cached per request, so this costs no extra query.
+  await requirePlatformAdmin();
 
   const [recentInquiries, recentCampaigns, pendingOrgs, pendingSenders] = await Promise.all([
     db.select().from(inquiries).orderBy(desc(inquiries.createdAt)).limit(3),
