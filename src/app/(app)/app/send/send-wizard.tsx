@@ -25,7 +25,7 @@ import {
 import { TestSendPanel } from "./test-send-panel";
 import type { TestRecipient } from "@/server/domain/test-send";
 import { loadGroupRecipientsAction } from "@/server/actions/groups";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { platformWallTimeToDate } from "@/i18n/format";
 import { FileDrop } from "@/components/file-drop";
 import type { Dictionary } from "@/i18n/dictionaries";
@@ -37,7 +37,6 @@ import {
   IconInfo,
   IconX,
 } from "@/components/icons";
-import { localizeServerText } from "@/i18n/server-text";
 
 type Sender = { id: string; value: string; supportsInboundReplies: boolean };
 type Template = { id: string; name: string; body: string };
@@ -672,6 +671,7 @@ function ReviewPanel({
   defaultName: string;
 }) {
   const t = useT();
+  const localizeServerText = useServerText();
   const expires = new Date(quote.expiresAt);
   const manila = (iso: string) =>
     new Intl.DateTimeFormat("en-PH", {
@@ -758,7 +758,7 @@ function ReviewPanel({
           <Notice tone="warning" title={t.send.approvalNeededTitle}>
             {t.send.approvalNeededBody}
             {quote.approvalReason ? (
-              <span className="mt-1 block">{localizeServerText(quote.approvalReason, t)}</span>
+              <span className="mt-1 block">{localizeServerText(quote.approvalReason)}</span>
             ) : null}
           </Notice>
         </div>

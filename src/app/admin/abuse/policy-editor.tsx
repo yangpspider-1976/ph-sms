@@ -8,8 +8,7 @@ import {
 } from "@/server/actions/app-config";
 import type { StoredContentPolicy } from "@/server/domain/content-checks";
 import { Button, Card, DataTable, Notice, Pill } from "@/components/ui";
-import { useLocale, useT } from "@/i18n/client";
-import { localizeServerText } from "@/i18n/server-text";
+import { useLocale, useServerText, useT } from "@/i18n/client";
 
 /**
  * The content policy.
@@ -21,6 +20,7 @@ import { localizeServerText } from "@/i18n/server-text";
  */
 export function PolicyEditor({ policy }: { policy: StoredContentPolicy }) {
   const t = useT();
+  const localizeServerText = useServerText();
   const { tag } = useLocale();
 
   const [editing, setEditing] = useState(false);
@@ -116,7 +116,7 @@ export function PolicyEditor({ policy }: { policy: StoredContentPolicy }) {
                 <tr key={rule.id}>
                   <td className="cell-text">
                     <span className="block text-[13px] font-semibold text-ink">
-                      {localizeServerText(rule.description, t)}
+                      {localizeServerText(rule.description)}
                     </span>
                     <span className="block font-mono text-[11.5px] text-muted">{rule.id}</span>
                   </td>

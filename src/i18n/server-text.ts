@@ -1,4 +1,4 @@
-import { en } from "./locales/en";
+import { enServerText } from "./locales/en-server-text";
 import type { Dictionary } from "./dictionaries";
 
 /**
@@ -18,9 +18,15 @@ import type { Dictionary } from "./dictionaries";
 type Text = Dictionary["serverText"];
 type Pattern = [RegExp, (text: Text, match: RegExpMatchArray, t: Dictionary) => string];
 
-/** Every fixed sentence, keyed by its English wording. */
+/**
+ * Every fixed sentence, keyed by its English wording.
+ *
+ * Built from the English messages alone, not the whole English dictionary:
+ * three client components import this file, and the full dictionary would
+ * follow it into the browser for Korean readers too.
+ */
 const EXACT = new Map<string, keyof Text>(
-  (Object.entries(en.serverText) as Array<[keyof Text, unknown]>)
+  (Object.entries(enServerText) as Array<[keyof Text, unknown]>)
     .filter(([, value]) => typeof value === "string")
     .map(([key, value]) => [value as string, key]),
 );

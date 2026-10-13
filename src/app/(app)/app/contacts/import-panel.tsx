@@ -19,9 +19,8 @@ import {
 import { IconDocument } from "@/components/icons";
 import { FileDrop } from "@/components/file-drop";
 import { ScrollRegion } from "@/components/scroll-region";
-import { useLocale, useT } from "@/i18n/client";
+import { useLocale, useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
-import { localizeServerText } from "@/i18n/server-text";
 
 /**
  * CSV import.
@@ -169,6 +168,7 @@ function Preview({
   pending: boolean;
 }) {
   const t = useT();
+  const localizeServerText = useServerText();
   const { counts } = preview;
   const excluded = counts.blank + counts.invalid + counts.duplicate + counts.suppressed;
 
@@ -244,7 +244,7 @@ function Preview({
                       t.status.unknown(row.status)}
                   </Pill>
                 </td>
-                <td className="text-muted">{localizeServerText(row.reason, t) ?? "—"}</td>
+                <td className="text-muted">{localizeServerText(row.reason) ?? "—"}</td>
               </tr>
             ))}
           </tbody>
