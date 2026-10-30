@@ -15,7 +15,7 @@ import {
   PageHeader,
 } from "@/components/ui";
 import { IconUsers } from "@/components/icons";
-import { GroupMembers } from "./group-members";
+import { GroupAddPanel, GroupMembers } from "./group-members";
 import { GroupSettings } from "./group-settings";
 import { getDictionary } from "@/i18n/server";
 
@@ -122,7 +122,7 @@ export default async function GroupPage({
               name={group.name}
               description={group.description}
             />
-            <GroupMembers.AddPanel groupId={group.id} candidates={candidates} />
+            <GroupAddPanel groupId={group.id} candidates={candidates} />
           </div>
         ) : null}
       </div>

@@ -117,8 +117,15 @@ export function GroupMembers({
   );
 }
 
-/** Adds contacts that are not already in this group. */
-function AddPanel({
+/**
+ * Adds contacts that are not already in this group.
+ *
+ * Its own export, not a property on GroupMembers: the page is a server
+ * component, and to a server component a client module's exports are only
+ * references. `GroupMembers.AddPanel` was undefined there, so the group page
+ * failed for everyone allowed to manage contacts.
+ */
+export function GroupAddPanel({
   groupId,
   candidates,
 }: {
@@ -224,5 +231,3 @@ function AddPanel({
     </Card>
   );
 }
-
-GroupMembers.AddPanel = AddPanel;
