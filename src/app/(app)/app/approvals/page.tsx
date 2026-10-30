@@ -4,6 +4,7 @@ import { db } from "@/server/db";
 import { campaigns } from "@/server/db/schema";
 import { requireOrgContext } from "@/server/auth/context";
 import { listPendingApproval } from "@/server/domain/approval";
+import { isUuid } from "@/server/uuid";
 import { formatCentavos } from "@/server/config";
 import { Card, CardHeader, EmptyState, Notice, PageHeader } from "@/components/ui";
 import { IconShield } from "@/components/icons";
@@ -24,7 +25,6 @@ export const dynamic = "force-dynamic";
  * Nothing here has been sent, and nothing will be until someone decides. The
  * money is already reserved, which is why rejecting returns it explicitly.
  */
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default async function ApprovalsPage({
   searchParams,
@@ -48,28 +48,26 @@ export default async function ApprovalsPage({
     );
   }
 
-  const pending = await listPendingApproval(ctx.org.organizationId);
-
   // Set after a decision. Read back from the campaign — scoped to this
   // organization — so the notice states what was stored, not what was asked.
+  // Looked up alongside the queue rather than after it.
   const { decided: decidedId } = await searchParams;
-  const decided =
-    decidedId && UUID.test(decidedId)
-      ? (
-          await db
-            .select({
-              name: campaigns.name,
-              approvedAt: campaigns.approvedAt,
-              rejectedAt: campaigns.rejectedAt,
-              scheduledAt: campaigns.scheduledAt,
-            })
-            .from(campaigns)
-            .where(
-              and(eq(campaigns.id, decidedId), eq(campaigns.organizationId, ctx.org.organizationId)),
-            )
-            .limit(1)
-        )[0]
-      : undefined;
+  const [pending, decided] = await Promise.all([
+    listPendingApproval(ctx.org.organizationId),
+    isUuid(decidedId)
+      ? db
+          .select({
+            name: campaigns.name,
+            approvedAt: campaigns.approvedAt,
+            rejectedAt: campaigns.rejectedAt,
+            scheduledAt: campaigns.scheduledAt,
+          })
+          .from(campaigns)
+          .where(and(eq(campaigns.id, decidedId), eq(campaigns.organizationId, ctx.org.organizationId)))
+          .limit(1)
+          .then((rows) => rows[0])
+      : undefined,
+  ]);
   const decidedNotice = !decided
     ? null
     : decided.rejectedAt

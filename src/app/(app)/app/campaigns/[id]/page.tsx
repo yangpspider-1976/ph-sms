@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { requireOrgContext } from "@/server/auth/context";
 import { dispatchDueOnVisit } from "@/server/jobs/dispatch-after-response";
+import { isUuid } from "@/server/uuid";
 import {
   campaignSummaryForOrg,
   getCampaignForOrg,
@@ -55,19 +56,23 @@ export default async function CampaignDetailPage({
   const { t, locale } = await getI18n();
 
   const { id } = await params;
+  if (!isUuid(id)) notFound();
   const ctx = await requireOrgContext();
+  const orgId = ctx.org.organizationId;
   // The layout's drain only runs on a full page load; arriving here from the
   // campaign list is a client-side navigation.
   dispatchDueOnVisit();
 
-  // Scoped by organization: another tenant's id simply does not resolve.
-  const campaign = await getCampaignForOrg(id, ctx.org.organizationId);
-  if (!campaign) notFound();
-
-  const [counts, items] = await Promise.all([
-    campaignSummaryForOrg(campaign.id, ctx.org.organizationId),
-    listCampaignItemsForOrg(campaign.id, ctx.org.organizationId),
+  // Scoped by organization: another tenant's id simply does not resolve. The
+  // counts and items are scoped the same way, so they start alongside the
+  // campaign instead of waiting for it — for someone else's id they match no
+  // rows, and the page is "not found" all the same.
+  const [campaign, counts, items] = await Promise.all([
+    getCampaignForOrg(id, orgId),
+    campaignSummaryForOrg(id, orgId),
+    listCampaignItemsForOrg(id, orgId),
   ]);
+  if (!campaign) notFound();
 
   const stoppable = ["SCHEDULED", "QUEUED", "PROCESSING", "PAUSED_REVIEW"].includes(
     campaign.status,

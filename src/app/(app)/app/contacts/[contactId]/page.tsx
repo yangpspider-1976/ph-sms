@@ -5,6 +5,7 @@ import { requireOrgContext } from "@/server/auth/context";
 import { db } from "@/server/db";
 import { contactGroupMembers, contactGroups } from "@/server/db/schema";
 import { getContact } from "@/server/domain/contacts";
+import { isUuid } from "@/server/uuid";
 import { ButtonLink, Card, DetailRow, PageHeader, Pill } from "@/components/ui";
 import Link from "next/link";
 import { ContactForm } from "./contact-form";
@@ -25,22 +26,26 @@ export default async function ContactPage({
   const { t, locale } = await getI18n();
 
   const { contactId } = await params;
+  if (!isUuid(contactId)) notFound();
   const ctx = await requireOrgContext();
   const orgId = ctx.org.organizationId;
 
-  const contact = await getContact({ organizationId: orgId, contactId });
-  if (!contact) notFound();
-
-  const groups = await db
-    .select({ id: contactGroups.id, name: contactGroups.name })
-    .from(contactGroupMembers)
-    .innerJoin(contactGroups, eq(contactGroups.id, contactGroupMembers.groupId))
-    .where(
-      and(
-        eq(contactGroupMembers.contactId, contactId),
-        eq(contactGroupMembers.organizationId, orgId),
+  // Both scoped by organization, so they run together: for another tenant's
+  // contact the group lookup simply matches nothing.
+  const [contact, groups] = await Promise.all([
+    getContact({ organizationId: orgId, contactId }),
+    db
+      .select({ id: contactGroups.id, name: contactGroups.name })
+      .from(contactGroupMembers)
+      .innerJoin(contactGroups, eq(contactGroups.id, contactGroupMembers.groupId))
+      .where(
+        and(
+          eq(contactGroupMembers.contactId, contactId),
+          eq(contactGroupMembers.organizationId, orgId),
+        ),
       ),
-    );
+  ]);
+  if (!contact) notFound();
 
   return (
     <>

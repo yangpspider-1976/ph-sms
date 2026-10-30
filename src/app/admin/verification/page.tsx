@@ -3,6 +3,7 @@ import { desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/server/db";
 import { organizations } from "@/server/db/schema";
 import { requirePlatformAdmin } from "@/server/auth/context";
+import { isUuid } from "@/server/uuid";
 import {
   Card,
   CardHeader,
@@ -32,8 +33,6 @@ const TONE: Record<string, Tone> = {
   REJECTED: "neutral",
 };
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 export default async function VerificationPage({
   searchParams,
 }: {
@@ -46,29 +45,29 @@ export default async function VerificationPage({
   // Set after a decision is recorded. Read back from the database rather than
   // echoed from the form, so the notice states what is actually stored.
   const { decided: decidedId } = await searchParams;
-  const justDecided =
-    decidedId && UUID.test(decidedId)
-      ? (
-          await db
-            .select({ name: organizations.name, status: organizations.status })
-            .from(organizations)
-            .where(eq(organizations.id, decidedId))
-            .limit(1)
-        )[0]
-      : undefined;
 
-  const queue = await db
-    .select()
-    .from(organizations)
-    .where(inArray(organizations.status, ["PENDING_REVIEW", "NEEDS_INFORMATION"]))
-    .orderBy(organizations.createdAt);
-
-  const decided = await db
-    .select()
-    .from(organizations)
-    .where(inArray(organizations.status, ["ACTIVE", "SUSPENDED", "REJECTED"]))
-    .orderBy(desc(organizations.statusChangedAt))
-    .limit(10);
+  // Three independent reads: they run at the same time, not one after another.
+  const [justDecided, queue, decided] = await Promise.all([
+    isUuid(decidedId)
+      ? db
+          .select({ name: organizations.name, status: organizations.status })
+          .from(organizations)
+          .where(eq(organizations.id, decidedId))
+          .limit(1)
+          .then((rows) => rows[0])
+      : undefined,
+    db
+      .select()
+      .from(organizations)
+      .where(inArray(organizations.status, ["PENDING_REVIEW", "NEEDS_INFORMATION"]))
+      .orderBy(organizations.createdAt),
+    db
+      .select()
+      .from(organizations)
+      .where(inArray(organizations.status, ["ACTIVE", "SUSPENDED", "REJECTED"]))
+      .orderBy(desc(organizations.statusChangedAt))
+      .limit(10),
+  ]);
 
   return (
     <>

@@ -4,6 +4,7 @@ import { db } from "@/server/db";
 import { imports } from "@/server/db/schema";
 import { requireOrgContext } from "@/server/auth/context";
 import { getImportRows } from "@/server/domain/contacts";
+import { isUuid } from "@/server/uuid";
 import { getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
 import {
@@ -37,18 +38,21 @@ export default async function ImportDetailPage({
   const { t, locale } = await getI18n();
 
   const { id } = await params;
+  if (!isUuid(id)) notFound();
   const ctx = await requireOrgContext();
+  const orgId = ctx.org.organizationId;
 
-  const record = (
-    await db
+  // Rows are scoped by organization like the import itself, so both queries
+  // run together; another tenant's id matches nothing in either.
+  const [[record], rows] = await Promise.all([
+    db
       .select()
       .from(imports)
-      .where(and(eq(imports.id, id), eq(imports.organizationId, ctx.org.organizationId)))
-      .limit(1)
-  )[0];
+      .where(and(eq(imports.id, id), eq(imports.organizationId, orgId)))
+      .limit(1),
+    getImportRows(id, orgId),
+  ]);
   if (!record) notFound();
-
-  const rows = await getImportRows(id, ctx.org.organizationId);
 
   return (
     <>

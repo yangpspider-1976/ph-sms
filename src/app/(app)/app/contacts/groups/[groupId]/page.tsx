@@ -6,6 +6,7 @@ import { db } from "@/server/db";
 import { contactGroups } from "@/server/db/schema";
 import { listGroupMembers } from "@/server/domain/groups";
 import { listContacts } from "@/server/domain/contacts";
+import { isUuid } from "@/server/uuid";
 import {
   ButtonLink,
   Card,
@@ -33,23 +34,25 @@ export default async function GroupPage({
   const t = await getDictionary();
 
   const { groupId } = await params;
+  if (!isUuid(groupId)) notFound();
   const ctx = await requireOrgContext();
   const orgId = ctx.org.organizationId;
 
-  const [group] = await db
-    .select()
-    .from(contactGroups)
-    .where(and(eq(contactGroups.id, groupId), eq(contactGroups.organizationId, orgId)))
-    .limit(1);
+  // One round of queries. Members are scoped by organization like the group,
+  // so starting them early shows another tenant nothing.
+  const [[group], members, allContacts] = await Promise.all([
+    db
+      .select()
+      .from(contactGroups)
+      .where(and(eq(contactGroups.id, groupId), eq(contactGroups.organizationId, orgId)))
+      .limit(1),
+    listGroupMembers({ organizationId: orgId, groupId }),
+    listContacts(orgId, 200),
+  ]);
 
   // Scoped by organization, so another tenant's group is simply not found
   // rather than forbidden — which would confirm that it exists.
   if (!group) notFound();
-
-  const [members, allContacts] = await Promise.all([
-    listGroupMembers({ organizationId: orgId, groupId }),
-    listContacts(orgId, 200),
-  ]);
 
   const memberIds = new Set(members.map((m) => m.contactId));
   const candidates = allContacts

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { desc, eq, inArray } from "drizzle-orm";
+import { count, desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/server/db";
 import { campaigns, inquiries, organizations, senderIdentities } from "@/server/db/schema";
 import { requirePlatformAdmin } from "@/server/auth/context";
@@ -70,28 +70,33 @@ export default async function AdminOverviewPage() {
   // The session lookup is cached per request, so this costs no extra query.
   await requirePlatformAdmin();
 
-  const [recentInquiries, recentCampaigns, pendingOrgs, pendingSenders] = await Promise.all([
+  const [recentInquiries, recentCampaigns, pendingOrgs, [pendingSenders]] = await Promise.all([
     db.select().from(inquiries).orderBy(desc(inquiries.createdAt)).limit(3),
-    db.select().from(campaigns).orderBy(desc(campaigns.createdAt)).limit(3),
+    // The account name comes with each campaign. It used to be a separate
+    // read of every organization, made after the others had finished, to
+    // label three rows.
+    db
+      .select({
+        id: campaigns.id,
+        name: campaigns.name,
+        status: campaigns.status,
+        includedCount: campaigns.includedCount,
+        purpose: campaigns.purpose,
+        organizationName: organizations.name,
+      })
+      .from(campaigns)
+      .leftJoin(organizations, eq(organizations.id, campaigns.organizationId))
+      .orderBy(desc(campaigns.createdAt))
+      .limit(3),
     db
       .select()
       .from(organizations)
       .where(inArray(organizations.status, ["PENDING_REVIEW", "NEEDS_INFORMATION"]))
       .orderBy(desc(organizations.createdAt))
       .limit(4),
-    db
-      .select({ id: senderIdentities.id })
-      .from(senderIdentities)
-      .where(eq(senderIdentities.status, "PENDING")),
+    // Only the number is shown, so count rather than fetch every id.
+    db.select({ n: count() }).from(senderIdentities).where(eq(senderIdentities.status, "PENDING")),
   ]);
-
-  const orgNames = new Map(
-    (
-      await db
-        .select({ id: organizations.id, name: organizations.name })
-        .from(organizations)
-    ).map((o) => [o.id, o.name]),
-  );
 
   const newInquiries = recentInquiries.filter((i) => i.status === "NEW").length;
 
@@ -121,7 +126,7 @@ export default async function AdminOverviewPage() {
           href="/admin/senders"
           icon={<IconTag size={20} />}
           title={t.adminExtra.tileSenders}
-          subtitle={t.adminExtra.tileSendersSub(pendingSenders.length)}
+          subtitle={t.adminExtra.tileSendersSub(pendingSenders?.n ?? 0)}
           tint="violet"
         />
         <NavTile
@@ -235,7 +240,7 @@ export default async function AdminOverviewPage() {
                           {campaign.name}
                         </Link>
                       </td>
-                      <td>{orgNames.get(campaign.organizationId) ?? "—"}</td>
+                      <td>{campaign.organizationName ?? "—"}</td>
                       <td>
                         <Pill tone={CAMPAIGN_TONE[campaign.status] ?? "neutral"}>
                           {t.status.campaign[campaign.status]}
