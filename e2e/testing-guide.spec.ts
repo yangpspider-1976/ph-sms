@@ -334,8 +334,14 @@ test.describe("Part A — core tests", () => {
     await expect(page.getByText("September Promos").first()).toBeVisible();
     await expect(page.locator(`main a[href="${new URL(campaignUrl).pathname}"]`)).toHaveCount(0);
 
-    const response = await page.goto(campaignUrl);
-    expect(response?.status()).toBe(404);
+    // The other tenant gets "not found", exactly as for an id that does not
+    // exist. Portal pages stream in behind a loading state, so that arrives as
+    // the not-found page rather than a 404 status code (Next.js cannot change
+    // the status once the response has started). Check what the reader sees,
+    // and that none of the campaign comes with it.
+    await page.goto(campaignUrl);
+    await expect(page.getByText("This page could not be found")).toBeVisible();
+    await expect(page.locator("body")).not.toContainText(/\+63 9\d\d \*\*\* \d{4}/);
   });
 });
 
