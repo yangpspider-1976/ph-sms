@@ -23,6 +23,14 @@ export const client =
     max: Number(process.env.DB_POOL_MAX ?? 10),
     idle_timeout: 20,
     prepare: false,
+    // By default every new connection first reads the catalogue's array types,
+    // an extra query and round trip before its first real one. On serverless
+    // hosting idle connections close after 20 seconds, so that happened on
+    // most page views after a pause, once per connection. The app stores no
+    // PostgreSQL arrays and sends none (inArray expands to separate
+    // parameters), so the lookup bought nothing. Turn this back on before
+    // adding an array column or passing an array as a single parameter.
+    fetch_types: false,
   });
 
 if (process.env.NODE_ENV !== "production") globalForDb.__phSmsClient = client;
