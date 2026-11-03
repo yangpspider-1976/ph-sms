@@ -357,9 +357,9 @@ function ControlRow({
   return (
     <Link
       href={href}
-      className="flex items-center gap-3.5 rounded-[9px] px-3 py-3 transition-colors hover:bg-brand-50/60"
+      className="flex items-center gap-3.5 px-3 py-3 transition-colors hover:bg-brand-50/60"
     >
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] bg-brand-50 text-brand-600">
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-700">
         {icon}
       </span>
       <span className="min-w-0 flex-1">

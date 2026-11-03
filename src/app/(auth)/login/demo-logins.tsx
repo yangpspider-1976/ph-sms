@@ -20,7 +20,7 @@ export async function DemoLogins() {
   const t = await getDictionary();
 
   return (
-    <div className="mt-8 rounded-[10px] border border-dashed border-brand-200 bg-brand-50/50 p-4">
+    <div className="mt-8 border border-dashed border-brand-200 bg-brand-50/50 p-4">
       <p className="text-[13px] font-bold text-ink">{t.auth.demoLogins.title}</p>
       <p className="mt-0.5 text-[12.5px] text-muted">
         {t.auth.demoLogins.passwordNote}{" "}

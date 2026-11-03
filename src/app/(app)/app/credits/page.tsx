@@ -120,7 +120,8 @@ export default async function CreditsPage() {
                 <input type="hidden" name="packageCode" value={pkg.code} />
                 <Button type="submit" variant="secondary" className="flex-col items-start gap-0.5 py-3">
                   <span className="text-[14px] font-bold">{formatCentavos(pkg.creditCentavos)}</span>
-                  <span className="text-[12px] font-medium opacity-80">
+                  {/* Full strength: dimmed, the teal fell below 4.5:1. */}
+                  <span className="text-[12px] font-medium">
                     {(t.creditsExtra.packageLabels as Record<string, string>)[pkg.code] ?? pkg.label}
                   </span>
                 </Button>

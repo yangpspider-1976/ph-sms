@@ -98,7 +98,7 @@ export function GroupMembers({
                 <td>
                   <input
                     type="checkbox"
-                    className="h-4 w-4 accent-brand-600"
+                    className="shrink-0"
                     checked={selected.has(member.contactId)}
                     onChange={() => toggle(member.contactId)}
                     aria-label={`${t.common.select} ${member.masked}`}
@@ -177,7 +177,7 @@ export function GroupAddPanel({
             onChange={(e) => setFilter(e.target.value)}
           />
 
-          <div className="mt-3 max-h-64 overflow-auto rounded-[10px] border border-line">
+          <div className="mt-3 max-h-64 overflow-auto border border-line">
             {visible.length === 0 ? (
               <p className="px-3 py-3 text-[12.5px] text-muted">{t.groups.nothingMatches}</p>
             ) : (
@@ -187,7 +187,7 @@ export function GroupAddPanel({
                     <label className="flex cursor-pointer items-center gap-2.5 px-3 py-2 hover:bg-navy-50">
                       <input
                         type="checkbox"
-                        className="h-4 w-4 accent-brand-600"
+                        className="shrink-0"
                         checked={selected.has(candidate.id)}
                         onChange={() =>
                           setSelected((prev) => {

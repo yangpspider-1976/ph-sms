@@ -77,8 +77,27 @@ export const ko: Dictionary = {
     menu: "메뉴",
     openMenu: "메뉴 열기",
     closeMenu: "메뉴 닫기",
-    sidebarPromoTitle: "고객과 계속 연결하세요",
-    sidebarPromoBody: "간편하고 안정적인 필리핀 기업용 SMS.",
+    credit: "크레딧",
+    myRates: "나의 단가",
+    quickMenu: "퀵 메뉴",
+    sections: (name: string) => `${name} 메뉴`,
+    logInToContinue: "로그인 후 이용해 주세요",
+    quick: {
+      guideTitle: "서비스",
+      guideSub: "이용 안내",
+      sendersTitle: "발신자 ID",
+      sendersSub: "신청 및 관리",
+      importTitle: "연락처",
+      importSub: "CSV 가져오기",
+      supportTitle: "고객 지원",
+      supportSub: "문의하기",
+      pricingTitle: "요금",
+      pricingSub: "세그먼트당 단가",
+      bulkTitle: "대량 발송",
+      bulkSub: "견적 요청",
+      helpTitle: "도움말",
+      helpSub: "자주 묻는 질문",
+    },
   },
 
   adminNav: {
@@ -98,6 +117,7 @@ export const ko: Dictionary = {
 
   components: {
     demoMark: "디자인 미리보기 • 샘플 콘텐츠 • 데모 — 실제 SMS 발송 및 결제 없음",
+    copyright: (year: number) => `© ${year} PH SMS. 모든 권리 보유.`,
     fileDrop: {
       browse: "파일 찾기",
       change: "다른 파일 선택",
@@ -576,13 +596,8 @@ export const ko: Dictionary = {
     notVerifiedBody:
       "지금 모든 설정을 마칠 수 있습니다. 인증이 승인되면 발송이 가능해집니다 — 상단 상태는 자동으로 갱신됩니다.",
     tileProfile: "내 프로필",
-    tileProfileSub: "개인 정보와 선택적 휴대폰 인증",
     tileTeam: "팀",
-    tileTeamSub: "발송·승인·조회 권한 관리",
     tileSenders: "발신자 ID",
-    tileSendersSub: "메시지에 표시되는 발신자 이름",
-    tileOptOuts: "수신 거부",
-    tileOptOutsSub: "발송 중단을 요청한 사람",
     businessProfile: "사업자 정보",
     businessProfileNote:
       "등록 상호나 인증 서류 변경은 플랫폼 고객 지원을 통해 처리되며, 기록과 승인 상태가 함께 갱신됩니다.",
@@ -916,8 +931,6 @@ export const ko: Dictionary = {
     philippinesOnly: "필리핀 전용",
     verifiedBusinesses: "인증된 사업자",
     prepaidCredits: "선불 크레딧",
-    scribbleHero: "간편하게.\n안정적으로.\n비즈니스를 위해.",
-    scribbleUpload: "명단 업로드는\n몇 초면 끝",
     phoneNewMessage: "새 메시지",
     phoneSample:
       "안녕하세요! PH SMS에서 보내는 샘플 메시지입니다. 여기에서 메시지 내용을 자유롭게 작성할 수 있습니다.\n\n감사합니다!",
@@ -932,7 +945,25 @@ export const ko: Dictionary = {
     bulkTitle: "대량으로 발송하시나요?",
     bulkBody: "다음 대량 발송 캠페인 계획을 함께 세워 드립니다.",
     bulkCta: "담당팀과 상담하기",
-    scribbleBulk: "같은 사람들,\n더 가깝게\n연결된\n필리핀.",
+    shortcuts: "바로가기",
+    featuresHeadingStrong: "믿고 보내는",
+    featuresHeadingLight: "{product} 서비스",
+    featuresIntro: "선불 크레딧, 내용 검토, 번호 보호까지. 모든 발송을 투명하게 관리합니다.",
+    card1Title: "확인할 수 있는 선불 크레딧",
+    card1Body:
+      "발송할 때 최대 비용을 먼저 예약하고 실제 비용으로 정산합니다. 모든 내역은 원장에 남습니다.",
+    card2Title: "접수와 전달을 구분합니다",
+    card2Body: "메시지마다 통신사가 접수했는지, 실제로 전달됐는지를 따로 보여 드립니다.",
+    card3Title: "수신 거부는 끝까지 지켜집니다",
+    card3Body: "발송 견적을 낼 때, 그리고 메시지가 나가기 직전에 다시 한번 수신 거부를 확인합니다.",
+    card4Title: "번호는 안전하게 다룹니다",
+    card4Body:
+      "번호는 암호화해 저장하고 가려서 표시합니다. 전체 번호 내보내기는 소유자만 할 수 있으며 기록됩니다.",
+    trustHeadingStrong: "PH SMS의",
+    trustHeadingLight: "안전한 운영 원칙",
+    trustIntro: "모든 사업자는 발송 전에 승인을 받으며, 모든 발송은 정해진 한도 안에서 이루어집니다.",
+    trustReview: "내용 검토",
+    trustLimits: "발송 한도",
   },
 
   legal: {

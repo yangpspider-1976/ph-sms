@@ -14,21 +14,27 @@ export function cx(...parts: Array<string | false | null | undefined>): string {
 type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "dark";
 type ButtonSize = "sm" | "md" | "lg";
 
+/* Square, as everything people operate is (DESIGN.md). Disabled is a grey fill
+   with a muted label, not a faded copy of the live button. */
 const BUTTON_BASE =
-  "inline-flex items-center justify-center gap-2 font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap";
+  "inline-flex items-center justify-center gap-2 font-medium transition-colors whitespace-nowrap disabled:cursor-not-allowed disabled:border-line! disabled:bg-subtle! disabled:text-muted!";
 
 const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
   primary: "bg-brand-600 text-white hover:bg-brand-700",
-  secondary: "bg-white text-brand-700 border border-brand-200 hover:bg-brand-50",
-  ghost: "bg-white text-ink border border-line hover:bg-navy-50",
-  danger: "bg-white text-danger-fg border border-danger-bg hover:bg-danger-bg",
+  // Outline: expands or offers a second path beside a primary.
+  secondary: "bg-white text-brand-700 border border-brand-600 hover:bg-brand-50",
+  // Quiet: back, list, export.
+  ghost: "bg-subtle text-ink border border-line-strong hover:bg-navy-50",
+  danger: "bg-white text-danger-fg border border-danger-fg hover:bg-danger-bg",
+  // Slate navy: a second action that still needs weight.
   dark: "bg-navy-800 text-white hover:bg-navy-900",
 };
 
+// Minimum heights, so a button with a second line of text grows instead of clipping it.
 const BUTTON_SIZES: Record<ButtonSize, string> = {
-  sm: "text-[13px] px-3 py-1.5",
-  md: "text-sm px-4 py-2.5",
-  lg: "text-[15px] px-6 py-3",
+  sm: "min-h-9 px-4 text-[13px]",
+  md: "min-h-11 px-5 text-[14px]",
+  lg: "min-h-13.5 px-10 text-[17px]",
 };
 
 export function Button({
@@ -162,7 +168,7 @@ export function NavTile({
   tint?: "brand" | "teal" | "violet" | "navy";
 }) {
   const tints = {
-    brand: "bg-brand-50 text-brand-600",
+    brand: "bg-brand-50 text-brand-700",
     teal: "bg-teal-100 text-teal-700",
     violet: "bg-violet-bg text-violet-fg",
     navy: "bg-navy-100 text-navy-700",
@@ -171,11 +177,11 @@ export function NavTile({
   return (
     <Link
       href={href}
-      className="card flex items-center gap-3.5 px-4 py-3.5 transition-colors hover:border-brand-200 hover:bg-brand-50/40"
+      className="card flex items-center gap-4 px-5 py-4 transition-colors hover:bg-subtle"
     >
       <span
         className={cx(
-          "flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px]",
+          "flex h-11 w-11 shrink-0 items-center justify-center rounded-full",
           tints[tint],
         )}
       >
@@ -213,26 +219,16 @@ const TONES: Record<Tone, string> = {
   brand: "bg-brand-50 text-brand-700",
 };
 
-/** Status pill with a dot. The label always carries the meaning, not the colour. */
-export function Pill({
-  tone = "neutral",
-  children,
-  dot = true,
-}: {
-  tone?: Tone;
-  children: ReactNode;
-  dot?: boolean;
-}) {
+/** Square status label. The word always carries the meaning, not the colour. */
+export function Pill({ tone = "neutral", children }: { tone?: Tone; children: ReactNode }) {
   return (
     <span
       className={cx(
-        // A status is one token: wrapped, "Credit / added" reads as two, and
-        // the dot is squeezed out of shape.
-        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[12.5px] font-semibold",
+        // A status is one token: wrapped, "Credit / added" reads as two.
+        "inline-flex items-center gap-1.5 whitespace-nowrap px-2 py-0.5 text-[12px] font-medium",
         TONES[tone],
       )}
     >
-      {dot ? <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-80" /> : null}
       {children}
     </span>
   );
@@ -257,25 +253,17 @@ export function Notice({
   children?: ReactNode;
   supportRef?: string;
 }) {
-  const border: Record<Tone, string> = {
-    info: "border-brand-200",
-    success: "border-success-bg",
-    warning: "border-warning-bg",
-    danger: "border-danger-bg",
-    violet: "border-violet-bg",
-    neutral: "border-line",
-    brand: "border-brand-200",
-  };
+  // A square box on the tone's tint: the title takes the tone colour, the
+  // message stays in body grey, which reads at 6:1 or better on every tint.
   return (
-    <div className={cx("rounded-[10px] border p-4", TONES[tone], border[tone])}>
-      <div className="flex gap-2.5">
-        <IconInfo size={17} className="mt-px shrink-0" />
+    <div className={cx("p-5", TONES[tone].split(" ")[0])}>
+      <div className="flex gap-3">
+        <IconInfo size={18} className={cx("mt-px shrink-0", TONES[tone].split(" ")[1])} />
         <div className="min-w-0">
-          <p className="text-[13.5px] font-bold">{title}</p>
-          {/* No opacity: the tone colours sit at ~4.9:1, and dimming them fails AA. */}
-          {children ? <div className="mt-1 text-[13px]">{children}</div> : null}
+          <p className={cx("text-[15px] font-bold", TONES[tone].split(" ")[1])}>{title}</p>
+          {children ? <div className="mt-1 text-[13.5px] text-body">{children}</div> : null}
           {supportRef ? (
-            <p className="mt-2 text-[12px]">Support reference: {supportRef}</p>
+            <p className="mt-2 text-[12px] text-body">Support reference: {supportRef}</p>
           ) : null}
         </div>
       </div>
@@ -296,15 +284,15 @@ export function EmptyState({
   icon?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center px-6 py-14 text-center">
+    <div className="flex flex-col items-center px-6 py-16 text-center">
       {icon ? (
-        <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-navy-50 text-muted">
+        <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-subtle text-muted">
           {icon}
         </span>
       ) : null}
-      <p className="text-[15px] font-bold text-ink">{title}</p>
-      <p className="mt-1 max-w-sm text-[13px] text-muted">{description}</p>
-      {action ? <div className="mt-4">{action}</div> : null}
+      <p className="text-[16px] font-bold text-ink">{title}</p>
+      <p className="mt-1.5 max-w-sm text-[14px] text-muted">{description}</p>
+      {action ? <div className="mt-5">{action}</div> : null}
     </div>
   );
 }
@@ -384,12 +372,14 @@ export function PageHeader({
   description?: string;
   action?: ReactNode;
 }) {
+  // The title band of every working page: the title, a line under it, and the
+  // page's main action at the right.
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
       <div>
-        <h1 className="text-[27px] leading-tight font-extrabold text-ink">{title}</h1>
+        <h1 className="text-[18px] leading-snug font-medium text-ink sm:text-[20px]">{title}</h1>
         {description ? (
-          <p className="mt-1.5 text-[14px] text-body">{description}</p>
+          <p className="mt-1.5 text-[14px] text-muted">{description}</p>
         ) : null}
       </div>
       {action}
@@ -397,12 +387,53 @@ export function PageHeader({
   );
 }
 
+/**
+ * Section tabs: equal segments across the column, the current one filled.
+ * Each is a link, so a section is one address and the back button works.
+ */
+export function SectionTabs({
+  label,
+  tabs,
+  current,
+}: {
+  /** Names the set for a screen reader, e.g. "Contacts sections". */
+  label: string;
+  tabs: Array<{ href: string; label: string }>;
+  current: string;
+}) {
+  return (
+    <nav aria-label={label} className="mb-8">
+      <ul className="flex">
+        {tabs.map((tab) => {
+          const active = tab.href === current;
+          return (
+            <li key={tab.href} className="-ml-px min-w-0 flex-1 first:ml-0">
+              <Link
+                href={tab.href}
+                aria-current={active ? "page" : undefined}
+                className={cx(
+                  "flex h-12.5 items-center justify-center border px-2 text-center text-[14px] leading-tight sm:text-[16px]",
+                  active
+                    ? "relative border-brand-600 bg-brand-600 font-bold text-white"
+                    : "border-line text-muted hover:bg-subtle hover:text-ink",
+                )}
+              >
+                {tab.label}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}
+
 /** Small key/value row used in review panels and detail pages. */
 export function DetailRow({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="flex items-start justify-between gap-6 border-b border-line py-2.5 last:border-b-0">
-      <dt className="text-[13px] text-muted">{label}</dt>
-      <dd className="text-right text-[13px] font-semibold text-ink">{value}</dd>
+    <div className="flex min-h-10.5 items-center justify-between gap-6 border-b border-line py-2.5 last:border-b-0">
+      <dt className="text-[13.5px] text-muted">{label}</dt>
+      <dd className="text-right text-[13.5px] font-medium text-ink">{value}</dd>
     </div>
   );
 }
@@ -419,17 +450,17 @@ export function Stat({
   hint?: string;
 }) {
   return (
-    <div className="card px-4 py-3.5">
-      <p className="text-[12.5px] font-medium text-muted">{label}</p>
+    <div className="card px-5 py-4">
+      <p className="text-[13px] text-muted">{label}</p>
       <p
         className={cx(
-          "mt-1 text-[22px] font-extrabold",
+          "mt-1.5 text-[24px] leading-tight font-bold tabular-nums",
           tone === "neutral" ? "text-ink" : TONES[tone].split(" ")[1],
         )}
       >
         {value}
       </p>
-      {hint ? <p className="mt-0.5 text-[12px] text-muted">{hint}</p> : null}
+      {hint ? <p className="mt-1 text-[12px] text-muted">{hint}</p> : null}
     </div>
   );
 }

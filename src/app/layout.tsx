@@ -1,8 +1,20 @@
 import type { Metadata, Viewport } from "next";
+import { Noto_Sans_KR } from "next/font/google";
 import { PRODUCT_NAME } from "@/components/brand";
 import { I18nProvider } from "@/i18n/client";
 import { getI18n } from "@/i18n/server";
 import "./globals.css";
+
+/**
+ * One family for English and Korean alike (DESIGN.md). It is a variable font,
+ * so every weight comes from the same files. Only the Latin slice is preloaded;
+ * the Korean slices load as a page uses them.
+ */
+const notoSansKr = Noto_Sans_KR({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-noto-sans-kr",
+});
 
 /**
  * Metadata is generated per request rather than exported as a constant, so the
@@ -36,7 +48,7 @@ export default async function RootLayout({
   return (
     // `lang` carries the real tag: screen readers choose a voice from it, and
     // announcing Korean text with an English voice makes it unintelligible.
-    <html lang={tag}>
+    <html lang={tag} className={notoSansKr.variable}>
       <body>
         <I18nProvider locale={locale}>{children}</I18nProvider>
       </body>

@@ -79,7 +79,7 @@ export default async function ContactPage({
                   <span className="flex flex-wrap gap-1.5">
                     {groups.map((group) => (
                       <Link key={group.id} href={`/app/contacts/groups/${group.id}`}>
-                        <Pill tone="neutral" dot={false}>
+                        <Pill tone="neutral">
                           {group.name}
                         </Pill>
                       </Link>

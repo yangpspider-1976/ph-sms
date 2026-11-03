@@ -54,7 +54,7 @@ export function TestSendPanel({
 
   if (recipients.length === 0) {
     return (
-      <div className="rounded-[10px] border border-line bg-navy-50 px-4 py-3.5">
+      <div className="border border-line bg-subtle px-4 py-3.5">
         <p className="text-[13px] font-semibold text-ink">{t.send.testSendTitle}</p>
         <p className="mt-1 text-[12.5px] leading-snug text-muted">
           <Link href="/app/settings/profile" className="font-semibold text-brand-600 hover:underline">
@@ -67,7 +67,7 @@ export function TestSendPanel({
   }
 
   return (
-    <div className="rounded-[10px] border border-line bg-navy-50 px-4 py-3.5">
+    <div className="border border-line bg-subtle px-4 py-3.5">
       <p className="mb-2 text-[13px] font-semibold text-ink">{t.send.testSendTitle}</p>
       <div className="flex flex-wrap items-end gap-3">
         <div className="min-w-0 flex-1">

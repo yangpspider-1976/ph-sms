@@ -207,7 +207,7 @@ export default async function CampaignDetailPage({
         <div className="min-w-0 space-y-5">
           <Card className="p-5">
             <h2 className="card-title">{t.campaignDetail.messageTitle}</h2>
-            <p className="mt-2 whitespace-pre-wrap rounded-[9px] bg-canvas p-3 text-[13px] text-ink">
+            <p className="mt-2 whitespace-pre-wrap bg-subtle p-3 text-[13px] text-ink">
               {campaign.body}
             </p>
           </Card>

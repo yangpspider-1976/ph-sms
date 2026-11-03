@@ -61,7 +61,7 @@ export function SenderDecision({ senderId, value }: { senderId: string; value: s
           <input
             type="checkbox"
             name="supportsInboundReplies"
-            className="mt-0.5 h-4 w-4 shrink-0 accent-brand-600"
+            className="mt-px shrink-0"
           />
           <span>
             {t.adminExtra.inboundRepliesLabel}

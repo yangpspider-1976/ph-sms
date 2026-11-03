@@ -17,6 +17,7 @@ import {
 } from "@/components/ui";
 import { IconDownload, IconUsers } from "@/components/icons";
 import { ImportPanel } from "./import-panel";
+import { ContactsTabs } from "./contacts-tabs";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
 
@@ -47,21 +48,15 @@ export default async function ContactsPage() {
         title={t.contacts.title}
         description={t.contacts.subheading}
         action={
-          <div className="flex gap-2">
-            <ButtonLink href="/app/contacts/groups" variant="ghost">
-              {t.groups.title}
+          ctx.can("reports.export.masked") ? (
+            <ButtonLink href="/app/exports?kind=contacts" variant="ghost" size="sm" prefetch={false}>
+              <IconDownload size={15} /> {t.common.export}
             </ButtonLink>
-            <ButtonLink href="/app/contacts/opt-outs" variant="ghost">
-              {t.contacts.optOuts.title}
-            </ButtonLink>
-            {ctx.can("reports.export.masked") ? (
-              <ButtonLink href="/app/exports?kind=contacts" variant="ghost" prefetch={false}>
-                <IconDownload size={15} /> {t.common.export}
-              </ButtonLink>
-            ) : null}
-          </div>
+          ) : null
         }
       />
+
+      <ContactsTabs t={t} current="/app/contacts" />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Stat label={t.contacts.statContacts} value={total} />

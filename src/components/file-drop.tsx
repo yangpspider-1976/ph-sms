@@ -81,7 +81,7 @@ export function FileDrop({
       onDragLeave={() => setDragging(false)}
       onDrop={() => setDragging(false)}
       className={cx(
-        "relative rounded-[10px] border border-dashed transition-colors",
+        "relative border border-dashed transition-colors",
         // The focus ring belongs to the box: the input that has focus is invisible.
         "has-focus-visible:border-brand-500 has-focus-visible:shadow-[0_0_0_3px_var(--color-brand-100)]",
         dragging
@@ -92,7 +92,7 @@ export function FileDrop({
     >
       {layout === "row" ? (
         <>
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-muted">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-muted">
             {chosen ? <IconCheckCircle size={20} className="text-success-fg" /> : <IconFile size={20} />}
           </span>
           {/* Narrow enough to stay beside the icon on a phone; the button wraps. */}
@@ -104,7 +104,7 @@ export function FileDrop({
           </span>
           <span
             aria-hidden="true"
-            className="rounded-lg border border-line bg-white px-3 py-1.5 text-[13px] font-semibold text-ink"
+            className="border border-line-strong bg-white px-3 py-1.5 text-[13px] text-ink"
           >
             {action}
           </span>
@@ -123,7 +123,7 @@ export function FileDrop({
           </span>
           <span
             aria-hidden="true"
-            className="mt-2 inline-flex items-center justify-center rounded-lg bg-brand-600 px-4 py-2 text-[13px] font-semibold text-white"
+            className="mt-2 inline-flex items-center justify-center bg-brand-600 px-4 py-2 text-[13px] text-white"
           >
             {action}
           </span>

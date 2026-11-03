@@ -16,6 +16,7 @@ import {
 import { IconMegaphone } from "@/components/icons";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
+import { CampaignsTabs } from "./campaigns-tabs";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -59,7 +60,9 @@ export default async function CampaignsPage({
         }
       />
 
-      <div className="mb-4 flex gap-2">
+      <CampaignsTabs t={t} current="/app/campaigns" />
+
+      <div className="mb-5 flex">
         <FilterTab href="/app/campaigns" active={!scheduledOnly} label={t.campaigns.filterAll} />
         <FilterTab href="/app/campaigns?filter=scheduled" active={scheduledOnly} label={t.campaigns.filterScheduled} />
       </div>
@@ -132,14 +135,14 @@ function FilterTab({
   active: boolean;
   label: string;
 }) {
+  // Text filters split by thin rules; the current one is slate navy and bold.
   return (
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
       className={
-        active
-          ? "rounded-lg bg-brand-600 px-3.5 py-1.5 text-[13px] font-semibold text-white"
-          : "rounded-lg border border-line bg-white px-3.5 py-1.5 text-[13px] font-semibold text-body hover:bg-navy-50"
+        "relative px-5 py-1.5 text-[16px] first:pl-0 after:absolute after:right-0 after:top-1/2 after:h-4 after:w-px after:-translate-y-1/2 after:bg-line-strong last:after:hidden " +
+        (active ? "font-bold text-navy-800" : "text-muted hover:text-ink")
       }
     >
       {label}

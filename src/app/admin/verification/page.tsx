@@ -121,7 +121,7 @@ export default async function VerificationPage({
                 </dl>
 
                 {org.intendedUsage ? (
-                  <div className="mt-3 rounded-[9px] bg-canvas p-3">
+                  <div className="mt-3 bg-subtle p-3">
                     <p className="text-[12px] font-semibold text-ink">{t.admin.verification.statedPurpose}</p>
                     <p className="mt-1 text-[13px] text-body">{org.intendedUsage}</p>
                   </div>

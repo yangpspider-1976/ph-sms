@@ -1,65 +1,88 @@
 @import "tailwindcss";
 
 /*
- * Design tokens.
+ * Design tokens. DESIGN.md is the source: white pages, one teal brand colour,
+ * square controls, hairline tables.
  *
- * Clean B2B surface: light background, navy text, blue primary action, with a
- * teal/green reserved for confirmed states (verified, delivered). Status
- * colours are never the only signal — every pill carries a text label too.
+ * The scale names predate the teal (`brand`, `navy`); they are kept so every
+ * page picks up the palette from here. `brand-600` is the action colour
+ * (#077d79, 4.98:1 with white). `brand-400` is the bright signature teal
+ * (#0bc0b9), which is 2.27:1 with white: decoration only, never text and never
+ * the only sign of a state. Status colours are never the only signal either —
+ * every pill carries a text label too.
  */
 @theme {
-  --color-brand-50: #eef5ff;
-  --color-brand-100: #e0ecfe;
-  --color-brand-200: #c6dbfd;
-  --color-brand-300: #9cc2fb;
-  --color-brand-400: #6aa1f7;
-  --color-brand-500: #3d81f0;
-  --color-brand-600: #1668e3;
-  --color-brand-700: #0f53c0;
-  --color-brand-800: #11459b;
-  --color-brand-900: #133c7b;
+  --color-brand-50: #e8f8f7;
+  --color-brand-100: #d2f1ef;
+  --color-brand-200: #a6e3df;
+  --color-brand-300: #63cdc8;
+  --color-brand-400: #0bc0b9;
+  --color-brand-500: #0a9993;
+  --color-brand-600: #077d79;
+  --color-brand-700: #066f6b;
+  --color-brand-800: #055c59;
+  --color-brand-900: #044a47;
 
-  --color-navy-50: #f4f7fb;
-  --color-navy-100: #e6ecf5;
-  --color-navy-200: #cbd8e8;
-  --color-navy-300: #9cb0cc;
-  --color-navy-400: #6a82a6;
-  --color-navy-500: #47618a;
-  --color-navy-600: #2f4970;
-  --color-navy-700: #1d3559;
-  --color-navy-800: #142a4a;
-  --color-navy-900: #0d1f3a;
-  --color-navy-950: #0a1830;
+  /* Greys at the light end, slate navy at the dark end (secondary buttons, the
+     admin sidebar). */
+  --color-navy-50: #f4f4f4;
+  --color-navy-100: #f0f0f0;
+  --color-navy-200: #e5e5e5;
+  --color-navy-300: #c1c1c1;
+  --color-navy-400: #8c8c8c;
+  --color-navy-500: #6b6b6b;
+  --color-navy-600: #595959;
+  --color-navy-700: #3c4161;
+  --color-navy-800: #282c47;
+  --color-navy-900: #1d2036;
+  --color-navy-950: #14162a;
 
-  --color-ink: #0f2244;
-  --color-body: #4a5d78;
-  /* Darkened from #7d8ea6, which measured 3.34:1 on white and failed WCAG AA.
-     This is 5.07:1 on white and 4.81:1 on the canvas background. */
-  --color-muted: #5f7085;
-  --color-line: #e5eaf1;
-  --color-canvas: #f7f9fc;
+  --color-ink: #111111;
+  --color-body: #595959;
+  /* The reference's #797979 measures 4.35:1 on white; this is 5.33:1 on white
+     and 4.76:1 on the footer grey. */
+  --color-muted: #6b6b6b;
+  --color-line: #f0f0f0;
+  --color-line-strong: #e5e5e5;
+  /* Checkbox and radio outlines: 3.36:1, enough for a control's edge. */
+  --color-control: #8c8c8c;
+  --color-canvas: #ffffff;
+  --color-subtle: #fafafa;
+  --color-band: #f2f2f2;
+  --color-copyright: #767676;
+  --color-mint: #35d8aa;
+  --color-review: #812a44;
+  --color-decor-pink: #ffe9e9;
+  --color-decor-lavender: #9e9ec3;
 
-  --color-teal-100: #d6f5ea;
-  --color-teal-600: #0d9276;
-  --color-teal-700: #0a7a62;
+  --color-teal-100: #e8f8f7;
+  --color-teal-600: #077d79;
+  --color-teal-700: #066f6b;
 
-  --color-success-bg: #e4f6ea;
-  --color-success-fg: #15764a;
+  --color-success-bg: #e8f8f7;
+  --color-success-fg: #066f6b;
   --color-warning-bg: #fdf1de;
   --color-warning-fg: #9a5a11;
-  --color-danger-bg: #fdeaea;
-  --color-danger-fg: #b02a2a;
+  --color-danger-bg: #ffe9e9;
+  --color-danger-fg: #c62828;
   --color-info-bg: #e8f0fe;
   --color-info-fg: #1b4fc4;
   --color-violet-bg: #f0e9fe;
   --color-violet-fg: #6b3fd4;
-  --color-neutral-bg: #eef1f6;
-  --color-neutral-fg: #55657d;
+  --color-neutral-bg: #f3f3f3;
+  --color-neutral-fg: #6b6b6b;
 
-  --font-sans: Inter, "Segoe UI", ui-sans-serif, system-ui, -apple-system,
-    "Helvetica Neue", Arial, sans-serif;
+  /* Working surfaces are square; rounding is for floating and marketing pieces. */
+  --radius-card: 0px;
 
-  --radius-card: 12px;
+  /* The quick menu and "My rates" sit in the margin beside a 1200px column. */
+  --breakpoint-wide: 98.75rem;
+}
+
+/* The font is loaded by next/font in the root layout, which sets the variable. */
+@theme inline {
+  --font-sans: var(--font-noto-sans-kr), "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI",
+    ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
@@ -67,11 +90,13 @@
     -webkit-text-size-adjust: 100%;
   }
 
+  /* Medium is the default weight, as in the reference: much of its crisp look. */
   body {
     background-color: var(--color-canvas);
     color: var(--color-body);
     font-family: var(--font-sans);
     font-size: 14px;
+    font-weight: 500;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
@@ -98,16 +123,44 @@
   :focus-visible {
     outline: 2px solid var(--color-brand-600);
     outline-offset: 2px;
-    border-radius: 4px;
   }
 
   ::placeholder {
-    color: var(--color-muted);
+    color: #767676;
   }
 
   /* A modal dialog makes the page inert but leaves it scrollable underneath. */
   :root:has(dialog:modal) {
     overflow: hidden;
+  }
+
+  /* Checkboxes and radios are 20px circles with a check mark. The faint check
+     on an empty box shows what clicking will do. */
+  input[type="checkbox"],
+  input[type="radio"] {
+    appearance: none;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border: 1px solid var(--color-control);
+    border-radius: 9999px;
+    background: #fff
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23d9d9d9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 10.2 2.7 2.7L14 7.5'/%3E%3C/svg%3E")
+      center / 20px no-repeat;
+    cursor: pointer;
+  }
+
+  input[type="checkbox"]:checked,
+  input[type="radio"]:checked {
+    border-color: var(--color-brand-600);
+    background-color: var(--color-brand-600);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 10.2 2.7 2.7L14 7.5'/%3E%3C/svg%3E");
+  }
+
+  input[type="checkbox"]:disabled,
+  input[type="radio"]:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 }
 
@@ -123,27 +176,33 @@
   }
 
   .card-title {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     color: var(--color-ink);
   }
 
-  /* Data tables: thin rules, tinted header, generous row height. */
+  /* Data tables: hairline rules, a #fafafa head row, centred cells. The first
+     column holds the name of the row and reads from the left. */
   .data-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13.5px;
+    font-size: 14px;
   }
 
   .data-table thead th {
-    background: #f8fafc;
-    color: var(--color-muted);
-    font-weight: 600;
-    text-align: left;
-    padding: 11px 16px;
+    height: 52px;
+    background: var(--color-subtle);
+    color: var(--color-ink);
+    font-weight: 500;
+    text-align: center;
+    padding: 0 16px;
     border-bottom: 1px solid var(--color-line);
     border-top: 1px solid var(--color-line);
     white-space: nowrap;
+  }
+
+  .data-table thead th:first-child {
+    text-align: left;
   }
 
   /* A cell holds one value — a number, a date, a status — and stays on one
@@ -152,9 +211,11 @@
      column to its longest word before it overflows, so "+63 917 *** 0001"
      ran to three lines in a table that had to be scrolled anyway. */
   .data-table tbody td {
-    padding: 14px 16px;
+    height: 50px;
+    padding: 12px 16px;
     border-bottom: 1px solid var(--color-line);
     color: var(--color-body);
+    text-align: center;
     vertical-align: middle;
     white-space: nowrap;
   }
@@ -182,8 +243,9 @@
   }
 
   /* Running text has to be readable where it is: a reason, a description. It
-     wraps, but never narrower than a readable line. `anywhere` lets a URL with
-     no spaces break at that width too. */
+     wraps, but never narrower than a readable line. It stays centred under its
+     heading, as the other cells do. `anywhere` lets a URL with no spaces break
+     at that width too. */
   .data-table tbody td.cell-text {
     white-space: normal;
     overflow-wrap: anywhere;
@@ -205,23 +267,34 @@
     padding-block: 6px;
   }
 
-  .data-table tbody tr:last-child td {
-    border-bottom: 0;
-  }
-
   .data-table tbody td:first-child {
     color: var(--color-ink);
-    font-weight: 600;
+    text-align: left;
   }
 
+  /* Fields are square, 44px tall, with a light border; the label above names
+     them. */
   .field {
     width: 100%;
-    border: 1px solid var(--color-line);
-    border-radius: 8px;
-    padding: 9px 12px;
+    border: 1px solid var(--color-line-strong);
+    border-radius: 0;
+    padding: 10px 16px;
     font-size: 14px;
     color: var(--color-ink);
     background: #fff;
+  }
+
+  input.field,
+  select.field {
+    height: 44px;
+    padding-block: 0;
+  }
+
+  /* iOS zooms into a field with text under 16px, and zoom stays allowed. */
+  @media (width < 48rem) {
+    .field {
+      font-size: 16px;
+    }
   }
 
   /* A select styled as a field loses the native arrow to appearance:none, and
@@ -229,22 +302,22 @@
      IconChevronDown, in the muted ink. */
   select.field {
     appearance: none;
-    padding-right: 36px;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235f7085' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5.5 9.5 6.5 6.5 6.5-6.5'/%3E%3C/svg%3E");
-    background-position: right 12px center;
+    padding-right: 40px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b6b6b' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5.5 9.5 6.5 6.5 6.5-6.5'/%3E%3C/svg%3E");
+    background-position: right 16px center;
     background-repeat: no-repeat;
     background-size: 15px;
   }
 
   select.field:disabled {
-    background-color: var(--color-navy-50);
+    background-color: var(--color-subtle);
     cursor: not-allowed;
   }
 
   .field:focus {
-    border-color: var(--color-brand-500);
-    outline: none;
-    box-shadow: 0 0 0 3px var(--color-brand-100);
+    border-color: var(--color-brand-600);
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
   }
 
   .field[aria-invalid="true"] {
@@ -252,15 +325,15 @@
   }
 
   .field[aria-invalid="true"]:focus {
-    box-shadow: 0 0 0 3px var(--color-danger-bg);
+    outline-color: var(--color-danger-fg);
   }
 
   .field-label {
     display: block;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
     color: var(--color-ink);
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
 }
 

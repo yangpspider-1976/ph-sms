@@ -9,6 +9,7 @@ import { MemberRow } from "./member-row";
 import { InviteRow } from "./invite-row";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
+import { SettingsTabs } from "../settings-tabs";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -36,6 +37,8 @@ export default async function TeamPage() {
         description={t.settings.team.subheading}
       />
 
+      <SettingsTabs t={t} current="/app/settings/team" />
+
       {!ctx.can("team.view") ? (
         <Card className="max-w-2xl p-6">
           <Notice tone="warning" title={t.settings.team.deniedTitle}>
@@ -50,7 +53,7 @@ export default async function TeamPage() {
               {ROLE_ORDER.map((role) => (
                 <div key={role} className="flex flex-wrap items-baseline gap-2">
                   <dt className="w-[150px] shrink-0">
-                    <Pill tone={ROLE_TONES[role]} dot={false}>
+                    <Pill tone={ROLE_TONES[role]}>
                       {t.roles.labels[role]}
                     </Pill>
                   </dt>

@@ -38,7 +38,7 @@ export function DemoApproveButton({ senderId, value }: { senderId: string; value
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-[9px] border border-dashed border-brand-200 bg-brand-50/50 px-3 py-2.5">
+    <div className="flex flex-wrap items-center gap-3 border border-dashed border-brand-200 bg-brand-50/50 px-3 py-2.5">
       <span className="text-[12.5px] text-body">{t.settings.senders.demoApproveNote(value)}</span>
       <Button
         variant="secondary"

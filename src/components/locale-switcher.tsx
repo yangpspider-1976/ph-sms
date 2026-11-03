@@ -36,8 +36,8 @@ export function LocaleSwitcher({ tone = "light" }: { tone?: "light" | "dark" }) 
         aria-label={t.locale.switcherLabel}
         className={
           tone === "dark"
-            ? "rounded-lg border border-white/20 bg-transparent px-2 py-1 text-[12.5px] font-semibold text-white/90 hover:bg-white/10"
-            : "rounded-lg border border-line bg-white px-2 py-1 text-[12.5px] font-semibold text-ink hover:bg-navy-50"
+            ? "border border-white/20 bg-transparent px-2 py-1 text-[12px] text-white/90 hover:bg-white/10"
+            : "border border-line-strong bg-white px-2 py-1 text-[12px] text-ink hover:bg-navy-50"
         }
       >
         {LOCALES.map((option) => (

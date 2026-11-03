@@ -1,15 +1,10 @@
 import type { Metadata } from "next";
 import { requireOrgContext } from "@/server/auth/context";
-import { Card, DetailRow, NavTile, Notice, PageHeader, Pill } from "@/components/ui";
+import { Card, DetailRow, Notice, PageHeader, Pill } from "@/components/ui";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
-import {
-  IconBuilding,
-  IconShield,
-  IconTag,
-  IconUser,
-  IconUsers,
-} from "@/components/icons";
+import { IconBuilding } from "@/components/icons";
+import { SettingsTabs } from "./settings-tabs";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -30,6 +25,9 @@ export default async function SettingsPage() {
         description={t.settings.subheading}
       />
 
+      {/* The opt-out list is a Contacts tab, not a Settings one. */}
+      <SettingsTabs t={t} current="/app/settings" />
+
       {!verified ? (
         <div className="mb-5 max-w-3xl">
           <Notice tone="warning" title={t.settings.notVerifiedTitle}>
@@ -38,38 +36,7 @@ export default async function SettingsPage() {
         </div>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <NavTile
-          href="/app/settings/profile"
-          icon={<IconUser size={20} />}
-          title={t.settings.tileProfile}
-          subtitle={t.settings.tileProfileSub}
-          tint="brand"
-        />
-        <NavTile
-          href="/app/settings/team"
-          icon={<IconUsers size={20} />}
-          title={t.settings.tileTeam}
-          subtitle={t.settings.tileTeamSub}
-          tint="teal"
-        />
-        <NavTile
-          href="/app/settings/senders"
-          icon={<IconTag size={20} />}
-          title={t.settings.tileSenders}
-          subtitle={t.settings.tileSendersSub}
-          tint="violet"
-        />
-        <NavTile
-          href="/app/contacts/opt-outs"
-          icon={<IconShield size={20} />}
-          title={t.settings.tileOptOuts}
-          subtitle={t.settings.tileOptOutsSub}
-          tint="navy"
-        />
-      </div>
-
-      <Card className="mt-5 max-w-3xl p-5">
+      <Card className="max-w-3xl p-5">
         <h2 className="card-title">{t.settings.businessProfile}</h2>
         <p className="mt-1 text-[12.5px] text-muted">
           {t.settings.businessProfileNote}
@@ -88,7 +55,7 @@ export default async function SettingsPage() {
             label={t.common.status}
             value={
               verified ? (
-                <Pill tone="success" dot={false}>
+                <Pill tone="success">
                   {t.common.verified}
                 </Pill>
               ) : (

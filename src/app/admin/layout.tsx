@@ -54,30 +54,32 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="flex min-h-screen bg-canvas">
-      {/* The admin console is visually distinct from the customer portal on purpose.
-          Logo pinned, nav scrolls inside the sidebar — see the customer layout. */}
-      <aside className="sticky top-0 hidden h-screen w-[235px] shrink-0 flex-col bg-navy-900 lg:flex">
+      {/* The admin console is visually distinct from the customer portal on
+          purpose: a slate sidebar rather than a top menu. The logo stays put
+          and the nav scrolls inside the sidebar: letting it overflow made the
+          document taller than the layout, so on a short screen the sticky
+          sidebar scrolled away. */}
+      <aside className="sticky top-0 hidden h-screen w-[235px] shrink-0 flex-col bg-navy-800 lg:flex">
         <div className="shrink-0 px-5 py-5">
           <Wordmark href="/admin" subtitle={t.adminExtra.adminSubtitle} onDark />
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col overflow-y-auto [scrollbar-color:var(--color-navy-700)_transparent] [scrollbar-width:thin]">
-          <SidebarNav items={nav} tone="dark" />
+          <SidebarNav items={nav} />
 
           <div className="mt-auto border-t border-white/8 px-6 py-5">
-            {/* navy-300 (7.45:1 on navy-900). navy-400 measured 4.20:1 and failed AA. */}
+            {/* navy-300 is 7.57:1 on the slate sidebar. */}
             <p className="text-[12.5px] leading-snug text-navy-300">{t.adminExtra.sidebarTagline}</p>
           </div>
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 border-b border-line bg-white">
+        <header className="sticky top-0 z-20 border-b border-line-strong bg-white">
           <div className="flex h-[60px] items-center gap-3 px-4 sm:px-8">
             <div className="flex items-center gap-3 lg:hidden">
               <MobileNav
                 items={nav}
-                tone="dark"
                 homeHref="/admin"
                 subtitle={t.adminExtra.adminSubtitle}
                 // A phone header has no room for the switcher next to the mode pill.
@@ -109,7 +111,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
               <Link
                 href="/admin/settings"
-                className="flex items-center gap-2 text-[13px] font-semibold text-ink hover:text-brand-700"
+                className="flex items-center gap-2 text-[13px] text-ink hover:text-brand-700"
               >
                 <span className="flex h-8 w-8 items-center justify-center rounded-full border border-line text-muted">
                   <IconUser size={16} />
@@ -124,7 +126,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
         <main className="flex-1 px-5 py-7 sm:px-8">{children}</main>
 
-        <footer className="border-t border-line bg-white px-5 py-4 sm:px-8">
+        <footer className="bg-band px-5 py-4 sm:px-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-[12.5px] text-muted">{t.adminExtra.auditFooter}</p>
             <p className="text-[12.5px] text-muted">

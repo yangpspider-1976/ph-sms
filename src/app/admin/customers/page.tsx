@@ -92,7 +92,7 @@ export default async function CustomersPage() {
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     {org.frozen ? <Pill tone="danger">{t.admin.customers.sendingFrozen}</Pill> : null}
-                    <Pill tone="neutral" dot={false}>
+                    <Pill tone="neutral">
                       {t.adminExtra.availableAmount(
                         formatCentavos((org.balance ?? 0) - (org.held ?? 0)),
                       )}

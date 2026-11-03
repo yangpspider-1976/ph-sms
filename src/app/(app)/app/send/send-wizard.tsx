@@ -323,8 +323,8 @@ export function SendWizard({
                 ) : null}
 
                 {fileName ? (
-                  <div className="mt-3 flex flex-wrap items-center gap-3 rounded-[9px] border border-line px-3 py-2.5">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-md bg-neutral-bg text-neutral-fg">
+                  <div className="mt-3 flex flex-wrap items-center gap-3 border border-line px-3 py-2.5">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-bg text-neutral-fg">
                       <IconDocument size={16} />
                     </span>
                     <span className="min-w-0 flex-1">
@@ -336,16 +336,16 @@ export function SendWizard({
                       </span>
                     </span>
                     <span className="flex flex-wrap gap-2">
-                      <Pill tone="success" dot={false}>
+                      <Pill tone="success">
                         <IconCheck size={12} /> {t.send.validCount(includedCount)}
                       </Pill>
                       {recipients.duplicate > 0 ? (
-                        <Pill tone="neutral" dot={false}>
+                        <Pill tone="neutral">
                           {t.send.duplicatesRemoved(recipients.duplicate)}
                         </Pill>
                       ) : null}
                       {recipients.invalid > 0 ? (
-                        <Pill tone="warning" dot={false}>
+                        <Pill tone="warning">
                           {t.send.invalidCount(recipients.invalid)}
                         </Pill>
                       ) : null}
@@ -548,7 +548,7 @@ export function SendWizard({
                 type="checkbox"
                 checked={authorized}
                 onChange={(e) => setAuthorized(e.target.checked)}
-                className="mt-0.5 h-4 w-4 shrink-0 accent-brand-600"
+                className="mt-px shrink-0"
               />
               <span>
                 <span className="block text-[13.5px] font-semibold text-ink">
@@ -616,7 +616,7 @@ export function SendWizard({
         </Card>
 
         <Card className="flex items-start gap-3.5 p-5">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] bg-brand-50 text-brand-600">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-700">
             <IconCalculator size={20} />
           </span>
           <div className="min-w-0">
@@ -735,7 +735,7 @@ function ReviewPanel({
         </p>
       ) : null}
 
-      <div className="mt-4 rounded-[9px] bg-canvas p-3">
+      <div className="mt-4 bg-subtle p-3">
         <p className="text-[12.5px] font-semibold text-ink">{t.send.sampleRecipients}</p>
         <p className="mt-1 text-[12.5px] text-muted">
           {quote.sampleMasked.join(", ")}
@@ -796,32 +796,29 @@ function ReviewPanel({
   );
 }
 
+/**
+ * The steps as section tabs (DESIGN.md, "Wizard steps"): the current step is
+ * filled, a finished one tinted, a later one plain. They show where you are;
+ * the wizard's own buttons move between them.
+ */
 function Stepper({ step, labels }: { step: number; labels: string[] }) {
   return (
-    <ol className="mb-1 flex items-center gap-3">
+    <ol className="mb-1 flex">
       {labels.map((label, index) => (
-        <li key={label} className="flex flex-1 items-center gap-3 last:flex-none">
-          <span className="flex items-center gap-2.5">
-            <span
-              className={cx(
-                "flex h-7 w-7 items-center justify-center rounded-full text-[12.5px] font-bold",
-                index <= step ? "bg-brand-600 text-white" : "bg-neutral-bg text-muted",
-              )}
-            >
-              {index + 1}
-            </span>
-            <span
-              className={cx(
-                "text-[13.5px] font-semibold",
-                index <= step ? "text-ink" : "text-muted",
-              )}
-            >
-              {label}
-            </span>
-          </span>
-          {index < labels.length - 1 ? (
-            <span className="h-px flex-1 bg-line" aria-hidden="true" />
-          ) : null}
+        <li
+          key={label}
+          aria-current={index === step ? "step" : undefined}
+          className={cx(
+            "-ml-px flex h-12.5 min-w-0 flex-1 items-center justify-center gap-2 border px-2 text-center text-[13px] leading-tight first:ml-0 sm:text-[15px]",
+            index === step
+              ? "relative border-brand-600 bg-brand-600 font-bold text-white"
+              : index < step
+                ? "border-line bg-brand-50 text-brand-700"
+                : "border-line bg-white text-muted",
+          )}
+        >
+          <span className="tabular-nums">{index + 1}</span>
+          <span className="min-w-0">{label}</span>
         </li>
       ))}
     </ol>
@@ -844,9 +841,9 @@ function Tab({
       aria-selected={active}
       role="tab"
       className={cx(
-        "-mb-px rounded-t-lg border-b-2 px-4 py-2.5 text-[13.5px] font-semibold transition-colors",
+        "-mb-px border-b-2 px-4 py-2.5 text-[14px] transition-colors",
         active
-          ? "border-brand-600 bg-brand-50/60 text-brand-700"
+          ? "border-brand-600 font-bold text-brand-700"
           : "border-transparent text-muted hover:text-ink",
       )}
     >
@@ -866,12 +863,7 @@ function Radio({
 }) {
   return (
     <label className="flex items-center gap-2 text-[13.5px] font-medium text-ink">
-      <input
-        type="radio"
-        checked={checked}
-        onChange={onChange}
-        className="h-4 w-4 accent-brand-600"
-      />
+      <input type="radio" checked={checked} onChange={onChange} />
       {label}
     </label>
   );
@@ -888,7 +880,7 @@ function RecipientSummary({
 }) {
   const t = useT();
   return (
-    <div className="mt-4 rounded-[10px] border border-line bg-canvas p-4">
+    <div className="mt-4 border border-line bg-subtle p-4">
       <p className="text-[13px] font-bold text-ink">{t.send.previewTitle}</p>
       <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1.5 sm:grid-cols-4">
         <Count label={t.send.countRowsEntered} value={recipients.raw} />
@@ -953,7 +945,7 @@ function PhoneFrame({
         </div>
 
         <div className="py-3">
-          <div className="min-h-[54px] rounded-[14px] bg-[#f1f3f7] px-3 py-2.5 text-[12.5px] leading-snug text-ink">
+          <div className="min-h-[54px] rounded-[14px] bg-navy-50 px-3 py-2.5 text-[12.5px] leading-snug text-ink">
             {body.trim() || (
               <span className="text-muted">{t.send.phonePlaceholder}</span>
             )}

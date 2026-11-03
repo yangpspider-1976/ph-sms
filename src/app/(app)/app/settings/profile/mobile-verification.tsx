@@ -74,7 +74,7 @@ export function MobileVerification({
           </p>
         </div>
         {verifiedAt ? (
-          <Pill tone="success" dot={false}>
+          <Pill tone="success">
             {t.common.verified}
           </Pill>
         ) : null}

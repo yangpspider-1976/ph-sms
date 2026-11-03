@@ -5,12 +5,11 @@ import { usePathname } from "next/navigation";
 import { Wordmark } from "./brand";
 import { IconMenu, IconX } from "./icons";
 import { SidebarNav, type NavItem } from "./sidebar";
-import { cx } from "./ui";
 import { useT } from "@/i18n/client";
 
 /**
- * The sidebar's navigation below the `lg` breakpoint, where the sidebar itself
- * is hidden: a menu button in the header that opens it as a drawer.
+ * The admin sidebar's navigation below the `lg` breakpoint, where the sidebar
+ * itself is hidden: a menu button in the header that opens it as a drawer.
  *
  * A native modal `<dialog>` rather than a hand-built overlay. `showModal()`
  * traps focus, makes the page behind it inert, closes on Escape and hands focus
@@ -19,13 +18,11 @@ import { useT } from "@/i18n/client";
  */
 export function MobileNav({
   items,
-  tone,
   homeHref,
   subtitle,
   footer,
 }: {
   items: NavItem[];
-  tone: "light" | "dark";
   homeHref: string;
   subtitle?: string;
   /** Extra controls pinned to the bottom of the drawer. */
@@ -35,7 +32,6 @@ export function MobileNav({
   const dialog = useRef<HTMLDialogElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
-  const dark = tone === "dark";
 
   // Close once a navigation lands, including back and forward.
   useEffect(() => {
@@ -58,7 +54,7 @@ export function MobileNav({
         onClick={open}
         aria-label={t.nav.openMenu}
         aria-haspopup="dialog"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-line text-ink hover:bg-navy-50 lg:hidden"
+        className="flex h-9 w-9 shrink-0 items-center justify-center border border-line-strong text-ink hover:bg-navy-50 lg:hidden"
       >
         <IconMenu size={18} />
       </button>
@@ -71,40 +67,29 @@ export function MobileNav({
         onClick={(e) => {
           if (e.target === e.currentTarget) close();
         }}
-        className={cx(
-          "m-0 h-dvh max-h-none w-[280px] max-w-[85vw] flex-col p-0 open:flex lg:hidden",
-          "backdrop:bg-[rgb(10_24_48/0.5)] motion-safe:transition-transform motion-safe:duration-200 starting:open:-translate-x-full",
-          dark ? "bg-navy-900" : "border-r border-line bg-white",
-        )}
+        className="m-0 h-dvh max-h-none w-[280px] max-w-[85vw] flex-col bg-navy-800 p-0 open:flex backdrop:bg-black/50 motion-safe:transition-transform motion-safe:duration-200 starting:open:-translate-x-full lg:hidden"
       >
         <div className="flex shrink-0 items-center justify-between gap-3 px-5 py-4">
           {/* Closes too when the link points at the page already open. */}
           <div onClick={close}>
-            <Wordmark href={homeHref} subtitle={subtitle} onDark={dark} />
+            <Wordmark href={homeHref} subtitle={subtitle} onDark />
           </div>
           <button
             ref={closeButton}
             type="button"
             onClick={close}
             aria-label={t.nav.closeMenu}
-            className={cx(
-              "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
-              dark ? "text-navy-200 hover:bg-white/10 hover:text-white" : "text-muted hover:bg-navy-50",
-            )}
+            className="flex h-9 w-9 shrink-0 items-center justify-center text-navy-200 hover:bg-white/10 hover:text-white"
           >
             <IconX size={18} />
           </button>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto pb-4">
-          <SidebarNav items={items} tone={tone} onNavigate={close} />
+          <SidebarNav items={items} onNavigate={close} />
         </div>
 
-        {footer ? (
-          <div className={cx("shrink-0 border-t px-5 py-4", dark ? "border-white/8" : "border-line")}>
-            {footer}
-          </div>
-        ) : null}
+        {footer ? <div className="shrink-0 border-t border-white/8 px-5 py-4">{footer}</div> : null}
       </dialog>
     </>
   );

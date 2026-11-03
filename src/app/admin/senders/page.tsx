@@ -97,7 +97,7 @@ export default async function SendersPage() {
                 </div>
 
                 {sender.evidenceNote ? (
-                  <p className="mt-3 rounded-[9px] bg-canvas p-3 text-[13px] text-body">
+                  <p className="mt-3 bg-subtle p-3 text-[13px] text-body">
                     {sender.evidenceNote}
                   </p>
                 ) : null}

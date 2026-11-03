@@ -2,16 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireOrgContext } from "@/server/auth/context";
 import { listGroups } from "@/server/domain/groups";
-import {
-  ButtonLink,
-  Card,
-  CardHeader,
-  DataTable,
-  EmptyState,
-  PageHeader,
-} from "@/components/ui";
+import { Card, CardHeader, DataTable, EmptyState, PageHeader } from "@/components/ui";
 import { IconUsers } from "@/components/icons";
 import { CreateGroupForm } from "./create-group-form";
+import { ContactsTabs } from "../contacts-tabs";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
 
@@ -29,15 +23,9 @@ export default async function GroupsPage() {
 
   return (
     <>
-      <PageHeader
-        title={t.groups.title}
-        description={t.groups.subheading}
-        action={
-          <ButtonLink href="/app/contacts" variant="ghost">
-            {t.contacts.detail.allContacts}
-          </ButtonLink>
-        }
-      />
+      <PageHeader title={t.groups.title} description={t.groups.subheading} />
+
+      <ContactsTabs t={t} current="/app/contacts/groups" />
 
       {ctx.can("contacts.manage") ? (
         <div className="mb-5">

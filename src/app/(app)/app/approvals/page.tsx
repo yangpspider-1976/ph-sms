@@ -12,6 +12,7 @@ import { ApprovalDecision } from "./decision-form";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
 import { localizeServerText } from "@/i18n/server-text";
+import { CampaignsTabs } from "../campaigns/campaigns-tabs";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -39,6 +40,7 @@ export default async function ApprovalsPage({
     return (
       <>
         <PageHeader title={t.approvals.title} description={t.approvals.subheadingDenied} />
+        <CampaignsTabs t={t} current="/app/approvals" />
         <Card className="max-w-2xl p-6">
           <Notice tone="warning" title={t.approvals.deniedTitle}>
             {t.approvalsExtra.deniedBody}
@@ -84,6 +86,8 @@ export default async function ApprovalsPage({
         title={t.approvals.title}
         description={t.approvals.subheading}
       />
+
+      <CampaignsTabs t={t} current="/app/approvals" />
 
       {ctx.org.role === "APPROVER" ? (
         <div className="mb-5 max-w-3xl">
@@ -138,7 +142,7 @@ export default async function ApprovalsPage({
                   </div>
                 ) : null}
 
-                <div className="mt-3 rounded-[9px] bg-canvas p-3">
+                <div className="mt-3 bg-subtle p-3">
                   <p className="text-[12px] font-semibold text-ink">{t.approvals.message}</p>
                   <p className="mt-1 whitespace-pre-wrap text-[13px] text-body">
                     {campaign.body}

@@ -95,7 +95,7 @@ export function MemberRow({
               </Button>
             </form>
           ) : (
-            <Pill tone={ROLE_TONE[role] ?? "neutral"} dot={false}>
+            <Pill tone={ROLE_TONE[role] ?? "neutral"}>
               {t.roles.labels[role]}
             </Pill>
           )}

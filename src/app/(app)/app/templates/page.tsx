@@ -66,18 +66,18 @@ export default async function TemplatesPage() {
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <Pill tone="neutral" dot={false}>
+                      <Pill tone="neutral">
                         {info.encoding === "GSM7" ? "GSM-7" : t.common.unicode}
                       </Pill>
-                      <Pill tone={info.segments > 1 ? "warning" : "success"} dot={false}>
+                      <Pill tone={info.segments > 1 ? "warning" : "success"}>
                         {t.common.segments(info.segments)}
                       </Pill>
-                      <Pill tone="neutral" dot={false}>
+                      <Pill tone="neutral">
                         {t.templates.costEach(formatCentavos(cost))}
                       </Pill>
                     </div>
                   </div>
-                  <p className="mt-3 whitespace-pre-wrap rounded-[9px] bg-canvas p-3 text-[13px] text-body">
+                  <p className="mt-3 whitespace-pre-wrap bg-subtle p-3 text-[13px] text-body">
                     {template.body}
                   </p>
                   {canManage ? <RemoveTemplate templateId={template.id} /> : null}

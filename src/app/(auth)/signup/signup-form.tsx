@@ -89,7 +89,7 @@ export function SignupForm() {
 
       <p className="text-[12.5px] text-muted">{t.auth.signup.noIdScans}</p>
 
-      <Button type="submit" className="w-full" disabled={pending}>
+      <Button type="submit" size="lg" className="w-full" disabled={pending}>
         {pending ? t.auth.signup.submitting : t.auth.signup.submit}
       </Button>
     </form>

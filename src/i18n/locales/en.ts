@@ -81,8 +81,27 @@ export const en = {
     menu: "Menu",
     openMenu: "Open menu",
     closeMenu: "Close menu",
-    sidebarPromoTitle: "Keep your customers connected",
-    sidebarPromoBody: "Simple. Reliable. Business SMS for the Philippines.",
+    credit: "Credit",
+    myRates: "My rates",
+    quickMenu: "Quick menu",
+    sections: (name: string) => `${name} sections`,
+    logInToContinue: "Log in to continue",
+    quick: {
+      guideTitle: "Guide",
+      guideSub: "How it works",
+      sendersTitle: "Sender IDs",
+      sendersSub: "Apply and manage",
+      importTitle: "Contacts",
+      importSub: "Import a CSV",
+      supportTitle: "Support",
+      supportSub: "Raise a request",
+      pricingTitle: "Pricing",
+      pricingSub: "Per segment",
+      bulkTitle: "Bulk SMS",
+      bulkSub: "Request a quote",
+      helpTitle: "Help",
+      helpSub: "Common questions",
+    },
   },
 
   adminNav: {
@@ -102,6 +121,7 @@ export const en = {
 
   components: {
     demoMark: "Design preview • Sample content • Demo — no real SMS or payments",
+    copyright: (year: number) => `© ${year} PH SMS. All rights reserved.`,
     fileDrop: {
       browse: "Browse files",
       change: "Choose a different file",
@@ -585,13 +605,8 @@ export const en = {
     notVerifiedBody:
       "You can set everything up now. Sending opens once verification is approved \u2014 the status above the page updates on its own.",
     tileProfile: "Your profile",
-    tileProfileSub: "Your details and optional mobile verification",
     tileTeam: "Team",
-    tileTeamSub: "Who can send, approve and view",
     tileSenders: "Sender identities",
-    tileSendersSub: "The names your messages arrive from",
-    tileOptOuts: "Opt-outs",
-    tileOptOutsSub: "People who asked you to stop",
     businessProfile: "Business profile",
     businessProfileNote:
       "Changing a registered business name or its verification evidence goes through platform support, so the record and the approval stay in step.",
@@ -928,8 +943,6 @@ export const en = {
     philippinesOnly: "Philippines only",
     verifiedBusinesses: "Verified businesses",
     prepaidCredits: "Prepaid credits",
-    scribbleHero: "Simple.\nReliable.\nFor your business.",
-    scribbleUpload: "Upload your list\nin seconds",
     phoneNewMessage: "New Message",
     phoneSample:
       "Hello! This is a sample message from PH SMS. You can customize your message here.\n\nThank you!",
@@ -944,7 +957,29 @@ export const en = {
     bulkTitle: "Sending at scale?",
     bulkBody: "Let us help plan your next bulk campaign.",
     bulkCta: "Talk to our team",
-    scribbleBulk: "Same people.\nA more\nconnected\nPhilippines.",
+    shortcuts: "Shortcuts",
+    featuresHeadingStrong: "Sending you can trust,",
+    // {product} is replaced by the product name, set in the brand colour.
+    featuresHeadingLight: "with {product}",
+    featuresIntro:
+      "Prepaid credit, checked content and protected numbers: every send is accounted for.",
+    card1Title: "Prepaid credit you can audit",
+    card1Body:
+      "A send reserves its maximum cost, then settles to the real cost. Every movement is in your ledger.",
+    card2Title: "Accepted is not delivered",
+    card2Body:
+      "Each message shows separately whether the provider accepted it and whether it was delivered.",
+    card3Title: "Opt-outs stay opted out",
+    card3Body: "Opt-outs are checked when a send is priced, and again before each message leaves.",
+    card4Title: "Numbers handled carefully",
+    card4Body:
+      "Numbers are encrypted at rest and shown masked. Full-number exports are owner-only and recorded.",
+    trustHeadingStrong: "How we keep",
+    trustHeadingLight: "sending safe",
+    trustIntro:
+      "Every business is approved before it can send, and every send stays within your limits.",
+    trustReview: "Content checks",
+    trustLimits: "Spending limits",
   },
 
   legal: {

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui";
 import { IconBlock, IconDownload } from "@/components/icons";
 import { OptOutForm } from "./opt-out-form";
+import { ContactsTabs } from "../contacts-tabs";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
 import type { Dictionary } from "@/i18n/dictionaries";
@@ -35,12 +36,14 @@ export default async function OptOutsPage() {
         description={t.contacts.optOuts.subheading}
         action={
           ctx.can("reports.export.masked") ? (
-            <ButtonLink href="/app/exports?kind=suppression" variant="ghost" prefetch={false}>
+            <ButtonLink href="/app/exports?kind=suppression" variant="ghost" size="sm" prefetch={false}>
               <IconDownload size={15} /> {t.common.export}
             </ButtonLink>
           ) : null
         }
       />
+
+      <ContactsTabs t={t} current="/app/contacts/opt-outs" />
 
       <div className="mb-5 max-w-3xl">
         <Notice tone="info" title={t.contacts.optOuts.howUsed}>

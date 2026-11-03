@@ -72,7 +72,7 @@ async function MailSinkPanel() {
   if (recent.length === 0) return null;
 
   return (
-    <div className="mt-5 rounded-[10px] border border-dashed border-brand-200 bg-brand-50/50 p-4">
+    <div className="mt-5 border border-dashed border-brand-200 bg-brand-50/50 p-4">
       <p className="text-[13px] font-bold text-ink">{t.verifyEmail.mailSink}</p>
       <p className="mt-0.5 text-[12.5px] text-muted">
         {t.publicExtra.mailSinkBody}

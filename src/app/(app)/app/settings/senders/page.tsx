@@ -17,6 +17,7 @@ import { DemoApproveButton } from "./demo-approve-button";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
 import { localizeServerText } from "@/i18n/server-text";
+import { SettingsTabs } from "../settings-tabs";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -45,6 +46,8 @@ export default async function SenderIdentitiesPage() {
         title={t.settings.senders.title}
         description={t.settings.senders.subheading}
       />
+
+      <SettingsTabs t={t} current="/app/settings/senders" />
 
       {approved.length === 0 ? (
         <div className="mb-5 max-w-3xl">
@@ -87,7 +90,7 @@ export default async function SenderIdentitiesPage() {
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     {sender.status === "APPROVED" ? (
-                      <Pill tone="neutral" dot={false}>
+                      <Pill tone="neutral">
                         {sender.supportsInboundReplies
                             ? t.settings.senders.canReceiveReplies
                             : t.settings.senders.oneWay}

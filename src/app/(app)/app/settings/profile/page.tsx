@@ -7,6 +7,7 @@ import { Card, DetailRow, PageHeader, Pill } from "@/components/ui";
 import { MobileVerification } from "./mobile-verification";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
+import { SettingsTabs } from "../settings-tabs";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -37,6 +38,8 @@ export default async function ProfilePage() {
         description={t.settings.profile.subheading}
       />
 
+      <SettingsTabs t={t} current="/app/settings/profile" />
+
       <div className="grid max-w-3xl gap-5">
         <Card className="p-5">
           <h2 className="card-title">{t.settings.profile.account}</h2>
@@ -48,7 +51,7 @@ export default async function ProfilePage() {
                 <span className="flex flex-wrap items-center gap-2">
                   {ctx.user.email}
                   {row?.emailVerifiedAt ? (
-                    <Pill tone="success" dot={false}>
+                    <Pill tone="success">
                       {t.common.verified}
                     </Pill>
                   ) : (

@@ -13,17 +13,15 @@ export type NavItem = {
 };
 
 /**
- * Sidebar navigation. `light` is the customer portal (white panel, navy text);
- * `dark` is the separate platform-admin surface, which is deliberately a
- * different colour so an operator always knows which console they are in.
+ * The admin console's sidebar navigation, on slate navy. The customer portal
+ * has a top menu instead (TopMenu), so an operator always knows which console
+ * they are in.
  */
 export function SidebarNav({
   items,
-  tone,
   onNavigate,
 }: {
   items: NavItem[];
-  tone: "light" | "dark";
   /** Called when a link is chosen, including the current page's own link. */
   onNavigate?: () => void;
 }) {
@@ -32,13 +30,11 @@ export function SidebarNav({
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-col gap-1 px-3" aria-label={t.publicSite.navMain}>
+    <nav className="flex flex-col gap-0.5 px-3" aria-label={t.publicSite.navMain}>
       {items.map((item) => {
         const active =
           pathname === item.href ||
-          (item.href !== "/app/dashboard" &&
-            item.href !== "/admin" &&
-            pathname.startsWith(`${item.href}/`));
+          (item.href !== "/admin" && pathname.startsWith(`${item.href}/`));
 
         return (
           <Link
@@ -47,19 +43,11 @@ export function SidebarNav({
             aria-current={active ? "page" : undefined}
             onClick={onNavigate}
             className={cx(
-              "flex items-center gap-3 rounded-[9px] px-3.5 py-2.5 text-[14px] font-semibold transition-colors",
-              tone === "dark"
-                ? active
-                  ? "bg-brand-600 text-white"
-                  : "text-navy-200 hover:bg-white/8 hover:text-white"
-                : active
-                  ? "bg-brand-600 text-white"
-                  : "text-body hover:bg-navy-50 hover:text-ink",
+              "flex items-center gap-3 px-3.5 py-2.5 text-[14px] transition-colors",
+              active ? "bg-brand-600 font-bold text-white" : "text-navy-200 hover:bg-white/8 hover:text-white",
             )}
           >
-            <span className={cx("shrink-0", active ? "text-white" : undefined)}>
-              {item.icon}
-            </span>
+            <span className="shrink-0">{item.icon}</span>
             {item.label}
           </Link>
         );

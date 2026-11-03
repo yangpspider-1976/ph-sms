@@ -91,7 +91,7 @@ export default async function InquiriesPage() {
                   <Detail label={t.adminExtra.rowSenderNeeds} value={inquiry.senderNeeds} />
                 </dl>
 
-                <div className="mt-3 rounded-[9px] bg-canvas p-3">
+                <div className="mt-3 bg-subtle p-3">
                   <p className="text-[12px] font-semibold text-ink">{t.adminExtra.sampleMessage}</p>
                   <p className="mt-1 text-[13px] text-body">{inquiry.sampleMessage}</p>
                 </div>

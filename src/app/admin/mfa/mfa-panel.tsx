@@ -65,7 +65,7 @@ export function MfaPanel({
           {result.recoveryCodes.map((code) => (
             <li
               key={code}
-              className="rounded-md border border-line bg-canvas px-3 py-2 text-center font-mono text-[13px] text-ink"
+              className="border border-line bg-subtle px-3 py-2 text-center font-mono text-[13px] text-ink"
             >
               {code}
             </li>
@@ -144,7 +144,7 @@ export function MfaPanel({
 
       <div>
         <p className="text-[13.5px] font-semibold text-ink">1. Add this key to your app</p>
-        <p className="mt-1 break-all rounded-md border border-line bg-canvas px-3 py-2 font-mono text-[13px] text-ink">
+        <p className="mt-1 break-all border border-line bg-subtle px-3 py-2 font-mono text-[13px] text-ink">
           {setup.secret}
         </p>
         <p className="mt-1.5 text-[12.5px] text-muted">{t.adminExtra.mfaSetupUri}</p>

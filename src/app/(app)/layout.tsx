@@ -1,46 +1,72 @@
 import Link from "next/link";
 import { Wordmark } from "@/components/brand";
 import { DemoFooterMark } from "@/components/demo-mark";
-import { SidebarNav, type NavItem } from "@/components/sidebar";
+import { TopMenu, type MenuSection } from "@/components/top-menu";
+import { PhoneMenu, type MenuShortcut } from "@/components/phone-menu";
+import { QuickMenu } from "@/components/quick-menu";
 import { Pill } from "@/components/ui";
-import {
-  IconCard,
-  IconChat,
-  IconDocument,
-  IconHelp,
-  IconHome,
-  IconMegaphone,
-  IconSend,
-  IconSettings,
-  IconUser,
-  IconUsers,
-  IconBuilding,
-  IconCheckCircle,
-  IconShield,
-} from "@/components/icons";
+import { IconCard, IconMegaphone, IconSend } from "@/components/icons";
 import { requireOrgContext } from "@/server/auth/context";
+import { getEffectiveConfig } from "@/server/domain/app-config";
+import { getWallet } from "@/server/domain/wallet";
+import { formatCentavos } from "@/server/config";
 import { env } from "@/server/env";
 import { dispatchDueOnVisit } from "@/server/jobs/dispatch-after-response";
 import { getI18n } from "@/i18n/server";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { LogoutButton } from "@/components/logout-button";
-import { MobileNav } from "@/components/mobile-nav";
 
-function navFor(t: Dictionary): NavItem[] {
+/** The portal's sections and the pages under each (DESIGN.md, "Navigation and Page Map"). */
+function sectionsFor(t: Dictionary): MenuSection[] {
   return [
-    { href: "/app/dashboard", label: t.nav.dashboard, icon: <IconHome size={18} /> },
-    { href: "/app/send", label: t.nav.send, icon: <IconSend size={18} /> },
-    { href: "/app/campaigns", label: t.nav.campaigns, icon: <IconMegaphone size={18} /> },
-    { href: "/app/approvals", label: t.nav.approvals, icon: <IconShield size={18} /> },
-    { href: "/app/contacts", label: t.nav.contacts, icon: <IconUsers size={18} /> },
-    { href: "/app/templates", label: t.nav.templates, icon: <IconDocument size={18} /> },
-    { href: "/app/credits", label: t.nav.credits, icon: <IconCard size={18} /> },
-    // Every role can open Settings (profile, team, sender IDs). It used to be
-    // reachable only through the organization button in the header, which
-    // nobody reads as a way in.
-    { href: "/app/settings", label: t.nav.settings, icon: <IconSettings size={18} /> },
-    { href: "/app/support", label: t.nav.support, icon: <IconHelp size={18} /> },
+    {
+      href: "/app/dashboard",
+      label: t.nav.dashboard,
+      links: [
+        { href: "/app/dashboard", label: t.nav.dashboard },
+        { href: "/app/account-status", label: t.accountStatus.title },
+      ],
+    },
+    {
+      href: "/app/send",
+      label: t.nav.send,
+      links: [
+        { href: "/app/send", label: t.nav.send },
+        { href: "/app/templates", label: t.nav.templates },
+      ],
+    },
+    {
+      href: "/app/contacts",
+      label: t.nav.contacts,
+      links: [
+        { href: "/app/contacts", label: t.nav.contacts },
+        { href: "/app/contacts/groups", label: t.groups.title },
+        { href: "/app/contacts/opt-outs", label: t.contacts.optOuts.title },
+      ],
+    },
+    {
+      href: "/app/campaigns",
+      label: t.nav.campaigns,
+      links: [
+        { href: "/app/campaigns", label: t.nav.campaigns },
+        { href: "/app/approvals", label: t.nav.approvals },
+      ],
+    },
+    {
+      href: "/app/credits",
+      label: t.nav.credits,
+      links: [{ href: "/app/credits", label: t.nav.credits }],
+    },
+    {
+      href: "/app/support",
+      label: t.nav.support,
+      links: [
+        { href: "/app/support", label: t.nav.support },
+        { href: "/help", label: t.helpCentre.title },
+        { href: "/bulk", label: t.home.requestBulkQuote },
+      ],
+    },
   ];
 }
 
@@ -49,126 +75,158 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Signed in, so scheduled sends and retries that are due go out now rather
   // than on the next scheduled drain.
   dispatchDueOnVisit();
-  const { t } = await getI18n();
+  const [{ t }, wallet, config] = await Promise.all([
+    getI18n(),
+    getWallet(ctx.org.organizationId),
+    getEffectiveConfig(),
+  ]);
   const verified = ctx.org.organizationStatus === "ACTIVE";
+  const sections = sectionsFor(t);
+  const credit = formatCentavos(wallet.availableCentavos);
+
+  // Verified is slate navy; anything short of it is burgundy (DESIGN.md, "Badges and pills").
+  const accountBadge = (
+    <span
+      className={
+        verified
+          ? "bg-navy-800 px-1.5 py-px text-[12px] whitespace-nowrap text-white"
+          : "bg-review px-1.5 py-px text-[12px] whitespace-nowrap text-white"
+      }
+    >
+      {verified ? t.common.verified : t.status.org[ctx.org.organizationStatus]}
+    </span>
+  );
+
+  const shortcuts: MenuShortcut[] = [
+    ...(ctx.can("campaign.send")
+      ? [{ href: "/app/send", label: t.nav.send, icon: <IconSend size={22} /> }]
+      : []),
+    ...(ctx.can("billing.manage")
+      ? [{ href: "/app/credits", label: t.credits.addCredit, icon: <IconCard size={22} /> }]
+      : []),
+    { href: "/app/campaigns", label: t.nav.campaigns, icon: <IconMegaphone size={22} /> },
+  ];
 
   return (
-    <div className="flex min-h-screen bg-canvas">
-      {/* Pinned to the viewport. The logo stays put and everything below it
-          scrolls inside the sidebar: letting it overflow instead made the
-          document taller than the layout, so on a short screen the "sticky"
-          sidebar scrolled away and its tail spilled out under the footer. */}
-      <aside className="sticky top-0 hidden h-screen w-[235px] shrink-0 flex-col border-r border-line bg-white lg:flex">
-        <div className="shrink-0 px-5 py-5">
-          <Wordmark href="/app/dashboard" />
-        </div>
+    <div className="flex min-h-screen flex-col bg-canvas">
+      <header className="relative z-30 border-b border-line-strong bg-white">
+        <div className="flex h-14 items-center gap-4 px-5 xl:h-[90px] xl:gap-6 xl:px-10">
+          <Wordmark href="/app/dashboard" size={28} />
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto [scrollbar-width:thin]">
-          <SidebarNav items={navFor(t)} tone="light" />
+          <TopMenu sections={sections} label={t.publicSite.navMain} />
 
-          {/* Decorative, so it gives way on short screens before the nav has to scroll. */}
-          <div className="mt-auto p-4 [@media(max-height:660px)]:hidden">
-            <div className="rounded-[10px] bg-brand-50 px-4 py-5 text-center">
-              <span className="mx-auto mb-2 flex w-fit items-center gap-1 text-brand-600">
-                <IconChat size={20} />
-                <IconChat size={15} className="opacity-70" />
+          {/* One language switcher for every width: the tests and screen
+              readers find it by its label, and a second copy would be a
+              second control of the same name. */}
+          <div className="ml-auto flex items-center gap-2 xl:ml-0 xl:flex-col xl:items-end xl:gap-1">
+            <div className="flex items-center gap-3">
+              <ul className="hidden items-center text-[12px] text-muted xl:flex">
+                {env.APP_MODE === "MOCK" ? (
+                  <li className="mr-3">
+                    <Pill tone="info">{t.common.demoMode}</Pill>
+                  </li>
+                ) : null}
+                <li className="relative pr-3 after:absolute after:right-0 after:top-1/2 after:h-2.5 after:w-px after:-translate-y-1/2 after:bg-navy-300">
+                  <Link href="/app/settings" className="-my-1 py-1 hover:text-ink">
+                    {t.nav.settings}
+                  </Link>
+                </li>
+                <li className="pl-3">
+                  <LogoutButton label={t.nav.logOut} look="utility" />
+                </li>
+              </ul>
+              <LocaleSwitcher />
+              {/* On a phone, Log out stays in the header as a labelled icon. */}
+              <span className="xl:hidden">
+                <LogoutButton label={t.nav.logOut} />
               </span>
-              <p className="text-[13px] font-bold text-ink">{t.nav.sidebarPromoTitle}</p>
-              <p className="mt-1 text-[12px] leading-snug text-muted">
-                {t.nav.sidebarPromoBody}
+              <PhoneMenu
+                homeHref="/app/dashboard"
+                sections={sections}
+                shortcuts={shortcuts}
+                summary={
+                  <div>
+                    <p className="flex flex-wrap items-center gap-2 text-[20px] font-bold text-ink">
+                      <span className="min-w-0 wrap-break-word">{ctx.org.organizationName}</span>
+                      {accountBadge}
+                    </p>
+                    <p className="mt-3 text-[13px] text-muted">{t.nav.credit}</p>
+                    <p className="text-[22px] font-bold text-brand-700 tabular-nums">{credit}</p>
+                  </div>
+                }
+                footer={
+                  <p className="flex gap-5 text-[13px]">
+                    <Link href="/app/settings" className="text-ink hover:text-brand-700">
+                      {t.nav.settings}
+                    </Link>
+                    <Link href="/legal/privacy" className="text-muted hover:text-ink">
+                      {t.nav.privacy}
+                    </Link>
+                    <Link href="/legal/terms" className="text-muted hover:text-ink">
+                      {t.nav.terms}
+                    </Link>
+                  </p>
+                }
+              />
+            </div>
+
+            <div className="hidden max-w-[300px] flex-col items-end xl:flex">
+              <p className="flex min-w-0 items-center gap-1.5 text-[14px] text-ink">
+                <span className="truncate">{ctx.org.organizationName}</span>
+                {accountBadge}
+              </p>
+              <p className="text-[12px] text-muted">
+                {t.nav.credit}{" "}
+                <span className="font-bold text-brand-700 tabular-nums">{credit}</span>
               </p>
             </div>
           </div>
         </div>
-      </aside>
+      </header>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 border-b border-line bg-white">
-          <div className="flex h-[60px] items-center gap-3 px-4 sm:px-8">
-            <div className="flex items-center gap-3 lg:hidden">
-              <MobileNav items={navFor(t)} tone="light" homeHref="/app/dashboard" />
-              <Wordmark href="/app/dashboard" size={26} textClassName="hidden sm:block" />
-            </div>
+      <main className="mx-auto w-full max-w-[1280px] flex-1 px-5 pb-20 pt-8 md:px-10">{children}</main>
 
-            <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-3">
-              {env.APP_MODE === "MOCK" ? (
-                <span className="hidden sm:block">
-                  <Pill tone="info">{t.common.demoMode}</Pill>
-                </span>
-              ) : null}
-
-              {/* A link to the organization's settings, so no down-arrow: that
-                  promised a menu of organizations and opened a page instead. */}
-              <Link
-                href="/app/settings"
-                className="flex min-w-0 items-center gap-2 rounded-lg border border-line px-3 py-1.5 text-[13px] font-semibold text-ink hover:bg-navy-50"
-              >
-                <IconBuilding size={15} className="shrink-0 text-muted" />
-                <span className="max-w-[110px] truncate sm:max-w-[160px]">
-                  {ctx.org.organizationName}
-                </span>
-              </Link>
-
-              {verified ? (
-                <span className="hidden items-center sm:flex">
-                  <Pill tone="success" dot={false}>
-                    <IconCheckCircle size={13} /> {t.common.verified}
-                  </Pill>
-                </span>
-              ) : (
-                <Pill tone="warning">{statusLabel(ctx.org.organizationStatus)}</Pill>
-              )}
-
-              <span className="hidden h-6 w-px bg-line sm:block" />
-
-              <Link
-                href="/app/settings/profile"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line text-muted hover:bg-navy-50"
-                aria-label={t.nav.signedInAs(ctx.user.fullName)}
-              >
-                <IconUser size={16} />
-              </Link>
-
-              <LogoutButton label={t.nav.logOut} />
-            </div>
+      <footer className="bg-band">
+        <div className="mx-auto flex max-w-[1280px] flex-col gap-4 px-5 py-8 md:flex-row md:items-center md:justify-between md:px-10">
+          <div className="space-y-1 text-[12px] text-muted">
+            <p>{t.common.timezoneNote}</p>
+            <DemoFooterMark />
           </div>
-        </header>
-
-        <main className="flex-1 px-5 py-7 sm:px-8">{children}</main>
-
-        <footer className="border-t border-line bg-white px-5 py-4 sm:px-8">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-0.5 text-[12px] text-muted">
-              <p>{t.common.timezoneNote}</p>
-              <DemoFooterMark />
-            </div>
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-              {/* The padding is tap area: the text alone is 19px tall. The
-                  negative margin keeps the row where it was. */}
-              <div className="flex gap-5 text-[12.5px] text-muted">
-                <Link href="/legal/privacy" className="-my-1 py-1 hover:text-brand-700">
-                  {t.nav.privacy}
-                </Link>
-                <Link href="/legal/terms" className="-my-1 py-1 hover:text-brand-700">
-                  {t.nav.terms}
-                </Link>
-                <Link href="/app/support" className="-my-1 py-1 hover:text-brand-700">
-                  {t.nav.help}
-                </Link>
-              </div>
-              <LocaleSwitcher />
-            </div>
+          {/* The padding is tap area: the text alone is 19px tall. The
+              negative margin keeps the row where it was. */}
+          <div className="flex gap-5 text-[12px]">
+            <Link href="/legal/privacy" className="-my-1 py-1 text-ink hover:text-brand-700">
+              {t.nav.privacy}
+            </Link>
+            <Link href="/legal/terms" className="-my-1 py-1 text-ink hover:text-brand-700">
+              {t.nav.terms}
+            </Link>
+            <Link href="/app/support" className="-my-1 py-1 text-ink hover:text-brand-700">
+              {t.nav.help}
+            </Link>
           </div>
-        </footer>
-      </div>
+        </div>
+        <p className="flex min-h-10 items-center justify-center bg-copyright px-5 text-center text-[13px] text-white">
+          {t.components.copyright(new Date().getFullYear())}
+        </p>
+      </footer>
+
+      {/* Last in the page: it is fixed in the margin, so its place in the
+          markup does not move it, and a search for a phrase it shares with
+          the page ("Price per segment") finds the page's copy first. */}
+      <QuickMenu
+        label={t.nav.quickMenu}
+        links={[
+          { href: "/how-it-works", title: t.nav.quick.guideTitle, sub: t.nav.quick.guideSub },
+          { href: "/app/settings/senders", title: t.nav.quick.sendersTitle, sub: t.nav.quick.sendersSub },
+          { href: "/app/contacts", title: t.nav.quick.importTitle, sub: t.nav.quick.importSub },
+          { href: "/app/support", title: t.nav.quick.supportTitle, sub: t.nav.quick.supportSub },
+        ]}
+        rates={{
+          label: t.nav.myRates,
+          rows: [{ label: t.send.rowPricePerSegment, value: formatCentavos(config.unitPriceCentavos) }],
+        }}
+      />
     </div>
   );
-}
-
-function statusLabel(status: string): string {
-  return status
-    .toLowerCase()
-    .split("_")
-    .map((w) => w[0]!.toUpperCase() + w.slice(1))
-    .join(" ");
 }

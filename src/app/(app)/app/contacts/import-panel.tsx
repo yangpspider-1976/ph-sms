@@ -111,7 +111,7 @@ export function ImportPanel({
 
         {needsAcknowledge ? (
           <label className="flex items-start gap-2 text-[13px] text-body">
-            <input type="checkbox" name="acknowledgeUnknown" className="mt-0.5 h-4 w-4 shrink-0 accent-brand-600" />
+            <input type="checkbox" name="acknowledgeUnknown" className="mt-px shrink-0" />
             <span>{t.contacts.importPanel.ignoreUnknown}</span>
           </label>
         ) : null}
@@ -173,7 +173,7 @@ function Preview({
   const excluded = counts.blank + counts.invalid + counts.duplicate + counts.suppressed;
 
   return (
-    <div className="mt-5 rounded-[10px] border border-line">
+    <div className="mt-5 border border-line">
       <div className="border-b border-line px-4 py-3">
         <p className="text-[13.5px] font-bold text-ink">{t.contacts.importPanel.reviewTitle}</p>
         <p className="mt-0.5 text-[12.5px] text-muted">
