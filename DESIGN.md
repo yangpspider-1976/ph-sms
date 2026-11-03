@@ -765,9 +765,13 @@ A centred row:
   - **Left:** a small grey pill as eyebrow, a 30 px headline with bold
     keywords, a 16 px muted line, and one dark or primary button.
   - **Right:** the phone mock-up with a message card. PH SMS already has one.
-  - **Slides:** one by default. A second slide rotates no faster than every
-    6 seconds, stops on hover or focus, and has a visible pause button and
-    labelled dots.
+  - **Slides:** two, after the reference's slider. The first is the welcome
+    with the only h1; the second shows what is checked before anything is sent,
+    as three numbered points beside a phone. They cross-fade every 6.5 seconds,
+    with the text rising into place, and stop while the pointer or focus is on
+    the hero, after the pause button, and for anyone who prefers reduced
+    motion. Labelled dots sit at the bottom left; a slide that is not showing
+    is `inert`.
 - **Shortcut card:**
   - **Placement:** 1280 px wide, 180 px tall, overlapping the hero by 40 px.
   - **Left block (340 px):** a title, one line, and a number in Gmarket Sans.
@@ -785,6 +789,15 @@ A centred row:
   - Heading: white, mixing light and bold; key phrases in mint.
   - Flow: a row of pill-shaped steps (dark #1f1f1f, white icon and label), joined
     by dashed lines. The current step is mint with ink text.
+- **Entrance animations:** as the reference plays its sections in.
+  - The shortcut card rises into place on load and its icons drop in one after
+    another. Its text never fades.
+  - Below the fold, elements play in as they scroll into view: section
+    headings rise, the feature cards zoom in one after another, the trust
+    badges slide in from both sides towards the middle, and the black band's
+    heading drops in.
+  - Content is visible without script, nothing already on screen is hidden,
+    and nothing moves for anyone who prefers reduced motion.
 - **Footer:** #f2f2f2, 50 px top padding.
   - **Left:** a grey logo, 12 px muted product lines split by thin rules, and
     12 px ink legal links.
@@ -919,7 +932,9 @@ If PH SMS later builds any of these, they take the reference's slot for them.
 - text sized in viewport units;
 - `user-scalable=no`;
 - image-based checkboxes;
-- sections that stay invisible until scrolled into view.
+- sections that are invisible until scrolled into view even without script,
+  in print, or for readers who prefer reduced motion. Here only the script
+  hides them, and only on screen.
 
 ## Do's and Don'ts
 

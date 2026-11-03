@@ -258,3 +258,9 @@ export const IconPause = (p: IconProps) => (
     <path d="M9.5 5v14M14.5 5v14" />
   </Base>
 );
+
+export const IconPlay = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M8 5.5v13l10.5-6.5L8 5.5Z" />
+  </Base>
+);

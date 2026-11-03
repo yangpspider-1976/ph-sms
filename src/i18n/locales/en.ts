@@ -980,6 +980,22 @@ export const en = {
       "Every business is approved before it can send, and every send stays within your limits.",
     trustReview: "Content checks",
     trustLimits: "Spending limits",
+    carouselLabel: "Highlights",
+    carouselRole: "carousel",
+    carouselSlideRole: "slide",
+    carouselSlide: (n: number, total: number) => `Slide ${n} of ${total}`,
+    carouselPause: "Pause the slides",
+    carouselPlay: "Play the slides",
+    slide2Eyebrow: "Before your first message",
+    slide2Title: "Checked before\nyour first send.",
+    slide2Body:
+      "Businesses and sender names are reviewed before anything goes out, and opt-outs apply to every send.",
+    slide2Point1Title: "Verified business",
+    slide2Point1Body: "We review every business before it can send.",
+    slide2Point2Title: "Approved sender name",
+    slide2Point2Body: "Your messages arrive from a sender name we have approved.",
+    slide2Point3Title: "Opt-outs honored",
+    slide2Point3Body: "Anyone who asks you to stop is left out of every later send.",
   },
 
   legal: {

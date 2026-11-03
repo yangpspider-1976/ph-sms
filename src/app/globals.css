@@ -337,9 +337,87 @@
   }
 }
 
-/* The demo banner must stay legible when printed or in high contrast. */
+/*
+ * Entrance animations, as the reference plays its sections in.
+ *
+ * `data-reveal` marks an element; ScrollReveal arms the page and marks each
+ * one `data-revealed` as it comes into view. The value picks where it comes
+ * from, `--reveal-delay` staggers a row. The hidden state has no transition,
+ * so arming hides at once instead of fading anything out; only the reveal
+ * itself is animated. Nothing moves for anyone who prefers reduced motion.
+ *
+ * `rise-in` and `drop-in` play once on load instead, for the shortcut card at
+ * the top of the home page: the card's position and its decorative icons, but
+ * never its text, which is readable from the first frame.
+ */
+:root {
+  --reveal-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-reveal] {
+  --reveal-from: translateY(48px);
+}
+
+[data-reveal="down"] {
+  --reveal-from: translateY(-48px);
+}
+
+[data-reveal="left"] {
+  --reveal-from: translateX(-120px);
+}
+
+[data-reveal="right"] {
+  --reveal-from: translateX(120px);
+}
+
+[data-reveal="zoom"] {
+  --reveal-from: scale(0.85);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal-armed] [data-reveal]:not([data-revealed]) {
+    opacity: 0;
+    transform: var(--reveal-from);
+  }
+
+  [data-reveal-armed] [data-reveal][data-revealed] {
+    transition:
+      opacity 0.9s var(--reveal-ease) var(--reveal-delay, 0s),
+      transform 0.9s var(--reveal-ease) var(--reveal-delay, 0s),
+      translate 0.2s ease;
+  }
+
+  .rise-in {
+    animation: rise-in 0.8s var(--reveal-ease) both;
+  }
+
+  .drop-in {
+    animation: drop-in 0.6s var(--reveal-ease) var(--reveal-delay, 0s) both;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    transform: translateY(32px);
+  }
+}
+
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+}
+
+/* The demo banner must stay legible when printed or in high contrast. A page
+   is printed whole, so nothing waits to be scrolled into view. */
 @media print {
   .no-print {
     display: none !important;
+  }
+
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
