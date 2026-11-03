@@ -18,6 +18,8 @@ import { normalizePhone, splitPastedNumbers } from "@/server/domain/phone";
 import { ensureWallet, postPurchase } from "@/server/domain/wallet";
 import { MOCK_DEFAULTS } from "@/server/config";
 import { demoFeaturesEnabled } from "@/server/env";
+import { isUuid } from "@/server/uuid";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 /**
  * Platform administration.
@@ -84,14 +86,16 @@ export async function decideVerificationAction(formData: FormData): Promise<Admi
       }
     }
 
+    // Stored in English, built from the server-text dictionary, so the
+    // dashboard can show it in the reader's language (i18n/server-text.ts).
     await tx.insert(notifications).values({
       organizationId,
       kind: "VERIFICATION_DECISION",
       title:
         decision === "ACTIVE"
-          ? "Your business was approved"
-          : `Your account status is now ${decision.toLowerCase().replace("_", " ")}`,
-      body: reason?.trim() || "No further detail was given.",
+          ? enServerText.businessApproved
+          : enServerText.accountStatusNow(decision.toLowerCase().replace("_", " ")),
+      body: reason?.trim() || enServerText.noFurtherDetail,
       href: "/app/account-status",
     });
 
@@ -344,6 +348,7 @@ export async function updateLimitsAction(formData: FormData): Promise<AdminResul
 /** Lifts a sending freeze once an operator has settled the debt. */
 export async function clearSendingFreezeAction(organizationId: string): Promise<AdminResult> {
   const admin = await requirePlatformAdmin();
+  if (!isUuid(organizationId)) return { ok: false, message: "That account was not found." };
 
   await db.transaction(async (tx) => {
     await tx

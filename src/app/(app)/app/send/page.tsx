@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/server/db";
-import { senderIdentities, templates } from "@/server/db/schema";
+import { senderIdentities } from "@/server/db/schema";
 import { requireOrgContext } from "@/server/auth/context";
 import { getWallet } from "@/server/domain/wallet";
 import { limitsFor, quotaUsage } from "@/server/domain/quota";
 import { listTestRecipients } from "@/server/domain/test-send";
 import { listGroups } from "@/server/domain/groups";
+import { listTemplates } from "@/server/domain/templates";
 import { MOCK_DEFAULTS } from "@/server/config";
 import { Card, Notice, PageHeader } from "@/components/ui";
 import { SendWizard } from "./send-wizard";
@@ -53,11 +54,8 @@ export default async function SendPage({
       .where(
         and(eq(senderIdentities.organizationId, orgId), eq(senderIdentities.status, "APPROVED")),
       ),
-    db
-      .select({ id: templates.id, name: templates.name, body: templates.body })
-      .from(templates)
-      .where(eq(templates.organizationId, orgId))
-      .limit(20),
+    // The twenty most recently saved, one chip per template.
+    listTemplates(orgId, 20),
     getWallet(orgId),
     quotaUsage(db, orgId, limitsFor(MOCK_DEFAULTS)),
     listTestRecipients({ organizationId: orgId, userId: ctx.user.id }),
@@ -69,7 +67,7 @@ export default async function SendPage({
       <PageHeader title={t.send.title} description={t.send.subheading} />
       <SendWizard
         senders={senders}
-        templates={savedTemplates}
+        templates={savedTemplates.map((tpl) => ({ id: tpl.id, name: tpl.name, body: tpl.body }))}
         testRecipients={testRecipients}
         groups={groups.map((g) => ({ id: g.id, name: g.name, memberCount: g.memberCount }))}
         initialGroupId={groupId}

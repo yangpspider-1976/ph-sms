@@ -8,7 +8,7 @@ import {
   type ConfigActionResult,
 } from "@/server/actions/app-config";
 import { Button, Card, DataTable, Notice, Pill } from "@/components/ui";
-import { useLocale, useT } from "@/i18n/client";
+import { useLocale, useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 type Row = {
@@ -29,6 +29,7 @@ type Row = {
 export function ConfigEditor({ rows, mode }: { rows: Row[]; mode: string }) {
   const t = useT();
   const { tag } = useLocale();
+  const localizeServerText = useServerText();
   // The server names each setting in English; the dictionary has both.
   const labelFor = (row: Row) =>
     (t.admin.settings.keyLabels as Record<string, string>)[row.key] ?? row.label;
@@ -67,7 +68,7 @@ export function ConfigEditor({ rows, mode }: { rows: Row[]; mode: string }) {
       {result ? (
         <div className="px-5 pt-4">
           <Notice tone={result.ok ? "success" : "danger"} title={result.ok ? t.contacts.detail.saved : t.contacts.detail.notSaved}>
-            {result.message}
+            {localizeServerText(result.message)}
           </Notice>
         </div>
       ) : null}

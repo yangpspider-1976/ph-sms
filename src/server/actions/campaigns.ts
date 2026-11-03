@@ -13,6 +13,7 @@ import { formatCentavos } from "@/server/config";
 import { getEffectiveConfig } from "@/server/domain/app-config";
 import { recordAudit } from "@/server/audit";
 import { checkRateLimit } from "@/server/security/rate-limit";
+import { isUuid } from "@/server/uuid";
 
 /**
  * Send-path server actions.
@@ -197,6 +198,7 @@ export type StopResult =
 export async function stopCampaignAction(campaignId: string): Promise<StopResult> {
   const auth = await authorize("campaign.cancel");
   if (!auth.ok) return { ok: false, error: auth.error.message };
+  if (!isUuid(campaignId)) return { ok: false, error: "That campaign was not found." };
 
   const result = await stopCampaign(campaignId, auth.ctx.org.organizationId);
 

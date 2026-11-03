@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DICTIONARIES } from "./dictionaries";
+import { enServerText } from "./locales/en-server-text";
 import { localizeServerText } from "./server-text";
 import { REJECTION_TEXT } from "@/server/domain/phone";
 import { DEFAULT_CONTENT_POLICY, checkContent } from "@/server/domain/content-checks";
@@ -51,6 +52,35 @@ describe("localizeServerText", () => {
       "DATA_ENCRYPTION_KEY",
     );
     expect(localizeServerText("Organization is SUSPENDED", ko)).toContain(ko.status.org.SUSPENDED);
+  });
+
+  it("shows a verification decision's notification in the reader's language", () => {
+    expect(localizeServerText(enServerText.businessApproved, ko)).toBe(
+      ko.serverText.businessApproved,
+    );
+    expect(localizeServerText(enServerText.noFurtherDetail, ko)).toBe(
+      ko.serverText.noFurtherDetail,
+    );
+    // The admin action names the decision in lower-case words.
+    for (const status of ["NEEDS_INFORMATION", "SUSPENDED", "REJECTED"] as const) {
+      const title = enServerText.accountStatusNow(status.toLowerCase().replace("_", " "));
+      expect(localizeServerText(title, ko), title).toBe(
+        ko.serverText.accountStatusNow(ko.status.org[status]),
+      );
+    }
+  });
+
+  it("shows the settings editor's messages in the reader's language", () => {
+    for (const text of [
+      enServerText.mustBeAtLeast("1"),
+      enServerText.mustBeAtMost("1000"),
+      enServerText.valueNotValid,
+      enServerText.settingSaved,
+      enServerText.settingRestored,
+    ]) {
+      expect(localizeServerText(text, ko), text).toMatch(hangul);
+    }
+    expect(localizeServerText(enServerText.mustBeAtLeast("1"), ko)).toContain("1");
   });
 
   it("does not touch what a person typed", () => {

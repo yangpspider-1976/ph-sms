@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { authorize } from "@/server/auth/context";
+import { authorize, currentContext } from "@/server/auth/context";
 import {
   contactTemplate,
   exportCampaignReport,
@@ -9,6 +9,7 @@ import {
   type ExportFile,
 } from "@/server/domain/exports";
 import { checkRateLimit } from "@/server/security/rate-limit";
+import { isUuid } from "@/server/uuid";
 
 /**
  * Export endpoint.
@@ -23,7 +24,12 @@ export async function GET(request: Request): Promise<NextResponse> {
   const scope = url.searchParams.get("scope") === "full" ? "FULL" : "MASKED";
 
   // The template contains no customer data, so it only needs a signed-in user.
-  if (kind === "template") return download(contactTemplate());
+  if (kind === "template") {
+    if (!(await currentContext())) {
+      return NextResponse.json({ error: "Sign in to continue." }, { status: 401 });
+    }
+    return download(contactTemplate());
+  }
 
   // Revealing full numbers is a separate permission from viewing a report.
   const permission = scope === "FULL" ? "reports.export.full" : "reports.export.masked";
@@ -51,6 +57,8 @@ export async function GET(request: Request): Promise<NextResponse> {
     case "campaign": {
       const campaignId = url.searchParams.get("campaignId");
       if (!campaignId) return NextResponse.json({ error: "Missing campaign" }, { status: 400 });
+      // A mistyped id cannot match anything; querying with it is a database error.
+      if (!isUuid(campaignId)) return NextResponse.json({ error: "Not found" }, { status: 404 });
       const file = await exportCampaignReport({ ...shared, campaignId, scope });
       if (!file) return NextResponse.json({ error: "Not found" }, { status: 404 });
       return download(file);
@@ -58,6 +66,7 @@ export async function GET(request: Request): Promise<NextResponse> {
     case "import-errors": {
       const importId = url.searchParams.get("importId");
       if (!importId) return NextResponse.json({ error: "Missing import" }, { status: 400 });
+      if (!isUuid(importId)) return NextResponse.json({ error: "Not found" }, { status: 404 });
       const file = await exportImportErrors({ ...shared, importId });
       if (!file) return NextResponse.json({ error: "Not found" }, { status: 404 });
       return download(file);

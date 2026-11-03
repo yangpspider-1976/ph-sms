@@ -5,6 +5,7 @@ import { notifications } from "@/server/db/schema";
 import { Card, CardHeader } from "./ui";
 import { getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
+import { localizeServerText } from "@/i18n/server-text";
 
 /**
  * In-app notifications.
@@ -47,8 +48,12 @@ export async function NotificationsPanel({
           <li key={notification.id} className="px-5 py-3.5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-[13.5px] font-bold text-ink">{notification.title}</p>
-                <p className="mt-0.5 text-[13px] text-body">{notification.body}</p>
+                {/* Written in English by the server; shown in the reader's
+                    language. A reason an admin typed comes back as written. */}
+                <p className="text-[13.5px] font-bold text-ink">
+                  {localizeServerText(notification.title, t)}
+                </p>
+                <p className="mt-0.5 text-[13px] text-body">{localizeServerText(notification.body, t)}</p>
               </div>
               <span className="whitespace-nowrap text-[12px] text-muted">
                 {formatDateTime(notification.createdAt, locale)}

@@ -100,6 +100,26 @@ test("an explicit choice outranks the browser preference", async ({ browser }) =
   await context.close();
 });
 
+test("the page-not-found screen is in the reader's language", async ({ browser }) => {
+  // It was Next.js's built-in screen, in English whatever the language, until
+  // 2 November 2026.
+  const context = await browser.newContext({ locale: "ko-KR" });
+  const page = await context.newPage();
+
+  const response = await page.goto("/no-such-page");
+  expect(response?.status()).toBe(404);
+  await expect(page.locator("html")).toHaveAttribute("lang", "ko-KR");
+  await expect(page.getByRole("heading", { name: "페이지를 찾을 수 없습니다" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "대시보드로 이동" })).toBeVisible();
+  await expect(page.locator("body")).not.toContainText("could not be found");
+
+  // It has the switcher, like every other page.
+  await page.getByLabel(SWITCHER.ko).selectOption("en");
+  await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
+
+  await context.close();
+});
+
 test("the signed-in app is translated too, not just the marketing site", async ({ page }) => {
   await page.goto("/login");
   await page.getByLabel("Work email").fill("owner@demo.test");

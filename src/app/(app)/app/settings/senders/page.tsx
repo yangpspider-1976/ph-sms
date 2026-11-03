@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { requireOrgContext } from "@/server/auth/context";
-import { listSenders } from "@/server/actions/senders";
+import { listSenders } from "@/server/domain/senders";
 import { demoFeaturesEnabled } from "@/server/env";
 import {
   Card,

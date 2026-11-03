@@ -9,6 +9,7 @@ import { normalizePhone, splitPastedNumbers } from "@/server/domain/phone";
 import { db } from "@/server/db";
 import { getEffectiveConfig } from "@/server/domain/app-config";
 import { checkRateLimit } from "@/server/security/rate-limit";
+import { isUuid } from "@/server/uuid";
 
 export type ImportActionResult =
   | { ok: true; preview: ImportPreview }
@@ -78,6 +79,10 @@ export async function commitImportAction(importId: string): Promise<CommitResult
 export async function deleteContactsAction(contactIds: string[]): Promise<{ deleted: number }> {
   const auth = await authorize("contacts.manage");
   if (!auth.ok) return { deleted: 0 };
+  // The same bound the group actions put on a selection.
+  if (!Array.isArray(contactIds) || contactIds.length > 5000 || !contactIds.every(isUuid)) {
+    return { deleted: 0 };
+  }
 
   const deleted = await deleteContacts({
     organizationId: auth.ctx.org.organizationId,

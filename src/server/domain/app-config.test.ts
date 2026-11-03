@@ -89,6 +89,14 @@ describe("setConfigValue", () => {
     expect(rows).toHaveLength(0);
   });
 
+  it("says what the value has to be, in words an admin can act on", async () => {
+    // Every setting is a positive whole number; zod's own wording for that is
+    // "Too small: expected number to be >0".
+    await expect(
+      setConfigValue({ key: "selfServiceCeiling", value: 0, actorUserId: tenant.userId }),
+    ).rejects.toThrow(/^Must be at least 1\.$/);
+  });
+
   it("keeps every previous value", async () => {
     for (const value of [10, 20, 30]) {
       await setConfigValue({ key: "maxScheduleDays", value, actorUserId: tenant.userId });

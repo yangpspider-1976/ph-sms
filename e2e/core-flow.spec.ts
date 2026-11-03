@@ -90,6 +90,15 @@ test.describe("core journey", () => {
     // Approval credits demo funding, so the balance is no longer zero.
     await expect(page.getByText("₱1,000.00").first()).toBeVisible();
 
+    // The approval notice is stored in English and shown in the reader's
+    // language; it stayed in English for Korean readers until 2 November 2026.
+    await expect(page.getByText("Your business was approved").first()).toBeVisible();
+    await page.getByLabel("Change language").selectOption("ko");
+    await expect(page.getByText("사업자 승인이 완료되었습니다").first()).toBeVisible();
+    await expect(page.getByText("추가 설명이 없습니다.").first()).toBeVisible();
+    await page.getByLabel("언어 변경").selectOption("en");
+    await expect(page.getByText("Your business was approved").first()).toBeVisible();
+
     /* --- 6. Apply for a sender identity and approve it in demo mode ----- */
 
     await page.goto("/app/settings/senders");

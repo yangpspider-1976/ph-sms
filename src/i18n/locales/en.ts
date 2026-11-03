@@ -726,6 +726,12 @@ export const en = {
     notSaved: "Not saved",
     save: "Save template",
     saving: "Saving…",
+    remove: "Remove",
+    removeConfirm: "Remove this template? Messages already sent with it are not affected.",
+    removeTemplate: "Remove template",
+    removing: "Removing…",
+    keepIt: "Keep it",
+    notRemoved: "Not removed",
   },
 
   credits: {
@@ -1758,6 +1764,14 @@ export const en = {
    * explains why it lives in a module of its own; edit the wording there.
    */
   serverText: enServerText,
+
+  /** The page shown for an address that does not exist or is not yours. */
+  notFound: {
+    title: "Page not found",
+    body: "This page does not exist, or you do not have access to it.",
+    dashboard: "Go to your dashboard",
+    home: "Go to the home page",
+  },
 
   locale: {
     label: "Language",

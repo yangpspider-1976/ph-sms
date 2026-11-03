@@ -1,14 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { and, desc, eq, max } from "drizzle-orm";
 import { z } from "zod";
-import { db } from "@/server/db";
-import { templates } from "@/server/db/schema";
 import { authorize } from "@/server/auth/context";
 import { validateMessageBody } from "@/server/domain/segments";
 import { getEffectiveConfig } from "@/server/domain/app-config";
-import { recordAudit } from "@/server/audit";
+import { archiveTemplate, saveTemplate } from "@/server/domain/templates";
+import { isUuid } from "@/server/uuid";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 export type TemplateResult = { ok: boolean; message: string };
 
@@ -45,68 +44,33 @@ export async function saveTemplateAction(formData: FormData): Promise<TemplateRe
   });
   if (!check.ok) return { ok: false, message: check.message };
 
-  await db.transaction(async (tx) => {
-    const existing = await tx
-      .select({ version: max(templates.version) })
-      .from(templates)
-      .where(
-        and(
-          eq(templates.organizationId, auth.ctx.org.organizationId),
-          eq(templates.name, parsed.data.name),
-        ),
-      );
-
-    const version = (existing[0]?.version ?? 0) + 1;
-
-    await tx.insert(templates).values({
-      organizationId: auth.ctx.org.organizationId,
-      name: parsed.data.name,
-      body: parsed.data.body,
-      version,
-      createdBy: auth.ctx.user.id,
-    });
-
-    await recordAudit(
-      {
-        action: "template.saved",
-        organizationId: auth.ctx.org.organizationId,
-        actorUserId: auth.ctx.user.id,
-        objectType: "template",
-        metadata: { name: parsed.data.name, version },
-      },
-      tx,
-    );
+  await saveTemplate({
+    organizationId: auth.ctx.org.organizationId,
+    userId: auth.ctx.user.id,
+    name: parsed.data.name,
+    body: parsed.data.body,
   });
 
   revalidatePath("/app/templates");
   return { ok: true, message: "Template saved." };
 }
 
-/** Archives a template. Past campaigns keep their own copy of the text. */
+/** Removes a template, every version of it. Past campaigns keep their own copy of the text. */
 export async function archiveTemplateAction(templateId: string): Promise<TemplateResult> {
   const auth = await authorize("templates.manage");
   if (!auth.ok) return { ok: false, message: auth.error.message };
 
-  await db
-    .update(templates)
-    .set({ archivedAt: new Date() })
-    .where(
-      and(
-        eq(templates.id, templateId),
-        eq(templates.organizationId, auth.ctx.org.organizationId),
-      ),
-    );
+  // The failure message comes from the server-text dictionary, so the page
+  // can show it in the reader's language.
+  if (!isUuid(templateId)) return { ok: false, message: enServerText.templateGone };
+
+  const removed = await archiveTemplate({
+    organizationId: auth.ctx.org.organizationId,
+    userId: auth.ctx.user.id,
+    templateId,
+  });
+  if (!removed) return { ok: false, message: enServerText.templateGone };
 
   revalidatePath("/app/templates");
-  return { ok: true, message: "Template archived." };
-}
-
-/** Latest version of each template, newest first. */
-export async function listTemplates(organizationId: string) {
-  return db
-    .select()
-    .from(templates)
-    .where(eq(templates.organizationId, organizationId))
-    .orderBy(desc(templates.createdAt))
-    .limit(100);
+  return { ok: true, message: "Template removed." };
 }

@@ -12,6 +12,7 @@ import {
   type EditableKey,
 } from "@/server/domain/app-config";
 import { contentPolicySchema } from "@/server/domain/content-checks";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 export type ConfigActionResult = { ok: boolean; message: string };
 
@@ -20,6 +21,8 @@ const valueSchema = z.object({
   value: z.coerce.number().int(),
 });
 
+// The settings editor's messages are built from the server-text dictionary, so
+// the editor can show them in the reader's language.
 export async function setConfigValueAction(formData: FormData): Promise<ConfigActionResult> {
   const admin = await requirePlatformAdmin();
 
@@ -28,7 +31,7 @@ export async function setConfigValueAction(formData: FormData): Promise<ConfigAc
     value: formData.get("value"),
   });
   if (!parsed.success) {
-    return { ok: false, message: "That setting or value is not valid." };
+    return { ok: false, message: enServerText.settingOrValueNotValid };
   }
 
   try {
@@ -38,7 +41,7 @@ export async function setConfigValueAction(formData: FormData): Promise<ConfigAc
       actorUserId: admin.id,
     });
     revalidatePath("/admin/settings");
-    return { ok: true, message: "Saved. It applies to the next send." };
+    return { ok: true, message: enServerText.settingSaved };
   } catch (err) {
     if (err instanceof ConfigError) return { ok: false, message: err.message };
     throw err;
@@ -49,11 +52,11 @@ export async function clearConfigValueAction(key: string): Promise<ConfigActionR
   const admin = await requirePlatformAdmin();
 
   const parsed = z.enum(EDITABLE_KEYS).safeParse(key);
-  if (!parsed.success) return { ok: false, message: "That setting is not valid." };
+  if (!parsed.success) return { ok: false, message: enServerText.settingNotValid };
 
   await clearConfigValue({ key: parsed.data as EditableKey, actorUserId: admin.id });
   revalidatePath("/admin/settings");
-  return { ok: true, message: "Restored to the built-in default." };
+  return { ok: true, message: enServerText.settingRestored };
 }
 
 /**

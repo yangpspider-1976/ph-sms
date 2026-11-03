@@ -89,4 +89,23 @@ export const enServerText = {
   organizationIs: (status: string) => `Organization is ${status}`,
   senderIs: (status: string) => `Sender identity is ${status}`,
   missing: "missing",
+
+  // In-app notifications, stored in English when they are written. The server
+  // builds them from these entries, so the wording cannot drift.
+  businessApproved: "Your business was approved",
+  accountStatusNow: (status: string) => `Your account status is now ${status}`,
+  noFurtherDetail: "No further detail was given.",
+
+  // Platform settings editor, also built from these entries.
+  mustBeAtLeast: (n: string) => `Must be at least ${n}.`,
+  mustBeAtMost: (n: string) => `Must be at most ${n}.`,
+  valueNotValid: "That value is not valid.",
+  settingOrValueNotValid: "That setting or value is not valid.",
+  settingNotEditable: "That setting is not editable.",
+  settingNotValid: "That setting is not valid.",
+  settingSaved: "Saved. It applies to the next send.",
+  settingRestored: "Restored to the built-in default.",
+
+  // Removing a template.
+  templateGone: "That template no longer exists.",
 };

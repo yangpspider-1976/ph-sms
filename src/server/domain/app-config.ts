@@ -12,6 +12,7 @@ import {
 import type { ContentPolicy } from "./content-checks";
 import { recordAudit } from "@/server/audit";
 import { env } from "@/server/env";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 /**
  * Admin-editable configuration.
@@ -130,6 +131,29 @@ export class ConfigError extends Error {
   }
 }
 
+type ConfigIssue = NonNullable<ReturnType<typeof configSchema.safeParse>["error"]>["issues"][number];
+
+/**
+ * A rejected value, as a sentence the admin can act on. Zod's own wording
+ * ("Too small: expected number to be >0") is written for developers and
+ * cannot be translated; these sentences come from the server-text dictionary,
+ * so the settings editor shows them in the reader's language. Every setting is
+ * a whole number, so a bound is stated as the nearest whole number allowed.
+ * The editor keeps a refused setting open while it shows the message, so the
+ * message does not repeat the setting's name.
+ */
+function describeRejectedValue(issue: ConfigIssue | undefined): string {
+  if (issue?.code === "too_small") {
+    const min = Number(issue.minimum);
+    return enServerText.mustBeAtLeast(String(issue.inclusive ? Math.ceil(min) : Math.floor(min) + 1));
+  }
+  if (issue?.code === "too_big") {
+    const max = Number(issue.maximum);
+    return enServerText.mustBeAtMost(String(issue.inclusive ? Math.floor(max) : Math.ceil(max) - 1));
+  }
+  return enServerText.valueNotValid;
+}
+
 /**
  * Sets one value.
  *
@@ -144,7 +168,7 @@ export async function setConfigValue(input: {
   actorUserId: string;
 }): Promise<void> {
   if (!(EDITABLE_KEYS as readonly string[]).includes(input.key)) {
-    throw new ConfigError("That setting is not editable.", "UNKNOWN_KEY");
+    throw new ConfigError(enServerText.settingNotEditable, "UNKNOWN_KEY");
   }
 
   // Validate the whole config with this one field replaced, so a value that is
@@ -152,10 +176,7 @@ export async function setConfigValue(input: {
   const candidate = configSchema.safeParse({ ...MOCK_DEFAULTS, [input.key]: input.value });
   if (!candidate.success) {
     const issue = candidate.error.issues.find((i) => i.path[0] === input.key);
-    throw new ConfigError(
-      issue ? `${KEY_LABELS[input.key]}: ${issue.message}` : "That value is not valid.",
-      "INVALID_VALUE",
-    );
+    throw new ConfigError(describeRejectedValue(issue), "INVALID_VALUE");
   }
 
   await db.transaction(async (tx) => {

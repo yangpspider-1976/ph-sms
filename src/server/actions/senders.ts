@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { and, desc, eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/server/db";
 import { senderIdentities } from "@/server/db/schema";
@@ -9,6 +9,7 @@ import { authorize } from "@/server/auth/context";
 import { isUniqueViolation } from "@/server/domain/wallet";
 import { recordAudit } from "@/server/audit";
 import { demoFeaturesEnabled } from "@/server/env";
+import { isUuid } from "@/server/uuid";
 
 /**
  * Sender identity applications.
@@ -102,6 +103,7 @@ export async function approveSenderForDemoAction(senderId: string): Promise<Send
 
   const auth = await authorize("sender.apply");
   if (!auth.ok) return { ok: false, message: auth.error.message };
+  if (!isUuid(senderId)) return { ok: false, message: "That sender is not awaiting review." };
 
   const updated = await db
     .update(senderIdentities)
@@ -131,12 +133,4 @@ export async function approveSenderForDemoAction(senderId: string): Promise<Send
 
   revalidatePath("/app/settings/senders");
   return { ok: true, message: `${updated[0]!.value} approved (demo mode only).` };
-}
-
-export async function listSenders(organizationId: string) {
-  return db
-    .select()
-    .from(senderIdentities)
-    .where(eq(senderIdentities.organizationId, organizationId))
-    .orderBy(desc(senderIdentities.createdAt));
 }

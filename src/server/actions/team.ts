@@ -14,6 +14,7 @@ import {
   revokeInvite,
   TeamError,
 } from "@/server/domain/team";
+import { isUuid } from "@/server/uuid";
 
 export type TeamResult = { ok: boolean; message: string };
 
@@ -100,6 +101,7 @@ export async function changeRoleAction(formData: FormData): Promise<TeamResult> 
 export async function removeMemberAction(membershipId: string): Promise<TeamResult> {
   const auth = await authorize("team.manage");
   if (!auth.ok) return { ok: false, message: auth.error.message };
+  if (!isUuid(membershipId)) return { ok: false, message: "That member was not found." };
 
   try {
     await removeMember({

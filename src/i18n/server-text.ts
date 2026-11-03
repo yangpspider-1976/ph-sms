@@ -56,6 +56,14 @@ const PATTERNS: Pattern[] = [
   [/^(\d+) recipients is at or above the review threshold of (\d+)$/, (s, m) => s.recipientThreshold(m[1]!, m[2]!)],
   [/^Organization is (\w+)$/, (s, m, t) => s.organizationIs(statusLabel(t, m[1]!))],
   [/^Sender identity is (\w+)$/, (s, m, t) => s.senderIs(statusLabel(t, m[1]!))],
+  // A verification decision's notification names the status in words
+  // ("needs information"); show the status's own label instead.
+  [
+    /^Your account status is now ([a-z ]+)$/,
+    (s, m, t) => s.accountStatusNow(statusLabel(t, m[1]!.toUpperCase().replace(/ /g, "_"))),
+  ],
+  [/^Must be at least (\d+)\.$/, (s, m) => s.mustBeAtLeast(m[1]!)],
+  [/^Must be at most (\d+)\.$/, (s, m) => s.mustBeAtMost(m[1]!)],
   // A held or refused campaign lists its reasons, each one a message above.
   [/^Held for approval: (.+)\.$/, (s, m, t) => s.held(m[1]!.split("; ").map((r) => localizeServerText(r, t)).join("; "))],
   [/^Refused: (.+)\.$/, (s, m, t) => s.refused(m[1]!.split("; ").map((r) => localizeServerText(r, t)).join("; "))],

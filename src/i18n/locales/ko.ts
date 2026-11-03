@@ -481,7 +481,7 @@ export const ko: Dictionary = {
     senderNoReplies: "이 발신자는 회신을 받을 수 없습니다.",
     noApprovedSender: "승인된 발신자 없음",
     messageLabel: "메시지",
-    bodyPlaceholder: "예약이 확정되었습니다. 내일 봁겠습니다.",
+    bodyPlaceholder: "예약이 확정되었습니다. 내일 뵙겠습니다.",
     sendTime: "발송 시점",
     sendNow: "지금 발송",
     scheduleLater: "나중으로 예약",
@@ -706,7 +706,7 @@ export const ko: Dictionary = {
     emptyBody: "자주 보내는 메시지를 저장해 두면 다시 입력할 필요가 없습니다.",
     newTemplate: "새 템플릿",
     namePlaceholder: "예약 확정 안내",
-    bodyPlaceholder: "예약이 확정되었습니다. 내일 봁겠습니다.",
+    bodyPlaceholder: "예약이 확정되었습니다. 내일 뵙겠습니다.",
     messageLabel: "메시지",
     counter: (characters: number, segments: number, encoding: string) =>
       `${characters}자 · ${segments}개 세그먼트 · ${encoding}`,
@@ -716,6 +716,12 @@ export const ko: Dictionary = {
     notSaved: "저장하지 못했습니다",
     save: "템플릿 저장",
     saving: "저장 중…",
+    remove: "삭제",
+    removeConfirm: "이 템플릿을 삭제할까요? 이미 발송한 메시지에는 영향이 없습니다.",
+    removeTemplate: "템플릿 삭제",
+    removing: "삭제 중…",
+    keepIt: "유지하기",
+    notRemoved: "삭제하지 못했습니다",
   },
 
   credits: {
@@ -1800,6 +1806,28 @@ export const ko: Dictionary = {
     organizationIs: (status: string) => `조직 상태: ${status}`,
     senderIs: (status: string) => `발신자 ID 상태: ${status}`,
     missing: "없음",
+
+    businessApproved: "사업자 승인이 완료되었습니다",
+    accountStatusNow: (status: string) => `계정 상태가 '${status}'(으)로 변경되었습니다`,
+    noFurtherDetail: "추가 설명이 없습니다.",
+
+    mustBeAtLeast: (n: string) => `${n} 이상이어야 합니다.`,
+    mustBeAtMost: (n: string) => `${n} 이하여야 합니다.`,
+    valueNotValid: "올바른 값이 아닙니다.",
+    settingOrValueNotValid: "설정 또는 값이 올바르지 않습니다.",
+    settingNotEditable: "변경할 수 없는 설정입니다.",
+    settingNotValid: "올바른 설정이 아닙니다.",
+    settingSaved: "저장되었습니다. 다음 발송부터 적용됩니다.",
+    settingRestored: "기본값으로 복원되었습니다.",
+
+    templateGone: "이 템플릿은 더 이상 존재하지 않습니다.",
+  },
+
+  notFound: {
+    title: "페이지를 찾을 수 없습니다",
+    body: "요청하신 페이지가 없거나 접근 권한이 없습니다.",
+    dashboard: "대시보드로 이동",
+    home: "홈페이지로 이동",
   },
 
   locale: {

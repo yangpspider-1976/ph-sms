@@ -67,7 +67,7 @@ async function expectNoErrorPage(page: Page, path: string) {
   const response = await page.goto(path);
   expect(response?.status(), `${path} status`).toBeLessThan(400);
   await expect(page.locator("h1").first(), `${path} heading`).toBeVisible();
-  await expect(page.getByText(/Application error|Something went wrong|This page could not be found/i)).toHaveCount(0);
+  await expect(page.getByText(/Application error|Something went wrong|Page not found/i)).toHaveCount(0);
 }
 
 test.describe("Part A — core tests", () => {
@@ -340,7 +340,7 @@ test.describe("Part A — core tests", () => {
     // the status once the response has started). Check what the reader sees,
     // and that none of the campaign comes with it.
     await page.goto(campaignUrl);
-    await expect(page.getByText("This page could not be found")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
     await expect(page.locator("body")).not.toContainText(/\+63 9\d\d \*\*\* \d{4}/);
   });
 });
