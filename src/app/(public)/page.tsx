@@ -8,7 +8,7 @@ import { getDictionary } from "@/i18n/server";
 import type { Dictionary } from "@/i18n/dictionaries";
 import {
   IconArrowRight,
-  IconBlock,
+  IconCalculator,
   IconCard,
   IconChat,
   IconCheckCircle,
@@ -18,9 +18,10 @@ import {
   IconLocation,
   IconMegaphone,
   IconSend,
+  IconSettings,
   IconShield,
-  IconSliders,
   IconTag,
+  IconUpload,
   IconUser,
   IconUsers,
   IconX,
@@ -363,10 +364,10 @@ function Shortcuts({ t }: { t: Dictionary }) {
 function Features({ t }: { t: Dictionary }) {
   const [beforeProduct, afterProduct] = t.home.featuresHeadingLight.split("{product}");
   const cards = [
-    { icon: <IconCard size={30} />, title: t.home.card1Title, body: t.home.card1Body },
-    { icon: <IconCheckCircle size={30} />, title: t.home.card2Title, body: t.home.card2Body },
-    { icon: <IconBlock size={30} />, title: t.home.card3Title, body: t.home.card3Body },
-    { icon: <IconShield size={30} />, title: t.home.card4Title, body: t.home.card4Body },
+    { icon: <IconCalculator size={30} />, title: t.home.card1Title, body: t.home.card1Body },
+    { icon: <IconDocument size={30} />, title: t.home.card2Title, body: t.home.card2Body },
+    { icon: <IconCard size={30} />, title: t.home.card3Title, body: t.home.card3Body },
+    { icon: <IconUpload size={30} />, title: t.home.card4Title, body: t.home.card4Body },
   ];
 
   return (
@@ -425,11 +426,11 @@ function Features({ t }: { t: Dictionary }) {
 
 function Trust({ t }: { t: Dictionary }) {
   const badges = [
-    { icon: <IconLocation size={44} />, label: t.home.philippinesOnly },
-    { icon: <IconShield size={44} />, label: t.home.verifiedBusinesses },
-    { icon: <IconCard size={44} />, label: t.home.prepaidCredits },
-    { icon: <IconCheckCircle size={44} />, label: t.home.trustReview },
-    { icon: <IconSliders size={44} />, label: t.home.trustLimits },
+    { icon: <IconSettings size={44} />, title: t.home.trustEasyTitle, body: t.home.trustEasyBody },
+    { icon: <IconUsers size={44} />, title: t.home.trustTeamTitle, body: t.home.trustTeamBody },
+    { icon: <IconShield size={44} />, title: t.home.trustSecurityTitle, body: t.home.trustSecurityBody },
+    { icon: <IconCheckCircle size={44} />, title: t.home.trustChecksTitle, body: t.home.trustChecksBody },
+    { icon: <IconChat size={44} />, title: t.home.trustVolumeTitle, body: t.home.trustVolumeBody },
   ];
 
   // The badges close in on the middle as they arrive, the outer ones first.
@@ -447,7 +448,7 @@ function Trust({ t }: { t: Dictionary }) {
         <ul className="mt-16 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-5">
           {badges.map((badge, index) => (
             <li
-              key={badge.label}
+              key={badge.title}
               data-reveal={entrances[index]}
               style={delay(100 * Math.min(index, badges.length - 1 - index))}
               className="flex flex-col items-center text-center"
@@ -455,7 +456,8 @@ function Trust({ t }: { t: Dictionary }) {
               <span className="flex h-32 w-32 items-center justify-center rounded-full bg-white text-brand-700 shadow-[5px_11px_10px_rgba(50,45,95,0.03),inset_0_8px_7px_rgba(181,181,201,0.18)] lg:h-40 lg:w-40">
                 {badge.icon}
               </span>
-              <span className="mt-6 text-[17px] text-ink">{badge.label}</span>
+              <h3 className="mt-6 text-[17px] text-ink">{badge.title}</h3>
+              <p className="mt-2 max-w-55 text-[13.5px] leading-relaxed text-muted">{badge.body}</p>
             </li>
           ))}
         </ul>

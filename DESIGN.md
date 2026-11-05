@@ -851,9 +851,35 @@ they are; only their presentation changes.
      Write your message → Review & send), with the bulk-sending call to action;
   6. footer.
 
-  The words for cards and badges come from the claims `/features` and
-  `/how-it-works` already make. Do not carry over the reference's claims (for
-  example "100 % automatic refund").
+  The cards and badges cover the topics the reference explains, wherever PH SMS
+  has the feature. The wording is PH SMS's own and says what PH SMS actually
+  does:
+
+  | Reference topic | PH SMS card or badge |
+  |---|---|
+  | Pricing by usage | "See the price before you send": per segment, quotes for volume |
+  | KakaoTalk template management | "Save the messages you send often": SMS templates |
+  | Refunds for failed sends | "Charged only for accepted messages" |
+  | Contact lists entered for you | "Upload a whole contact list at once": self-service CSV |
+  | Easy setup | "Nothing to install" |
+  | Business service | "Roles for your team" |
+  | Data security | "Protected numbers" |
+  | Round-the-clock monitoring | "Every message checked": content checks, with no monitoring promise |
+  | Tailored service | "Plans for large volumes" |
+
+  Never copy the reference's sentences, and never promise what PH SMS does not
+  do. Its "100 % automatic refund" would be wrong here: an accepted message is
+  charged even if it is never delivered. The reference's API band has no
+  counterpart, because PH SMS has no customer API, so the black band keeps the
+  flow.
+- **Help center `/help`:**
+  - **Layout:** questions grouped like the reference's FAQ: Sending, Contacts and
+    opt-outs, Credit and billing. Each question is an ink line marked "Q", with
+    its answer in body grey beneath. The groups sit on the FAQ-style rule, with
+    the contact card on the right.
+  - **Content:** only questions about what PH SMS does. The reference's
+    KakaoTalk, 080-number, tax-invoice, cash-receipt, election and
+    contact-entry-service questions have no counterpart.
 - **Log-in:**
   - a 480 px column with the title set beside a 4 px ink bar (▌);
   - a label and a 44 px field for each input;
@@ -919,7 +945,8 @@ they are; only their presentation changes.
 - Korean phone identity checks and 080 opt-out numbers;
 - tax-invoice and cash-receipt pages;
 - long and picture messages (PH SMS sends SMS, split into parts);
-- daily and monthly statistics pages.
+- daily and monthly statistics pages;
+- the contact-list entry service (PH SMS has a self-service CSV upload instead).
 
 If PH SMS later builds any of these, they take the reference's slot for them.
 

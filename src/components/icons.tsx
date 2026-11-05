@@ -173,8 +173,9 @@ export const IconDownload = (p: IconProps) => (
 
 export const IconUpload = (p: IconProps) => (
   <Base {...p}>
-    <path d="M12 20V9" />
-    <path d="m7.5 13 4.5-4.5 13 0" />
+    <path d="M12 15V4" />
+    <path d="m7.5 8.5 4.5-4.5 4.5 4.5" />
+    <path d="M4.5 20.5h15" />
   </Base>
 );
 

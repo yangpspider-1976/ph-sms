@@ -958,28 +958,40 @@ export const en = {
     bulkBody: "Let us help plan your next bulk campaign.",
     bulkCta: "Talk to our team",
     shortcuts: "Shortcuts",
-    featuresHeadingStrong: "Sending you can trust,",
+    // The cards and badges cover the topics the reference explains, where PH SMS
+    // has the feature, in our own words (DESIGN.md, "Marketing pieces").
+    featuresHeadingStrong: "Sending made easier",
     // {product} is replaced by the product name, set in the brand colour.
     featuresHeadingLight: "with {product}",
     featuresIntro:
-      "Prepaid credit, checked content and protected numbers: every send is accounted for.",
-    card1Title: "Prepaid credit you can audit",
+      "See prices up front, reuse your wording, pay only for accepted messages and upload contact lists in one go.",
+    card1Title: "See the price before you send",
     card1Body:
-      "A send reserves its maximum cost, then settles to the real cost. Every movement is in your ledger.",
-    card2Title: "Accepted is not delivered",
+      "Messages are charged per SMS segment, and the total is on screen before you confirm. For large volumes, our team will quote you a rate.",
+    card2Title: "Save the messages you send often",
     card2Body:
-      "Each message shows separately whether the provider accepted it and whether it was delivered.",
-    card3Title: "Opt-outs stay opted out",
-    card3Body: "Opt-outs are checked when a send is priced, and again before each message leaves.",
-    card4Title: "Numbers handled carefully",
+      "Keep reminders, notices and announcements as templates. Each one shows how many segments it uses and what it costs, ready to pick while you write.",
+    card3Title: "Charged only for accepted messages",
+    card3Body:
+      "A send holds its cost first. Messages the provider rejects, messages you stop before they go out and numbers left out for an opt-out all go back to your credit automatically.",
+    card4Title: "Upload a whole contact list at once",
     card4Body:
-      "Numbers are encrypted at rest and shown masked. Full-number exports are owner-only and recorded.",
-    trustHeadingStrong: "How we keep",
-    trustHeadingLight: "sending safe",
+      "Drop in a CSV file and every number is checked, duplicates are removed and opted-out numbers are skipped. Rows that need fixing can be downloaded.",
+    trustHeadingStrong: "Looking after",
+    trustHeadingLight: "your business",
     trustIntro:
-      "Every business is approved before it can send, and every send stays within your limits.",
-    trustReview: "Content checks",
-    trustLimits: "Spending limits",
+      "Easy to start and built for teams, with protected numbers, checked messages and people to talk to as you grow.",
+    trustEasyTitle: "Nothing to install",
+    trustEasyBody: "Sign up, get verified and send from your browser.",
+    trustTeamTitle: "Roles for your team",
+    trustTeamBody: "From owner to view-only, each person gets only the access they need.",
+    trustSecurityTitle: "Protected numbers",
+    trustSecurityBody: "Numbers are encrypted when stored and masked on screen.",
+    trustChecksTitle: "Every message checked",
+    trustChecksBody:
+      "Scam-like messages are refused, and loan or investment offers wait for an approver.",
+    trustVolumeTitle: "Plans for large volumes",
+    trustVolumeBody: "Our team quotes high-volume and promotional campaigns.",
     carouselLabel: "Highlights",
     carouselRole: "carousel",
     carouselSlideRole: "slide",
@@ -1067,18 +1079,46 @@ export const en = {
   helpCentre: {
     title: "Help center",
     subheading: "Answers to the questions we are asked most, and how to reach us.",
-    numbersTitle: "Numbers and formats",
+    // Grouped like the reference's FAQ, with only questions about what PH SMS does.
+    groupSending: "Sending",
+    groupContacts: "Contacts and opt-outs",
+    groupCredit: "Credit and billing",
+    bulkTitle: "Can I send to a large list at once?",
+    bulkBody:
+      "Yes, within your account's limits: a maximum per send, plus daily and monthly totals. The dashboard shows how much of today's limit is left. For larger or promotional campaigns, request a bulk quote and our team will set it up with you.",
+    statesTitle: "A message says accepted, but it has not arrived. Why?",
+    statesBody:
+      "Accepted means the provider took the message. Delivered means a receipt came back from the network confirming it reached the phone. Some networks never send a receipt, so a message can arrive without being marked delivered, and a phone that stays switched off may get it late or not at all.",
+    heldTitle: "Why is my campaign awaiting approval?",
+    heldBody:
+      "Every message is checked before it goes out. Loan, investment and high-pressure marketing messages wait until an approver on your team reviews them, and messages that read like phishing or prize scams are refused. A check never changes your wording.",
+    failedTitle: "How do I see which numbers failed?",
+    failedBody:
+      "Open the campaign from Campaigns. Its recipients list shows every number, masked, with whether the provider accepted it and whether it was delivered.",
+    stopTitle: "Can I stop a scheduled or running campaign?",
+    stopBody:
+      "Yes. Open the campaign and choose Stop campaign. Messages that have not gone out are cancelled and their cost returns to your credit. Messages already sent cannot be recalled.",
+    numbersTitle: "Which numbers can I send to?",
     numbersBody:
       "Philippine mobile numbers only. 09171234567, 9171234567, 639171234567 and +639171234567 are all accepted and stored identically. Landlines and international numbers are refused.",
-    csvTitle: "CSV files",
+    csvTitle: "How do I upload my contacts?",
     csvBody:
-      "UTF-8, with a phone_number column. first_name, last_name, consent_source, consent_date and custom_1 to custom_5 are optional. Any other column is ignored, and the import preview shows exactly how each one was read.",
-    statesTitle: "Accepted, delivered and the difference",
-    statesBody:
-      "Accepted means the provider took the message. Delivered means a receipt came back confirming it reached the handset. Some networks never send a receipt, so a message can arrive without ever being marked delivered.",
-    optOutTitle: "Opt-outs",
+      "On the Contacts page, upload a UTF-8 CSV file with a phone_number column; the sample file there shows the layout. first_name, last_name, consent_source, consent_date and custom_1 to custom_5 are optional, and any other column is ignored. A preview shows how every row was read, and nothing is saved until you confirm it.",
+    exportTitle: "Can I download my contacts?",
+    exportBody:
+      "Yes. Use Export on the Contacts page, and the one on the opt-out list for that list. Numbers in these files are masked.",
+    optOutTitle: "What happens to a number on the opt-out list?",
     optOutBody:
-      "Record an opt-out as soon as someone asks you to stop. The list is yours alone, it is applied to every send, and it survives deleting and re-importing the contact.",
+      "It is left out of every send: when the send is priced, and again just before each message leaves. The list belongs to your business alone, and deleting or re-importing the contact does not remove the opt-out. Add a number as soon as someone asks you to stop.",
+    chargedTitle: "Am I charged for messages that fail?",
+    chargedBody:
+      "Only messages the provider accepts are charged. A send holds its full cost first, and anything rejected, stopped before it went out or left out for an opt-out is returned to your credit automatically. An accepted message is charged even if no delivery receipt comes back.",
+    historyTitle: "Where can I see my top-ups and charges?",
+    historyBody:
+      "On Credits & Billing. Every top-up, hold, charge and return is listed with its date. Entries are never edited afterwards: a correction is added as a new entry.",
+    costTitle: "How is the cost of a message worked out?",
+    costBody:
+      "You pay per SMS segment. One segment holds up to 160 standard characters, or 70 when the message includes emoji or other Unicode characters, and longer messages use more segments. The send screen shows the segment count and the total before you confirm.",
     contactTitle: "Contact us",
     contactBody:
       "Signed-in customers can raise a request from the Support page in the app, which gives you a reference to quote. For sales and high-volume enquiries, use the bulk request form.",
