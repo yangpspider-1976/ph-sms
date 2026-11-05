@@ -26,6 +26,7 @@ import {
   recordRateLimitFailure,
 } from "@/server/security/rate-limit";
 import { headers } from "next/headers";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 export type ActionState = { error?: string; fieldErrors?: Record<string, string> } | null;
 
@@ -239,7 +240,7 @@ export async function verifyEmailAction(token: string): Promise<{ ok: boolean; m
     );
   });
 
-  return { ok: true, message: "Your email address is verified." };
+  return { ok: true, message: enServerText.emailVerified };
 }
 
 /** Switches the active organization, but only to one the user belongs to. */

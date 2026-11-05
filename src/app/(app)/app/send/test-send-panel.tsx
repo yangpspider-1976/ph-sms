@@ -6,7 +6,7 @@ import { sendTestAction } from "@/server/actions/test-send";
 import type { TestRecipient } from "@/server/domain/test-send";
 import { Button, Notice, Select } from "@/components/ui";
 import { IconSend } from "@/components/icons";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 
 /**
  * Test send (MSG-04).
@@ -31,6 +31,7 @@ export function TestSendPanel({
   segments: number;
 }) {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [to, setTo] = useState(recipients[0]?.userId ?? "");
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
@@ -103,7 +104,7 @@ export function TestSendPanel({
             tone={result.ok ? "success" : "danger"}
             title={result.ok ? t.send.testSent : t.send.testNotSent}
           >
-            {result.message}
+            {localizeServerText(result.message)}
           </Notice>
         </div>
       ) : null}

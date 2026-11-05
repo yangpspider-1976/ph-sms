@@ -108,4 +108,50 @@ export const enServerText = {
 
   // Removing a template.
   templateGone: "That template no longer exists.",
+
+  // What a form says once it has worked, also built from these entries.
+  // Counts arrive as text, the way server-text.ts reads them back.
+  templateSaved: "Template saved.",
+  saved: "Saved.",
+  groupCreated: (name: string) => `"${name}" created.`,
+  groupDeleted: "Group deleted. The contacts in it were kept.",
+  membersAdded: (added: string) => `${added} contact${added === "1" ? "" : "s"} added.`,
+  membersAddedSomeSkipped: (added: string, skipped: string) =>
+    `${added} added. ${skipped} ${skipped === "1" ? "was" : "were"} already in the group.`,
+  membersRemoved: (removed: string) =>
+    `${removed} removed from the group. ${removed === "1" ? "It is" : "They are"} still in your contacts.`,
+  optOutsAdded: (added: string) =>
+    `${added} number${added === "1" ? "" : "s"} added to your opt-out list.`,
+  optOutsAddedSomeInvalid: (added: string, invalid: string) =>
+    `${added} added. ${invalid} entr${invalid === "1" ? "y was" : "ies were"} not a valid Philippine mobile number.`,
+  testSent: (mask: string, cost: string) =>
+    `Test sent to ${mask}. It is charged like any other message (${cost}).`,
+  mobileCodeSent: (mask: string) => `We sent a 6-digit code to ${mask}. It expires in 10 minutes.`,
+  mobileVerified: (mask: string) => `${mask} is verified. You can now send test messages.`,
+  mobileRemoved: "Your mobile number has been removed.",
+  senderSubmitted: (value: string) =>
+    `${value} submitted for review. You cannot send under it until it is approved.`,
+  invitationSent: (email: string) =>
+    `Invitation sent to ${email}. It expires in 7 days and can be used once.`,
+  supportReference: (reference: string, email: string) =>
+    `Your reference is ${reference}. We have emailed a copy to ${email}.`,
+  emailVerified: "Your email address is verified.",
+  inquiryReceived:
+    "Thank you. Your request has been logged and someone will contact you about volumes, pricing and sender approval.",
+  inquiryThanks: "Thank you. We will be in touch.",
+
+  // The admin console's. A status is lower-cased, so the English reads the
+  // same whether it is given the action's words or the status's label.
+  policySaved: (rules: string) => `Saved. ${rules} rules are now in force.`,
+  limitsUpdated: "Limits updated.",
+  freezeLifted: "Sending freeze lifted. The recorded debt is unchanged.",
+  inquiryMoved: (status: string) => `Inquiry moved to ${status.toLowerCase()}. No SMS was sent.`,
+  senderDecided: (status: string) => `Sender ${status.toLowerCase()}.`,
+  platformBlocked: (added: string) => `${added} blocked platform-wide.`,
+  platformBlockedSomeInvalid: (added: string, invalid: string) =>
+    `${added} blocked platform-wide, ${invalid} not valid.`,
+  mfaOn: "Two-factor authentication is on. Save these recovery codes now — they are shown once.",
+  mfaVerified: "Verified.",
+  recoveryCodeAccepted: (remaining: string) =>
+    `Recovery code accepted. ${remaining} remaining — re-enrol soon.`,
 };

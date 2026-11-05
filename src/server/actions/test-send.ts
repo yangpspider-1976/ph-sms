@@ -8,6 +8,7 @@ import { checkRateLimit } from "@/server/security/rate-limit";
 import { formatCentavos, MOCK_DEFAULTS } from "@/server/config";
 import { recordAudit } from "@/server/audit";
 import { dispatchAfterResponse } from "@/server/jobs/dispatch-after-response";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 /** Test send (MSG-04). A real, charged send to a verified number. */
 
@@ -62,7 +63,7 @@ export async function sendTestAction(raw: unknown): Promise<TestSendActionResult
       ok: true,
       campaignId: result.campaignId,
       // Said plainly, because a test costs the same as any other message.
-      message: `Test sent to ${result.mask}. It is charged like any other message (${formatCentavos(result.costCentavos)}).`,
+      message: enServerText.testSent(result.mask, formatCentavos(result.costCentavos)),
     };
   } catch (err) {
     if (err instanceof TestSendError) return { ok: false, message: err.message };

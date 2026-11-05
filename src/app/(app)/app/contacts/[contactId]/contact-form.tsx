@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateContactAction, type ContactResult } from "@/server/actions/groups";
 import { Button, Card, Field, Input, Notice } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 /** Corrects a contact's details. The number is not among them, by design. */
@@ -22,6 +22,7 @@ export function ContactForm({
   tags: string[];
 }) {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [result, setResult] = useState<ContactResult | null>(null);
   const [pending, startTransition] = useTransition();
@@ -81,7 +82,7 @@ export function ContactForm({
       {result ? (
         <div className="mt-4">
           <Notice tone={result.ok ? "success" : "danger"} title={result.ok ? t.contacts.detail.saved : t.contacts.detail.notSaved}>
-            {result.message}
+            {localizeServerText(result.message)}
           </Notice>
         </div>
       ) : null}

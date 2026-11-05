@@ -4,11 +4,12 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createGroupAction, type GroupResult } from "@/server/actions/groups";
 import { Button, Card, Field, Input, Notice } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function CreateGroupForm() {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [result, setResult] = useState<GroupResult | null>(null);
   const [pending, startTransition] = useTransition();
@@ -49,7 +50,7 @@ export function CreateGroupForm() {
       {result ? (
         <div className="mt-4">
           <Notice tone={result.ok ? "success" : "danger"} title={result.ok ? t.groups.created : t.groups.notCreated}>
-            {result.message}
+            {localizeServerText(result.message)}
           </Notice>
         </div>
       ) : null}

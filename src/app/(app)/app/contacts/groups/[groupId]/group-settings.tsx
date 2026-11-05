@@ -8,7 +8,7 @@ import {
   type GroupResult,
 } from "@/server/actions/groups";
 import { Button, Card, Field, Input, Notice } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function GroupSettings({
@@ -21,6 +21,7 @@ export function GroupSettings({
   description: string | null;
 }) {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [result, setResult] = useState<GroupResult | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -90,7 +91,7 @@ export function GroupSettings({
       {result ? (
         <div className="mt-4">
           <Notice tone={result.ok ? "success" : "danger"} title={result.ok ? t.groups.done : t.groups.notDone}>
-            {result.message}
+            {localizeServerText(result.message)}
           </Notice>
         </div>
       ) : null}

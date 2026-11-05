@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { addOptOutsAction, type OptOutResult } from "@/server/actions/contacts";
 import { Button, Field, FormCard, Input, Notice, Textarea } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 /**
@@ -16,6 +16,7 @@ import { keepValuesOnSubmit } from "@/components/form-submit";
  */
 export function OptOutForm() {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [result, setResult] = useState<OptOutResult | null>(null);
   const [pending, startTransition] = useTransition();
@@ -58,7 +59,7 @@ export function OptOutForm() {
             tone={result.ok ? "success" : "danger"}
             title={result.ok ? t.contacts.optOuts.recorded : t.contacts.optOuts.notRecorded}
           >
-            {result.message}
+            {localizeServerText(result.message)}
           </Notice>
         ) : null}
 

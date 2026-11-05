@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import { saveTemplateAction, type TemplateResult } from "@/server/actions/templates";
 import { analyzeMessage } from "@/server/domain/segments";
 import { Button, Field, FormCard, Input, Notice, Textarea } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function TemplateForm() {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [body, setBody] = useState("");
   const [result, setResult] = useState<TemplateResult | null>(null);
@@ -66,7 +67,7 @@ export function TemplateForm() {
 
         {result ? (
           <Notice tone={result.ok ? "success" : "danger"} title={result.ok ? t.templates.saved : t.templates.notSaved}>
-            {result.message}
+            {localizeServerText(result.message)}
           </Notice>
         ) : null}
 

@@ -4,11 +4,12 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { applyForSenderAction, type SenderResult } from "@/server/actions/senders";
 import { Button, Field, FormCard, Input, Notice, Textarea } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function SenderApplicationForm() {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [result, setResult] = useState<SenderResult | null>(null);
   const [pending, startTransition] = useTransition();
@@ -65,7 +66,7 @@ export function SenderApplicationForm() {
             tone={result.ok ? "success" : "danger"}
             title={result.ok ? t.settings.senders.submitted : t.settings.senders.notSubmitted}
           >
-            {result.message}
+            {localizeServerText(result.message)}
           </Notice>
         ) : null}
 

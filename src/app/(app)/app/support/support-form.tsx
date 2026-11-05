@@ -6,7 +6,7 @@ import {
   type SupportResult,
 } from "@/server/actions/support";
 import { Button, Card, Field, Input, Notice, Select, Textarea } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 /**
@@ -18,6 +18,7 @@ import { keepValuesOnSubmit } from "@/components/form-submit";
  */
 export function SupportForm() {
   const t = useT();
+  const localizeServerText = useServerText();
   const [result, setResult] = useState<SupportResult | null>(null);
   const [pending, startTransition] = useTransition();
   const formRef = useRef<HTMLFormElement>(null);
@@ -41,7 +42,7 @@ export function SupportForm() {
             tone={result.ok ? "success" : "danger"}
             title={result.ok ? t.supportPage.sent : t.supportPage.notSent}
           >
-            {result.message}
+            {localizeServerText(result.message)}
           </Notice>
         </div>
       ) : null}

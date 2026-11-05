@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateInquiryAction, type AdminResult } from "@/server/actions/admin";
 import { Button, Input, Notice, Select } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 const STATUSES = [
@@ -27,6 +27,7 @@ export function InquiryForm({
   note: string | null;
 }) {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [result, setResult] = useState<AdminResult | null>(null);
   const [pending, startTransition] = useTransition();
@@ -80,7 +81,7 @@ export function InquiryForm({
           tone={result.ok ? "success" : "danger"}
           title={result.ok ? t.adminExtra.updated : t.adminExtra.notUpdated}
         >
-          {result.message}
+          {localizeServerText(result.message)}
         </Notice>
       ) : null}
     </form>

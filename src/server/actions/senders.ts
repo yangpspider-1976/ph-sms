@@ -10,6 +10,7 @@ import { isUniqueViolation } from "@/server/domain/wallet";
 import { recordAudit } from "@/server/audit";
 import { demoFeaturesEnabled } from "@/server/env";
 import { isUuid } from "@/server/uuid";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 /**
  * Sender identity applications.
@@ -87,7 +88,7 @@ export async function applyForSenderAction(formData: FormData): Promise<SenderRe
   revalidatePath("/app/settings/senders");
   return {
     ok: true,
-    message: `${value} submitted for review. You cannot send under it until it is approved.`,
+    message: enServerText.senderSubmitted(value),
   };
 }
 

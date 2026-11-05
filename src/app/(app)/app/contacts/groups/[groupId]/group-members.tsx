@@ -8,7 +8,7 @@ import {
   type GroupResult,
 } from "@/server/actions/groups";
 import { Button, Card, DataTable, Notice } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 
 type Member = {
   contactId: string;
@@ -28,6 +28,7 @@ export function GroupMembers({
   members: Member[];
 }) {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [result, setResult] = useState<GroupResult | null>(null);
@@ -62,7 +63,7 @@ export function GroupMembers({
       {result ? (
         <div className="px-5 pt-4">
           <Notice tone={result.ok ? "success" : "danger"} title={result.ok ? t.groups.updated : t.groups.notUpdated}>
-            {result.message}
+            {localizeServerText(result.message)}
           </Notice>
         </div>
       ) : null}
@@ -133,6 +134,7 @@ export function GroupAddPanel({
   candidates: Candidate[];
 }) {
   const t = useT();
+  const localizeServerText = useServerText();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState("");
   const [result, setResult] = useState<GroupResult | null>(null);
@@ -224,7 +226,7 @@ export function GroupAddPanel({
       {result ? (
         <div className="mt-3">
           <Notice tone={result.ok ? "success" : "danger"} title={result.ok ? t.groups.added : t.groups.notAdded}>
-            {result.message}
+            {localizeServerText(result.message)}
           </Notice>
         </div>
       ) : null}

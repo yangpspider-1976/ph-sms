@@ -4,11 +4,12 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { addPlatformSuppressionAction, type AdminResult } from "@/server/actions/admin";
 import { Button, Field, FormCard, Input, Notice, Textarea } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function PlatformBlockForm() {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [result, setResult] = useState<AdminResult | null>(null);
   const [pending, startTransition] = useTransition();
@@ -41,7 +42,7 @@ export function PlatformBlockForm() {
             tone={result.ok ? "success" : "danger"}
             title={result.ok ? t.adminExtra.blocked : t.adminExtra.notBlocked}
           >
-            {result.message}
+            {localizeServerText(result.message)}
           </Notice>
         ) : null}
 

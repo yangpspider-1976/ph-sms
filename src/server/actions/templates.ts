@@ -52,7 +52,7 @@ export async function saveTemplateAction(formData: FormData): Promise<TemplateRe
   });
 
   revalidatePath("/app/templates");
-  return { ok: true, message: "Template saved." };
+  return { ok: true, message: enServerText.templateSaved };
 }
 
 /** Removes a template, every version of it. Past campaigns keep their own copy of the text. */

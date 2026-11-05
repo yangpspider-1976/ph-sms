@@ -176,7 +176,7 @@ export async function decideSenderAction(formData: FormData): Promise<AdminResul
   });
 
   revalidatePath("/admin/senders");
-  return { ok: true, message: `Sender ${parsed.data.decision.toLowerCase()}.` };
+  return { ok: true, message: enServerText.senderDecided(parsed.data.decision) };
 }
 
 const INQUIRY_STATUSES = [
@@ -241,7 +241,7 @@ export async function updateInquiryAction(formData: FormData): Promise<AdminResu
   revalidatePath("/admin");
   return {
     ok: true,
-    message: `Inquiry moved to ${parsed.data.status.toLowerCase().replace("_", " ")}. No SMS was sent.`,
+    message: enServerText.inquiryMoved(parsed.data.status.replace("_", " ")),
   };
 }
 
@@ -292,7 +292,10 @@ export async function addPlatformSuppressionAction(formData: FormData): Promise<
   revalidatePath("/admin/suppression");
   return {
     ok: true,
-    message: `${added} blocked platform-wide${invalid > 0 ? `, ${invalid} not valid` : ""}.`,
+    message:
+      invalid > 0
+        ? enServerText.platformBlockedSomeInvalid(String(added), String(invalid))
+        : enServerText.platformBlocked(String(added)),
   };
 }
 
@@ -342,7 +345,7 @@ export async function updateLimitsAction(formData: FormData): Promise<AdminResul
   });
 
   revalidatePath("/admin/customers");
-  return { ok: true, message: "Limits updated." };
+  return { ok: true, message: enServerText.limitsUpdated };
 }
 
 /** Lifts a sending freeze once an operator has settled the debt. */
@@ -370,5 +373,5 @@ export async function clearSendingFreezeAction(organizationId: string): Promise<
   });
 
   revalidatePath("/admin/credits");
-  return { ok: true, message: "Sending freeze lifted. The recorded debt is unchanged." };
+  return { ok: true, message: enServerText.freezeLifted };
 }

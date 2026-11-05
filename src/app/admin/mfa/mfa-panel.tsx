@@ -10,7 +10,7 @@ import {
   type MfaSetup,
 } from "@/server/actions/mfa";
 import { Button, ButtonLink, Field, Input, Notice } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function MfaPanel({
@@ -21,6 +21,7 @@ export function MfaPanel({
   remainingRecoveryCodes: number;
 }) {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [setup, setSetup] = useState<MfaSetup | null>(null);
   const [result, setResult] = useState<MfaResult | null>(null);
@@ -59,7 +60,7 @@ export function MfaPanel({
     return (
       <div>
         <Notice tone="success" title={t.adminExtra.mfaOnTitle}>
-          {result.message}
+          {localizeServerText(result.message)}
         </Notice>
         <ul className="mt-4 grid grid-cols-2 gap-2">
           {result.recoveryCodes.map((code) => (
@@ -86,12 +87,12 @@ export function MfaPanel({
       <form action={verify} onSubmit={keepValuesOnSubmit(verify)} className="space-y-4">
         {result && !result.ok ? (
           <Notice tone="danger" title={t.adminExtra.mfaNotVerified}>
-            {result.message}
+            {localizeServerText(result.message)}
           </Notice>
         ) : null}
         {result?.ok ? (
           <Notice tone="success" title={t.adminExtra.mfaVerified}>
-            {result.message}
+            {localizeServerText(result.message)}
           </Notice>
         ) : null}
 
@@ -127,7 +128,7 @@ export function MfaPanel({
         {result && !result.ok ? (
           <div className="mt-4">
             <Notice tone="danger" title={t.adminExtra.mfaNotEnrolled}>
-              {result.message}
+              {localizeServerText(result.message)}
             </Notice>
           </div>
         ) : null}
@@ -153,7 +154,7 @@ export function MfaPanel({
 
       {result && !result.ok ? (
         <Notice tone="danger" title={t.adminExtra.mfaNotEnrolled}>
-          {result.message}
+          {localizeServerText(result.message)}
         </Notice>
       ) : null}
 

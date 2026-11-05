@@ -90,7 +90,7 @@ export async function setContentPolicyAction(raw: string): Promise<ConfigActionR
     revalidatePath("/admin/abuse");
     return {
       ok: true,
-      message: `Saved. ${parsed.data.rules.length} rules are now in force.`,
+      message: enServerText.policySaved(String(parsed.data.rules.length)),
     };
   } catch (err) {
     if (err instanceof ConfigError) return { ok: false, message: err.message };

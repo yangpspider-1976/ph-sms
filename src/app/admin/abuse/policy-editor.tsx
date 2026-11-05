@@ -72,7 +72,7 @@ export function PolicyEditor({ policy }: { policy: StoredContentPolicy }) {
       {result ? (
         <div className="px-5 pt-4">
           <Notice tone={result.ok ? "success" : "danger"} title={result.ok ? t.contacts.detail.saved : t.contacts.detail.notSaved}>
-            {result.message}
+            {localizeServerText(result.message)}
           </Notice>
         </div>
       ) : null}

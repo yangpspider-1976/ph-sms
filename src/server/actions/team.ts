@@ -15,6 +15,7 @@ import {
   TeamError,
 } from "@/server/domain/team";
 import { isUuid } from "@/server/uuid";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 export type TeamResult = { ok: boolean; message: string };
 
@@ -54,7 +55,7 @@ export async function inviteMemberAction(formData: FormData): Promise<TeamResult
   revalidatePath("/app/settings/team");
   return {
     ok: true,
-    message: `Invitation sent to ${parsed.data.email}. It expires in 7 days and can be used once.`,
+    message: enServerText.invitationSent(parsed.data.email),
   };
 }
 

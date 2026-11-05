@@ -14,6 +14,7 @@ import {
   renameGroup,
 } from "@/server/domain/groups";
 import { updateContact } from "@/server/domain/contacts";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 export type GroupResult = { ok: boolean; message: string; groupId?: string };
 
@@ -42,7 +43,7 @@ export async function createGroupAction(formData: FormData): Promise<GroupResult
       description: parsed.data.description,
     });
     revalidatePath("/app/contacts/groups");
-    return { ok: true, message: `"${group.name}" created.`, groupId: group.id };
+    return { ok: true, message: enServerText.groupCreated(group.name), groupId: group.id };
   } catch (err) {
     if (err instanceof GroupError) return { ok: false, message: err.message };
     throw err;
@@ -72,7 +73,7 @@ export async function renameGroupAction(formData: FormData): Promise<GroupResult
     });
     revalidatePath("/app/contacts/groups");
     revalidatePath(`/app/contacts/groups/${groupId.data}`);
-    return { ok: true, message: "Saved." };
+    return { ok: true, message: enServerText.saved };
   } catch (err) {
     if (err instanceof GroupError) return { ok: false, message: err.message };
     throw err;
@@ -94,7 +95,7 @@ export async function deleteGroupAction(groupId: string): Promise<GroupResult> {
     });
     revalidatePath("/app/contacts/groups");
     // Deleting a group never deletes contacts, and the screen says so.
-    return { ok: true, message: "Group deleted. The contacts in it were kept." };
+    return { ok: true, message: enServerText.groupDeleted };
   } catch (err) {
     if (err instanceof GroupError) return { ok: false, message: err.message };
     throw err;
@@ -127,8 +128,8 @@ export async function addToGroupAction(raw: unknown): Promise<GroupResult> {
       ok: true,
       message:
         skipped > 0
-          ? `${added} added. ${skipped} ${skipped === 1 ? "was" : "were"} already in the group.`
-          : `${added} contact${added === 1 ? "" : "s"} added.`,
+          ? enServerText.membersAddedSomeSkipped(String(added), String(skipped))
+          : enServerText.membersAdded(String(added)),
     };
   } catch (err) {
     if (err instanceof GroupError) return { ok: false, message: err.message };
@@ -153,7 +154,7 @@ export async function removeFromGroupAction(raw: unknown): Promise<GroupResult> 
   revalidatePath(`/app/contacts/groups/${parsed.data.groupId}`);
   return {
     ok: true,
-    message: `${removed} removed from the group. ${removed === 1 ? "It is" : "They are"} still in your contacts.`,
+    message: enServerText.membersRemoved(String(removed)),
   };
 }
 
@@ -195,7 +196,7 @@ export async function updateContactAction(formData: FormData): Promise<ContactRe
 
   revalidatePath("/app/contacts");
   revalidatePath(`/app/contacts/${parsed.data.contactId}`);
-  return { ok: true, message: "Saved." };
+  return { ok: true, message: enServerText.saved };
 }
 
 export type GroupRecipientsResult =

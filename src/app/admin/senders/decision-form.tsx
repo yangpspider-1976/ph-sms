@@ -4,11 +4,12 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { decideSenderAction, type AdminResult } from "@/server/actions/admin";
 import { Button, Input, Notice, Select } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function SenderDecision({ senderId, value }: { senderId: string; value: string }) {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [decision, setDecision] = useState("APPROVED");
   const [result, setResult] = useState<AdminResult | null>(null);
@@ -75,7 +76,7 @@ export function SenderDecision({ senderId, value }: { senderId: string; value: s
           tone={result.ok ? "success" : "danger"}
           title={result.ok ? t.adminExtra.recorded : t.common.notRecorded}
         >
-          {result.message}
+          {localizeServerText(result.message)}
         </Notice>
       ) : null}
     </form>

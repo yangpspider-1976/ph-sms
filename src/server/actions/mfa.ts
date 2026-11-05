@@ -15,6 +15,7 @@ import {
   verifyTotp,
 } from "@/server/auth/totp";
 import { recordAudit } from "@/server/audit";
+import { enServerText } from "@/i18n/locales/en-server-text";
 import {
   clearRateLimit,
   peekRateLimit,
@@ -100,7 +101,7 @@ export async function confirmMfaEnrolmentAction(formData: FormData): Promise<Mfa
 
   return {
     ok: true,
-    message: "Two-factor authentication is on. Save these recovery codes now — they are shown once.",
+    message: enServerText.mfaOn,
     recoveryCodes,
   };
 }
@@ -134,7 +135,7 @@ export async function verifyMfaAction(formData: FormData): Promise<MfaResult> {
       objectId: user.id,
     });
     revalidatePath("/admin");
-    return { ok: true, message: "Verified." };
+    return { ok: true, message: enServerText.mfaVerified };
   }
 
   // Recovery codes are single use: a matching one is consumed, not just checked.
@@ -164,7 +165,7 @@ export async function verifyMfaAction(formData: FormData): Promise<MfaResult> {
     revalidatePath("/admin");
     return {
       ok: true,
-      message: `Recovery code accepted. ${remaining.length} remaining — re-enrol soon.`,
+      message: enServerText.recoveryCodeAccepted(String(remaining.length)),
     };
   }
 

@@ -3,11 +3,12 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { submitInquiryAction, type InquiryResult } from "@/server/actions/inquiries";
 import { Button, Field, Input, Notice, Select, Textarea } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { focusFirstInvalid, keepValuesOnSubmit } from "@/components/form-submit";
 
 export function InquiryForm() {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [result, setResult] = useState<InquiryResult | null>(null);
   const [pending, startTransition] = useTransition();
@@ -29,7 +30,7 @@ export function InquiryForm() {
   if (result?.ok) {
     return (
       <Notice tone="success" title={t.bulk.received}>
-        {result.message}
+        {localizeServerText(result.message)}
       </Notice>
     );
   }
@@ -40,7 +41,7 @@ export function InquiryForm() {
 
       {result && !result.ok && !result.fieldErrors ? (
         <Notice tone="danger" title={t.bulk.couldNotSubmit}>
-          {result.message}
+          {localizeServerText(result.message)}
         </Notice>
       ) : null}
 

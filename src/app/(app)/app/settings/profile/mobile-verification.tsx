@@ -9,7 +9,7 @@ import {
   type MobileResult,
 } from "@/server/actions/mobile";
 import { Button, Card, Field, Input, Notice, Pill } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 /**
@@ -26,6 +26,7 @@ export function MobileVerification({
   verifiedAt: string | null;
 }) {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [stage, setStage] = useState<"idle" | "code">("idle");
   const [result, setResult] = useState<MobileResult | null>(null);
@@ -83,7 +84,7 @@ export function MobileVerification({
       {result ? (
         <div className="mt-4">
           <Notice tone={result.ok ? "success" : "danger"} title={result.ok ? t.groups.done : t.groups.notDone}>
-            {result.message}
+            {localizeServerText(result.message)}
           </Notice>
         </div>
       ) : null}

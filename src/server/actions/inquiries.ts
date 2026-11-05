@@ -6,6 +6,7 @@ import { db } from "@/server/db";
 import { inquiries } from "@/server/db/schema";
 import { recordAudit } from "@/server/audit";
 import { checkRateLimit } from "@/server/security/rate-limit";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 /**
  * Public bulk inquiry.
@@ -56,7 +57,7 @@ export async function submitInquiryAction(formData: FormData): Promise<InquiryRe
 
   // Silently accept a honeypot submission so a bot learns nothing.
   if (parsed.data.website) {
-    return { ok: true, message: "Thank you. We will be in touch." };
+    return { ok: true, message: enServerText.inquiryThanks };
   }
 
   const hdrs = await headers();
@@ -109,7 +110,6 @@ export async function submitInquiryAction(formData: FormData): Promise<InquiryRe
   // admin console.
   return {
     ok: true,
-    message:
-      "Thank you. Your request has been logged and someone will contact you about volumes, pricing and sender approval.",
+    message: enServerText.inquiryReceived,
   };
 }

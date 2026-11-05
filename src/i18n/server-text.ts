@@ -38,6 +38,11 @@ function statusLabel(t: Dictionary, raw: string): string {
   return labels[raw] ?? raw;
 }
 
+/** A status an action named in lower-case words ("quotation sent"): its label in one list. */
+function labelFor(labels: Record<string, string>, words: string): string {
+  return labels[words.toUpperCase().replace(/ /g, "_")] ?? words;
+}
+
 const PATTERNS: Pattern[] = [
   [/^(\d+) job\(s\) due more than (\d+)s ago and unclaimed\. Is the worker running\?$/, (s, m) => s.overdueJobs(m[1]!, m[2]!)],
   [/^(\d+) submission\(s\) unresolved; their cost stays held pending reconciliation\.$/, (s, m) => s.unresolvedSubmissions(m[1]!)],
@@ -67,6 +72,25 @@ const PATTERNS: Pattern[] = [
   // A held or refused campaign lists its reasons, each one a message above.
   [/^Held for approval: (.+)\.$/, (s, m, t) => s.held(m[1]!.split("; ").map((r) => localizeServerText(r, t)).join("; "))],
   [/^Refused: (.+)\.$/, (s, m, t) => s.refused(m[1]!.split("; ").map((r) => localizeServerText(r, t)).join("; "))],
+  // What a form says once it has worked.
+  [/^"(.+)" created\.$/, (s, m) => s.groupCreated(m[1]!)],
+  [/^(\d+) contacts? added\.$/, (s, m) => s.membersAdded(m[1]!)],
+  [/^(\d+) added\. (\d+) (?:was|were) already in the group\.$/, (s, m) => s.membersAddedSomeSkipped(m[1]!, m[2]!)],
+  [/^(\d+) removed from the group\. (?:It is|They are) still in your contacts\.$/, (s, m) => s.membersRemoved(m[1]!)],
+  [/^(\d+) numbers? added to your opt-out list\.$/, (s, m) => s.optOutsAdded(m[1]!)],
+  [/^(\d+) added\. (\d+) entr(?:y was|ies were) not a valid Philippine mobile number\.$/, (s, m) => s.optOutsAddedSomeInvalid(m[1]!, m[2]!)],
+  [/^Test sent to (.+)\. It is charged like any other message \((.+)\)\.$/, (s, m) => s.testSent(m[1]!, m[2]!)],
+  [/^We sent a 6-digit code to (.+)\. It expires in 10 minutes\.$/, (s, m) => s.mobileCodeSent(m[1]!)],
+  [/^(.+) is verified\. You can now send test messages\.$/, (s, m) => s.mobileVerified(m[1]!)],
+  [/^(.+) submitted for review\. You cannot send under it until it is approved\.$/, (s, m) => s.senderSubmitted(m[1]!)],
+  [/^Invitation sent to (.+)\. It expires in 7 days and can be used once\.$/, (s, m) => s.invitationSent(m[1]!)],
+  [/^Your reference is (\S+)\. We have emailed a copy to (.+)\.$/, (s, m) => s.supportReference(m[1]!, m[2]!)],
+  [/^Saved\. (\d+) rules are now in force\.$/, (s, m) => s.policySaved(m[1]!)],
+  [/^Inquiry moved to ([a-z ]+)\. No SMS was sent\.$/, (s, m, t) => s.inquiryMoved(labelFor(t.status.inquiry, m[1]!))],
+  [/^Sender (approved|rejected|revoked)\.$/, (s, m, t) => s.senderDecided(labelFor(t.status.sender, m[1]!))],
+  [/^(\d+) blocked platform-wide\.$/, (s, m) => s.platformBlocked(m[1]!)],
+  [/^(\d+) blocked platform-wide, (\d+) not valid\.$/, (s, m) => s.platformBlockedSomeInvalid(m[1]!, m[2]!)],
+  [/^Recovery code accepted\. (\d+) remaining — re-enrol soon\.$/, (s, m) => s.recoveryCodeAccepted(m[1]!)],
 ];
 
 export function localizeServerText(text: string, t: Dictionary): string;

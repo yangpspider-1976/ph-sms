@@ -8,6 +8,7 @@ import { desc } from "drizzle-orm";
 import { demoFeaturesEnabled } from "@/server/env";
 import { getDictionary } from "@/i18n/server";
 import type { Dictionary } from "@/i18n/dictionaries";
+import { localizeServerText } from "@/i18n/server-text";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -31,7 +32,7 @@ export default async function VerifyEmailPage({
       <Card className="mt-6 p-6">
         {result ? (
           <Notice tone={result.ok ? "success" : "danger"} title={result.ok ? t.publicExtra.verified : t.publicExtra.linkNotValid}>
-            {result.message}
+            {localizeServerText(result.message, t)}
           </Notice>
         ) : (
           <Notice tone="info" title={t.verifyEmail.checkInbox}>

@@ -1906,6 +1906,49 @@ export const ko: Dictionary = {
     settingRestored: "기본값으로 복원되었습니다.",
 
     templateGone: "이 템플릿은 더 이상 존재하지 않습니다.",
+
+    templateSaved: "템플릿이 저장되었습니다.",
+    saved: "저장되었습니다.",
+    groupCreated: (name: string) => `"${name}" 그룹을 만들었습니다.`,
+    groupDeleted: "그룹을 삭제했습니다. 그룹에 있던 연락처는 그대로 유지됩니다.",
+    membersAdded: (added: string) => `연락처 ${added}건을 추가했습니다.`,
+    membersAddedSomeSkipped: (added: string, skipped: string) =>
+      `${added}건을 추가했습니다. ${skipped}건은 이미 그룹에 있습니다.`,
+    membersRemoved: (removed: string) =>
+      `${removed}건을 그룹에서 제거했습니다. 연락처 목록에는 그대로 남습니다.`,
+    optOutsAdded: (added: string) => `수신 거부 목록에 번호 ${added}건을 추가했습니다.`,
+    optOutsAddedSomeInvalid: (added: string, invalid: string) =>
+      `${added}건을 추가했습니다. ${invalid}건은 올바른 필리핀 휴대폰 번호가 아닙니다.`,
+    testSent: (mask: string, cost: string) =>
+      `${mask}(으)로 테스트 메시지를 보냈습니다. 테스트도 일반 메시지와 똑같이 요금이 부과됩니다(${cost}).`,
+    mobileCodeSent: (mask: string) => `${mask}(으)로 6자리 인증번호를 보냈습니다. 10분 후 만료됩니다.`,
+    mobileVerified: (mask: string) =>
+      `${mask} 번호가 인증되었습니다. 이제 테스트 메시지를 보낼 수 있습니다.`,
+    mobileRemoved: "휴대폰 번호를 삭제했습니다.",
+    senderSubmitted: (value: string) =>
+      `발신자 ID ${value}의 검토를 요청했습니다. 승인되기 전에는 이 ID로 발송할 수 없습니다.`,
+    invitationSent: (email: string) =>
+      `${email}(으)로 초대를 보냈습니다. 링크는 7일 후 만료되며 1회만 사용할 수 있습니다.`,
+    supportReference: (reference: string, email: string) =>
+      `접수 번호는 ${reference}입니다. 사본을 ${email}(으)로 보냈습니다.`,
+    emailVerified: "이메일 주소가 인증되었습니다.",
+    inquiryReceived:
+      "감사합니다. 요청이 접수되었습니다. 담당자가 발송량, 요금, 발신자 승인에 대해 연락드리겠습니다.",
+    inquiryThanks: "감사합니다. 곧 연락드리겠습니다.",
+
+    policySaved: (rules: string) => `저장되었습니다. 이제 규칙 ${rules}개가 적용됩니다.`,
+    limitsUpdated: "발송 한도가 변경되었습니다.",
+    freezeLifted: "발송 동결이 해제되었습니다. 기록된 미지급금은 그대로입니다.",
+    inquiryMoved: (status: string) =>
+      `문의 상태가 '${status}'(으)로 변경되었습니다. 문자는 발송되지 않았습니다.`,
+    senderDecided: (status: string) => `발신자 ID 상태가 '${status}'(으)로 변경되었습니다.`,
+    platformBlocked: (added: string) => `번호 ${added}건을 플랫폼 전체에서 차단했습니다.`,
+    platformBlockedSomeInvalid: (added: string, invalid: string) =>
+      `번호 ${added}건을 플랫폼 전체에서 차단했습니다. ${invalid}건은 올바르지 않습니다.`,
+    mfaOn: "2단계 인증이 켜졌습니다. 복구 코드는 지금 한 번만 표시되니 바로 저장해 두세요.",
+    mfaVerified: "인증되었습니다.",
+    recoveryCodeAccepted: (remaining: string) =>
+      `복구 코드가 확인되었습니다. 남은 코드는 ${remaining}개입니다. 곧 다시 등록해 주세요.`,
   },
 
   notFound: {

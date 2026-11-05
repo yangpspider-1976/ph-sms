@@ -12,6 +12,7 @@ import {
 import { checkRateLimit } from "@/server/security/rate-limit";
 import { getSmsProvider } from "@/server/providers/sms";
 import { env } from "@/server/env";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 /** Mobile verification (AUTH-02). Optional for every account. */
 
@@ -49,7 +50,7 @@ export async function startMobileVerificationAction(
       ok: true,
       mask: result.mask,
       demoCode: result.demoCode,
-      message: `We sent a 6-digit code to ${result.mask}. It expires in 10 minutes.`,
+      message: enServerText.mobileCodeSent(result.mask),
     };
   } catch (err) {
     if (err instanceof MobileVerificationError) return { ok: false, message: err.message };
@@ -69,7 +70,7 @@ export async function confirmMobileVerificationAction(
     const { mask } = await confirmMobileVerification({ userId: user.id, code });
     revalidatePath("/app/settings/profile");
     revalidatePath("/app/send");
-    return { ok: true, mask, message: `${mask} is verified. You can now send test messages.` };
+    return { ok: true, mask, message: enServerText.mobileVerified(mask) };
   } catch (err) {
     if (err instanceof MobileVerificationError) return { ok: false, message: err.message };
     throw err;
@@ -81,5 +82,5 @@ export async function removeVerifiedMobileAction(): Promise<MobileResult> {
   await removeVerifiedMobile(user.id);
   revalidatePath("/app/settings/profile");
   revalidatePath("/app/send");
-  return { ok: true, message: "Your mobile number has been removed." };
+  return { ok: true, message: enServerText.mobileRemoved };
 }

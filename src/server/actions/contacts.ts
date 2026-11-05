@@ -10,6 +10,7 @@ import { db } from "@/server/db";
 import { getEffectiveConfig } from "@/server/domain/app-config";
 import { checkRateLimit } from "@/server/security/rate-limit";
 import { isUuid } from "@/server/uuid";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 export type ImportActionResult =
   | { ok: true; preview: ImportPreview }
@@ -144,7 +145,7 @@ export async function addOptOutsAction(formData: FormData): Promise<OptOutResult
     added,
     message:
       invalid > 0
-        ? `${added} added. ${invalid} entr${invalid === 1 ? "y was" : "ies were"} not a valid Philippine mobile number.`
-        : `${added} number${added === 1 ? "" : "s"} added to your opt-out list.`,
+        ? enServerText.optOutsAddedSomeInvalid(String(added), String(invalid))
+        : enServerText.optOutsAdded(String(added)),
   };
 }

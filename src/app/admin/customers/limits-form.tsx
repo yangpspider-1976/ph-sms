@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateLimitsAction, type AdminResult } from "@/server/actions/admin";
 import { Button, Input, Notice } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function LimitsForm({
@@ -19,6 +19,7 @@ export function LimitsForm({
   usingDefaults: boolean;
 }) {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [result, setResult] = useState<AdminResult | null>(null);
   const [pending, startTransition] = useTransition();
@@ -74,7 +75,7 @@ export function LimitsForm({
           tone={result.ok ? "success" : "danger"}
           title={result.ok ? t.adminExtra.updated : t.adminExtra.notUpdated}
         >
-          {result.message}
+          {localizeServerText(result.message)}
         </Notice>
       ) : null}
     </form>

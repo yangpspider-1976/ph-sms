@@ -5,6 +5,7 @@ import { authorize, referenceId } from "@/server/auth/context";
 import { recordAudit } from "@/server/audit";
 import { checkRateLimit } from "@/server/security/rate-limit";
 import { sendMail } from "@/server/providers/mail";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 export type SupportResult =
   | { ok: true; reference: string; message: string }
@@ -83,6 +84,6 @@ export async function submitSupportRequestAction(
   return {
     ok: true,
     reference,
-    message: `Your reference is ${reference}. We have emailed a copy to ${auth.ctx.user.email}.`,
+    message: enServerText.supportReference(reference, auth.ctx.user.email),
   };
 }

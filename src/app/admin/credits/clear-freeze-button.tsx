@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { clearSendingFreezeAction, type AdminResult } from "@/server/actions/admin";
 import { Button, Notice } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 
 /**
  * Lifts a sending freeze.
@@ -15,6 +15,7 @@ import { useT } from "@/i18n/client";
  */
 export function ClearFreezeButton({ organizationId }: { organizationId: string }) {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [confirming, setConfirming] = useState(false);
   const [result, setResult] = useState<AdminResult | null>(null);
@@ -33,7 +34,7 @@ export function ClearFreezeButton({ organizationId }: { organizationId: string }
   if (result?.ok) {
     return (
       <Notice tone="success" title={t.admin.credits.freezeLifted}>
-        {result.message}
+        {localizeServerText(result.message)}
       </Notice>
     );
   }

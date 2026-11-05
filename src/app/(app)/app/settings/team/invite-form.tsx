@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import { inviteMemberAction, type TeamResult } from "@/server/actions/team";
 import { Button, Field, FormCard, Input, Notice, Select } from "@/components/ui";
 import { ROLE_ORDER } from "@/server/auth/rbac";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function InviteForm() {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [result, setResult] = useState<TeamResult | null>(null);
   const [pending, startTransition] = useTransition();
@@ -49,7 +50,7 @@ export function InviteForm() {
             tone={result.ok ? "success" : "danger"}
             title={result.ok ? t.settings.team.inviteSent : t.settings.team.inviteNotSent}
           >
-            {result.message}
+            {localizeServerText(result.message)}
           </Notice>
         ) : null}
 
