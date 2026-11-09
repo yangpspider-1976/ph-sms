@@ -18,6 +18,7 @@ import { findSuppressedNumbers } from "./suppression";
 import { limitsFor, reserveQuota, QuotaError } from "./quota";
 import { isUniqueViolation, reserveFunds, WalletError } from "./wallet";
 import { recordAudit } from "@/server/audit";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 /**
  * Campaign submission.
@@ -109,7 +110,7 @@ export async function submitCampaign(input: SubmitInput): Promise<SubmitResult> 
         // Same key, different request: a conflict, never a second send.
         if (!existing || existing.requestHash !== requestHash) {
           throw new SubmitError(
-            "That request key has already been used for a different send.",
+            enServerText.requestKeyReused,
             "IDEMPOTENCY_CONFLICT",
           );
         }
@@ -134,7 +135,7 @@ export async function submitCampaign(input: SubmitInput): Promise<SubmitResult> 
           }
         }
         throw new SubmitError(
-          "That request is already being processed.",
+          enServerText.requestInProgress,
           "IDEMPOTENCY_CONFLICT",
         );
       }
@@ -156,7 +157,7 @@ export async function submitCampaign(input: SubmitInput): Promise<SubmitResult> 
       )[0];
       if (!org || org.status !== "ACTIVE") {
         throw new SubmitError(
-          "This organization is not active and cannot send.",
+          enServerText.organizationCannotSend,
           "ORG_NOT_ACTIVE",
         );
       }
@@ -177,7 +178,7 @@ export async function submitCampaign(input: SubmitInput): Promise<SubmitResult> 
       )[0];
       if (!sender) {
         throw new SubmitError(
-          "That sender identity is no longer approved. Review the send again.",
+          enServerText.senderNoLongerApproved,
           "SENDER_NOT_APPROVED",
         );
       }
@@ -188,7 +189,7 @@ export async function submitCampaign(input: SubmitInput): Promise<SubmitResult> 
 
       if (included.length === 0) {
         throw new SubmitError(
-          "Every recipient on this quote has since opted out, so there is nothing to send.",
+          enServerText.allOptedOut,
           "NO_ELIGIBLE_RECIPIENTS",
         );
       }
@@ -341,14 +342,14 @@ function translate(err: unknown): Error {
   if (err instanceof WalletError) {
     if (err.code === "INSUFFICIENT_FUNDS") {
       return new SubmitError(
-        "Your available credit does not cover this send. Top up and review again.",
+        enServerText.creditShort,
         "INSUFFICIENT_FUNDS",
         err.message,
       );
     }
     if (err.code === "SENDING_FROZEN") {
       return new SubmitError(
-        "Sending is frozen on this account. Contact support.",
+        enServerText.sendingFrozen,
         "SENDING_FROZEN",
         err.message,
       );
@@ -362,7 +363,7 @@ function translate(err: unknown): Error {
   }
   if (isUniqueViolation(err)) {
     return new SubmitError(
-      "That request has already been submitted.",
+      enServerText.alreadySubmitted,
       "IDEMPOTENCY_CONFLICT",
     );
   }

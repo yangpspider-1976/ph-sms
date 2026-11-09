@@ -73,7 +73,7 @@ export async function setContentPolicyAction(raw: string): Promise<ConfigActionR
   try {
     parsedJson = JSON.parse(raw);
   } catch {
-    return { ok: false, message: "That is not valid JSON." };
+    return { ok: false, message: enServerText.notJson };
   }
 
   const parsed = contentPolicySchema.safeParse(parsedJson);
@@ -81,7 +81,7 @@ export async function setContentPolicyAction(raw: string): Promise<ConfigActionR
     const issue = parsed.error.issues[0];
     return {
       ok: false,
-      message: issue ? `${issue.path.join(".") || "policy"}: ${issue.message}` : "That policy is not valid.",
+      message: issue ? enServerText.policyIssue(issue.path.join(".") || "policy", issue.message) : enServerText.policyNotValid,
     };
   }
 

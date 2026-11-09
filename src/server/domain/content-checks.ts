@@ -13,6 +13,7 @@
  * without touching this file.
  */
 import { z } from "zod";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 export type CheckSeverity = "BLOCK" | "REVIEW";
 
@@ -68,45 +69,45 @@ export const DEFAULT_CONTENT_POLICY: ContentPolicy = {
     {
       id: "credential-request",
       severity: "BLOCK",
-      description: "Asks for a password, PIN, OTP or card details",
+      description: enServerText.ruleCredentialRequest,
       pattern:
         /\b(password|passwd|pin\s*code|otp|one[-\s]?time\s*(pin|password|code)|cvv|card\s*number|account\s*number)\b/i,
     },
     {
       id: "credential-phishing-verb",
       severity: "BLOCK",
-      description: "Asks the recipient to verify or confirm an account",
+      description: enServerText.ruleVerifyAccount,
       pattern: /\b(verify|confirm|validate|update)\b[^.]{0,40}\b(account|identity|details)\b/i,
     },
     {
       id: "lottery-prize",
       severity: "BLOCK",
-      description: "Prize, lottery or windfall claim",
+      description: enServerText.rulePrize,
       pattern: /\b(congratulations|you\s*(have\s*)?won|winner|jackpot|lotto|raffle\s*prize)\b/i,
     },
     {
       id: "loan-offer",
       severity: "REVIEW",
-      description: "Lending or credit offer",
+      description: enServerText.ruleLending,
       pattern: /\b(loan|lending|cash\s*advance|sangla|pautang|interest\s*rate)\b/i,
     },
     {
       id: "investment",
       severity: "REVIEW",
-      description: "Investment or returns claim",
+      description: enServerText.ruleInvestment,
       pattern: /\b(invest|investment|returns?\s*guaranteed|double\s*your\s*money|crypto)\b/i,
     },
     {
       id: "urgency",
       severity: "REVIEW",
-      description: "High-pressure urgency language",
+      description: enServerText.ruleUrgency,
       pattern:
         /\b(act\s*now|urgent(ly)?|immediately|expires?\s*(today|in\s*\d+)|last\s*chance|final\s*notice)\b/i,
     },
     {
       id: "gambling",
       severity: "REVIEW",
-      description: "Gambling or betting",
+      description: enServerText.ruleGambling,
       pattern: /\b(casino|betting|sabong|online\s*game\s*of\s*chance|slots?)\b/i,
     },
   ],
@@ -191,7 +192,7 @@ export function checkContent(
       findings.push({
         ruleId: "url-blocked",
         severity: "BLOCK",
-        description: `Link to a blocked domain (${domain})`,
+        description: enServerText.blockedDomain(domain),
         evidence: domain,
       });
       continue;
@@ -200,7 +201,7 @@ export function checkContent(
       findings.push({
         ruleId: "url-shortener",
         severity: "REVIEW",
-        description: `Shortened link hides its destination (${domain})`,
+        description: enServerText.shortenedLink(domain),
         evidence: domain,
       });
       continue;
@@ -210,7 +211,7 @@ export function checkContent(
       findings.push({
         ruleId: "url-unknown",
         severity: "REVIEW",
-        description: `Link to a domain that is not on the allow list (${domain})`,
+        description: enServerText.unlistedDomain(domain),
         evidence: domain,
       });
     }
@@ -223,7 +224,7 @@ export function checkContent(
     findings.push({
       ruleId: "volume",
       severity: "REVIEW",
-      description: `${recipients} recipients is at or above the review threshold of ${policy.reviewRecipientThreshold}`,
+      description: enServerText.recipientThreshold(String(recipients), String(policy.reviewRecipientThreshold)),
       evidence: String(recipients),
     });
   }
@@ -268,13 +269,12 @@ export const storedRuleSchema = z.object({
   description: z.string().min(1).max(200),
   // Capped because a stored pattern is compiled and run against every message.
   pattern: z.string().min(1).max(500).refine(isSafePattern, {
-    message:
-      "That pattern nests one repetition inside another, which can take a very long time to run. Simplify it.",
+    message: enServerText.patternNested,
   }),
   flags: z
     .string()
     .max(4)
-    .regex(/^[imsu]*$/, "Only the i, m, s and u flags are allowed.")
+    .regex(/^[imsu]*$/, enServerText.onlyFlags)
     .default("i"),
 });
 

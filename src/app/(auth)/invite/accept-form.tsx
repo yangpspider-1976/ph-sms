@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { acceptInviteAction } from "@/server/actions/team";
 import { Button, Field, Input, Notice } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function AcceptInviteForm({
@@ -16,6 +16,7 @@ export function AcceptInviteForm({
   needsAccount: boolean;
 }) {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -34,7 +35,7 @@ export function AcceptInviteForm({
 
       {error ? (
         <Notice tone="danger" title={t.invite.couldNotAccept}>
-          {error}
+          {localizeServerText(error)}
         </Notice>
       ) : null}
 

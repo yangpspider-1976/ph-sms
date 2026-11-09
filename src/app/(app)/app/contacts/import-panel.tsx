@@ -36,6 +36,7 @@ export function ImportPanel({
   maxDataRows: number;
 }) {
   const t = useT();
+  const localizeServerText = useServerText();
   const { tag } = useLocale();
   const maxMiB = Math.round(maxUploadBytes / 1024 / 1024);
 
@@ -141,7 +142,7 @@ export function ImportPanel({
       {result && !result.ok ? (
         <div className="mt-4">
           <Notice tone="danger" title={t.contacts.importPanel.failedTitle}>
-            {result.message}
+            {localizeServerText(result.message)}
             {result.detail && result.detail.length > 0 ? (
               <ul className="mt-2 list-disc pl-4">
                 {result.detail.slice(0, 5).map((d) => (
@@ -204,7 +205,7 @@ function Preview({
                 →
               </span>
               <span className={column.used ? "text-muted" : "text-muted italic"}>
-                {column.field}
+                {localizeServerText(column.field)}
               </span>
             </li>
           ))}

@@ -22,22 +22,22 @@ export type InquiryResult =
   | { ok: false; message: string; fieldErrors?: Record<string, string> };
 
 const schema = z.object({
-  company: z.string().min(2, "Enter your business name.").max(200),
-  contactName: z.string().min(2, "Enter a contact name.").max(200),
-  contactEmail: z.string().email("Enter a valid email address."),
+  company: z.string().min(2, enServerText.enterBusinessName).max(200),
+  contactName: z.string().min(2, enServerText.enterContactName).max(200),
+  contactEmail: z.string().email(enServerText.enterValidEmail),
   contactPhone: z.string().max(40).optional(),
   estimatedVolume: z.coerce
     .number()
     .int()
-    .positive("Enter roughly how many messages you expect to send.")
+    .positive(enServerText.enterVolume)
     .max(100_000_000),
-  frequency: z.string().min(1, "How often would you send?").max(100),
+  frequency: z.string().min(1, enServerText.howOften).max(100),
   purpose: z.enum(["INFORMATIONAL", "PROMOTIONAL"]),
-  audience: z.string().min(10, "Describe who receives these messages.").max(1000),
+  audience: z.string().min(10, enServerText.describeAudience).max(1000),
   preferredDate: z.string().max(40).optional(),
-  sampleMessage: z.string().min(10, "Paste an example message.").max(1000),
+  sampleMessage: z.string().min(10, enServerText.pasteExample).max(1000),
   senderNeeds: z.string().max(200).optional(),
-  consentSource: z.string().min(3, "Tell us how these people agreed to hear from you.").max(500),
+  consentSource: z.string().min(3, enServerText.consentHow).max(500),
   // Honeypot: a real person leaves this empty.
   website: z.string().max(0).optional(),
 });
@@ -52,7 +52,7 @@ export async function submitInquiryAction(formData: FormData): Promise<InquiryRe
       const key = String(issue.path[0] ?? "form");
       fieldErrors[key] ??= issue.message;
     }
-    return { ok: false, message: "Check the highlighted fields.", fieldErrors };
+    return { ok: false, message: enServerText.checkHighlighted, fieldErrors };
   }
 
   // Silently accept a honeypot submission so a bot learns nothing.

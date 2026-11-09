@@ -9,6 +9,7 @@ import { analyzeMessage, validateMessageBody } from "./segments";
 import { findSuppressedNumbers } from "./suppression";
 import { checkContent, type ContentCheckResult, type ContentPolicy } from "./content-checks";
 import { getEffectiveContentPolicy } from "./app-config";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 /**
  * Immutable priced offer.
@@ -99,7 +100,7 @@ export async function issueQuote(request: QuoteRequest): Promise<IssuedQuote> {
 
   if (request.purpose === "PROMOTIONAL") {
     throw new QuoteError(
-      "Promotional messages are handled as an inquiry, not self-service. Request a bulk quote instead.",
+      enServerText.promotionalNeedsInquiry,
       "PROMOTIONAL_INQUIRY_ONLY",
     );
   }
@@ -121,7 +122,7 @@ export async function issueQuote(request: QuoteRequest): Promise<IssuedQuote> {
   const sender = senderRows[0];
   if (!sender) {
     throw new QuoteError(
-      "That sender identity is not approved for this organization.",
+      enServerText.senderNotApproved,
       "SENDER_NOT_ALLOWED",
     );
   }
@@ -137,11 +138,11 @@ export async function issueQuote(request: QuoteRequest): Promise<IssuedQuote> {
     const now = Date.now();
     const at = request.scheduledAt.getTime();
     if (at <= now) {
-      throw new QuoteError("Pick a time in the future.", "SCHEDULE_INVALID");
+      throw new QuoteError(enServerText.pickFutureTime, "SCHEDULE_INVALID");
     }
     if (at > now + config.maxScheduleDays * 86_400_000) {
       throw new QuoteError(
-        `Scheduling is limited to ${config.maxScheduleDays} days ahead.`,
+        enServerText.scheduleTooFar(String(config.maxScheduleDays)),
         "SCHEDULE_INVALID",
       );
     }
@@ -172,7 +173,7 @@ export async function issueQuote(request: QuoteRequest): Promise<IssuedQuote> {
   if (!request.isTestSend && unique.length > config.selfServiceCeiling) {
     exclusions.overCeiling = unique.length - config.selfServiceCeiling;
     throw new QuoteError(
-      `This send has ${unique.length} unique destinations, above the self-service limit of ${config.selfServiceCeiling}. Request a bulk quote for a list this size.`,
+      enServerText.overSelfServiceLimit(String(unique.length), String(config.selfServiceCeiling)),
       "ABOVE_SELF_SERVICE_CEILING",
     );
   }
@@ -183,7 +184,7 @@ export async function issueQuote(request: QuoteRequest): Promise<IssuedQuote> {
 
   if (eligible.length === 0) {
     throw new QuoteError(
-      "No eligible recipients remain after validation and opt-outs, so there is nothing to send.",
+      enServerText.noEligibleRecipients,
       "NO_ELIGIBLE_RECIPIENTS",
     );
   }
@@ -200,7 +201,7 @@ export async function issueQuote(request: QuoteRequest): Promise<IssuedQuote> {
 
   if (checks.blocked) {
     throw new QuoteError(
-      `${checks.summary} Edit the message and try again.`,
+      enServerText.refusedEditMessage(checks.summary),
       "CONTENT_BLOCKED",
     );
   }
@@ -286,21 +287,21 @@ export async function loadQuoteForConfirmation(
     .limit(1);
 
   const quote = rows[0];
-  if (!quote) throw new QuoteError("That quote could not be found.", "QUOTE_NOT_FOUND");
+  if (!quote) throw new QuoteError(enServerText.quoteNotFound, "QUOTE_NOT_FOUND");
 
   // Confirmation is bound to the user the quote was issued to.
   if (quote.createdBy !== input.userId) {
-    throw new QuoteError("That quote was issued to a different user.", "QUOTE_MISMATCH");
+    throw new QuoteError(enServerText.quoteOtherUser, "QUOTE_MISMATCH");
   }
   if (quote.consumedByCampaignId) {
     throw new QuoteError(
-      "That quote has already been used for a campaign.",
+      enServerText.quoteUsed,
       "QUOTE_ALREADY_USED",
     );
   }
   if (quote.expiresAt.getTime() <= Date.now()) {
     throw new QuoteError(
-      "This quote has expired. Review the send again to get current pricing.",
+      enServerText.quoteExpired,
       "QUOTE_EXPIRED",
     );
   }
@@ -309,10 +310,10 @@ export async function loadQuoteForConfirmation(
 
   // The snapshot must still match the hash the customer confirmed against.
   if (hashRecipients(recipients) !== quote.recipientHash) {
-    throw new QuoteError("This quote's recipient list does not match.", "QUOTE_MISMATCH");
+    throw new QuoteError(enServerText.quoteRecipientsChanged, "QUOTE_MISMATCH");
   }
   if (sha256(quote.body) !== quote.bodyHash) {
-    throw new QuoteError("This quote's message does not match.", "QUOTE_MISMATCH");
+    throw new QuoteError(enServerText.quoteMessageChanged, "QUOTE_MISMATCH");
   }
 
   return { ...quote, recipients };

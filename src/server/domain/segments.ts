@@ -11,6 +11,8 @@
  * GSM-7 it does not exist at all.
  */
 
+import { enServerText } from "@/i18n/locales/en-server-text";
+
 export type Encoding = "GSM7" | "UCS2";
 
 /**
@@ -164,14 +166,14 @@ export function validateMessageBody(
   },
 ): MessageRejection {
   if (body.trim().length === 0) {
-    return { ok: false, code: "EMPTY", message: "Enter a message." };
+    return { ok: false, code: "EMPTY", message: enServerText.enterMessage };
   }
   if (VARIABLE_SYNTAX.test(body)) {
     return {
       ok: false,
       code: "TEMPLATE_VARIABLES",
       message:
-        "Personalization variables are not available yet, so {{name}} would be sent literally. Remove the variable and write the message out in full.",
+        enServerText.noVariables,
     };
   }
   const info = analyzeMessage(body);
@@ -179,7 +181,7 @@ export function validateMessageBody(
     return {
       ok: false,
       code: "UNSUPPORTED_CHARACTERS",
-      message: "This sender only supports the basic GSM character set.",
+      message: enServerText.gsmOnly,
     };
   }
   if (info.hasNonBmp && !opts.supportsNonBmp) {
@@ -187,14 +189,14 @@ export function validateMessageBody(
       ok: false,
       code: "UNSUPPORTED_NON_BMP",
       message:
-        "This provider supports strict UCS-2 only, which cannot carry emoji outside the basic multilingual plane. Remove them.",
+        enServerText.ucs2Strict,
     };
   }
   if (info.segments > opts.maxSegments) {
     return {
       ok: false,
       code: "TOO_MANY_SEGMENTS",
-      message: `This message is ${info.segments} segments; the limit is ${opts.maxSegments}.`,
+      message: enServerText.tooManySegments(String(info.segments), String(opts.maxSegments)),
     };
   }
   return { ok: true };

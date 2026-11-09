@@ -5,6 +5,7 @@ import { z } from "zod";
 import { authorize } from "@/server/auth/context";
 import { approveCampaign, rejectCampaign, ApprovalError } from "@/server/domain/approval";
 import { dispatchAfterResponse } from "@/server/jobs/dispatch-after-response";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 export type ApprovalResult = { ok: boolean; message: string };
 
@@ -20,7 +21,7 @@ export async function approveCampaignAction(campaignId: string): Promise<Approva
   if (!auth.ok) return { ok: false, message: auth.error.message };
 
   const parsed = z.string().uuid().safeParse(campaignId);
-  if (!parsed.success) return { ok: false, message: "That campaign is not valid." };
+  if (!parsed.success) return { ok: false, message: enServerText.campaignNotValid };
 
   try {
     const result = await approveCampaign({
@@ -37,8 +38,8 @@ export async function approveCampaignAction(campaignId: string): Promise<Approva
     return {
       ok: true,
       message: result.scheduledAt
-        ? "Approved. It will send at the scheduled time."
-        : "Approved. It has been queued for sending.",
+        ? enServerText.approvedScheduled
+        : enServerText.approvedQueued,
     };
   } catch (err) {
     if (err instanceof ApprovalError) return { ok: false, message: err.message };
@@ -53,7 +54,7 @@ export async function rejectCampaignAction(formData: FormData): Promise<Approval
   const parsed = z
     .object({
       campaignId: z.string().uuid(),
-      reason: z.string().trim().min(5, "Give a reason so the sender knows what to change."),
+      reason: z.string().trim().min(5, enServerText.giveRejectionReason),
     })
     .safeParse({
       campaignId: formData.get("campaignId"),
@@ -61,7 +62,7 @@ export async function rejectCampaignAction(formData: FormData): Promise<Approval
     });
 
   if (!parsed.success) {
-    return { ok: false, message: parsed.error.issues[0]?.message ?? "That rejection is not valid." };
+    return { ok: false, message: parsed.error.issues[0]?.message ?? enServerText.rejectionNotValid };
   }
 
   try {
@@ -77,7 +78,7 @@ export async function rejectCampaignAction(formData: FormData): Promise<Approval
 
     return {
       ok: true,
-      message: `Rejected. Nothing was sent and the reserved credit has been returned.`,
+      message: enServerText.rejectedCreditReturned,
     };
   } catch (err) {
     if (err instanceof ApprovalError) return { ok: false, message: err.message };

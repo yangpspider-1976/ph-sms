@@ -3,6 +3,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { type DbOrTx } from "@/server/db";
 import { quotaBuckets, quotaReservations } from "@/server/db/schema";
 import { manilaDayKey, manilaMonthKey, type AppConfig } from "@/server/config";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 /**
  * Destination quota.
@@ -98,8 +99,8 @@ export async function reserveQuota(
     if (input.count > remaining) {
       throw new QuotaError(
         period === "DAY"
-          ? `This send needs ${input.count} destinations but only ${Math.max(remaining, 0)} remain in today's limit (${effectiveLimit}).`
-          : `This send needs ${input.count} destinations but only ${Math.max(remaining, 0)} remain in this month's limit (${effectiveLimit}).`,
+          ? enServerText.dailyQuota(String(input.count), String(Math.max(remaining, 0)), String(effectiveLimit))
+          : enServerText.monthlyQuota(String(input.count), String(Math.max(remaining, 0)), String(effectiveLimit)),
         period === "DAY" ? "DAILY_EXCEEDED" : "MONTHLY_EXCEEDED",
         Math.max(remaining, 0),
       );

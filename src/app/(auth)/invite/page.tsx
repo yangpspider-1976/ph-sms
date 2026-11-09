@@ -5,6 +5,7 @@ import { getSessionUser } from "@/server/auth/session";
 import { Card, Notice } from "@/components/ui";
 import { AcceptInviteForm } from "./accept-form";
 import { getDictionary } from "@/i18n/server";
+import { localizeServerText } from "@/i18n/server-text";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -38,7 +39,7 @@ export default async function InvitePage({
     return (
       <Shell>
         <Notice tone="danger" title={t.invite.cannotUseTitle}>
-          {err instanceof TeamError ? err.message : "That link is not valid."}
+          {err instanceof TeamError ? localizeServerText(err.message, t) : t.invite.linkNotValid}
         </Notice>
         <p className="mt-4 text-center text-[13px] text-muted">
           <Link href="/login" className="font-semibold text-brand-700 hover:underline">

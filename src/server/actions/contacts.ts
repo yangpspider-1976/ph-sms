@@ -26,14 +26,14 @@ export async function uploadContactsAction(formData: FormData): Promise<ImportAc
 
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
-    return { ok: false, message: "Choose a CSV file to upload.", code: "NO_FILE" };
+    return { ok: false, message: enServerText.chooseCsv, code: "NO_FILE" };
   }
 
   const config = await getEffectiveConfig();
   if (file.size > config.maxUploadBytes) {
     return {
       ok: false,
-      message: `That file is larger than the ${Math.round(config.maxUploadBytes / 1024 / 1024)} MiB limit.`,
+      message: enServerText.uploadTooLarge(String(Math.round(config.maxUploadBytes / 1024 / 1024))),
       code: "TOO_LARGE",
     };
   }
@@ -65,7 +65,7 @@ export async function commitImportAction(importId: string): Promise<CommitResult
   if (!auth.ok) return { ok: false, message: auth.error.message };
 
   const parsed = z.string().uuid().safeParse(importId);
-  if (!parsed.success) return { ok: false, message: "That import is not valid." };
+  if (!parsed.success) return { ok: false, message: enServerText.importNotValid };
 
   const result = await commitImport({
     importId: parsed.data,
@@ -109,11 +109,11 @@ export async function addOptOutsAction(formData: FormData): Promise<OptOutResult
   if (!auth.ok) return { ok: false, message: auth.error.message };
 
   const raw = String(formData.get("numbers") ?? "");
-  const reason = String(formData.get("reason") ?? "").trim() || "Requested to stop";
+  const reason = String(formData.get("reason") ?? "").trim() || enServerText.requestedToStop;
   const entries = splitPastedNumbers(raw);
 
   if (entries.length === 0) {
-    return { ok: false, message: "Enter at least one mobile number." };
+    return { ok: false, message: enServerText.enterMobileNumbers };
   }
 
   let added = 0;

@@ -3,22 +3,27 @@
 import { useActionState } from "react";
 import { loginAction, type ActionState } from "@/server/actions/auth";
 import { Button, Field, Input, Notice } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function LoginForm() {
   const t = useT();
+  const localizeServerText = useServerText();
   const [state, action, pending] = useActionState<ActionState, FormData>(loginAction, null);
+  const err = (field: string) => {
+    const message = state?.fieldErrors?.[field];
+    return message ? localizeServerText(message) : undefined;
+  };
 
   return (
     <form action={action} onSubmit={keepValuesOnSubmit(action)} className="space-y-4">
       {state?.error ? (
         <Notice tone="danger" title={t.auth.login.failed}>
-          {state.error}
+          {localizeServerText(state.error)}
         </Notice>
       ) : null}
 
-      <Field label={t.auth.login.email} htmlFor="email" error={state?.fieldErrors?.email}>
+      <Field label={t.auth.login.email} htmlFor="email" error={err("email")}>
         <Input
           id="email"
           name="email"
@@ -29,7 +34,7 @@ export function LoginForm() {
         />
       </Field>
 
-      <Field label={t.auth.login.password} htmlFor="password" error={state?.fieldErrors?.password}>
+      <Field label={t.auth.login.password} htmlFor="password" error={err("password")}>
         <Input id="password" name="password" type="password" autoComplete="current-password" required />
       </Field>
 

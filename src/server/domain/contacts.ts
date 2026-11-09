@@ -8,6 +8,7 @@ import { maskNormalized } from "./phone";
 import { parseContactCsv, type CsvParseResult } from "./csv";
 import { findSuppressedNumbers } from "./suppression";
 import { recordAudit } from "@/server/audit";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 /**
  * Contact imports.
@@ -197,16 +198,16 @@ export async function createImport(input: {
 
 /** Human wording for each column the platform understands. */
 const COLUMN_MEANINGS: Record<string, string> = {
-  phone_number: "Mobile number",
-  first_name: "First name",
-  last_name: "Last name",
-  consent_source: "How they agreed to hear from you",
-  consent_date: "When they agreed",
-  custom_1: "Custom field 1",
-  custom_2: "Custom field 2",
-  custom_3: "Custom field 3",
-  custom_4: "Custom field 4",
-  custom_5: "Custom field 5",
+  phone_number: enServerText.columnPhone,
+  first_name: enServerText.columnFirstName,
+  last_name: enServerText.columnLastName,
+  consent_source: enServerText.columnConsentSource,
+  consent_date: enServerText.columnConsentDate,
+  custom_1: enServerText.columnCustom("1"),
+  custom_2: enServerText.columnCustom("2"),
+  custom_3: enServerText.columnCustom("3"),
+  custom_4: enServerText.columnCustom("4"),
+  custom_5: enServerText.columnCustom("5"),
 };
 
 /** Maps the file's headers to what the import will do with each (REC-02). */
@@ -215,7 +216,7 @@ function describeColumns(headers: string[]): ImportPreview["columnMapping"] {
     const meaning = COLUMN_MEANINGS[header];
     return {
       header,
-      field: meaning ?? "Ignored",
+      field: meaning ?? enServerText.columnIgnored,
       used: Boolean(meaning),
     };
   });

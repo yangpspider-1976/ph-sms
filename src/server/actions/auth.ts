@@ -31,8 +31,8 @@ import { enServerText } from "@/i18n/locales/en-server-text";
 export type ActionState = { error?: string; fieldErrors?: Record<string, string> } | null;
 
 const loginSchema = z.object({
-  email: z.string().email("Enter a valid email address."),
-  password: z.string().min(1, "Enter your password."),
+  email: z.string().email(enServerText.enterValidEmail),
+  password: z.string().min(1, enServerText.enterPassword),
 });
 
 export async function loginAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
@@ -71,7 +71,7 @@ export async function loginAction(_prev: ActionState, formData: FormData): Promi
     for (const subject of subjects) {
       await recordRateLimitFailure("login", subject);
     }
-    return { error: "That email address and password do not match." };
+    return { error: enServerText.loginMismatch };
   }
 
   // A correct password clears the counter, so ordinary typos never accumulate
@@ -91,18 +91,18 @@ export async function loginAction(_prev: ActionState, formData: FormData): Promi
 }
 
 const signupSchema = z.object({
-  fullName: z.string().min(2, "Enter your name."),
-  email: z.string().email("Enter a valid work email address."),
+  fullName: z.string().min(2, enServerText.enterYourName),
+  email: z.string().email(enServerText.enterValidWorkEmail),
   password: z
     .string()
-    .min(12, "Use at least 12 characters.")
-    .max(200, "That password is too long."),
-  company: z.string().min(2, "Enter your registered business name."),
-  registrationId: z.string().min(2, "Enter your SEC or DTI registration number."),
-  address: z.string().min(5, "Enter your business address."),
-  industry: z.string().min(2, "Enter your industry."),
+    .min(12, enServerText.passwordTooShort)
+    .max(200, enServerText.passwordTooLong),
+  company: z.string().min(2, enServerText.enterRegisteredName),
+  registrationId: z.string().min(2, enServerText.enterRegistrationId),
+  address: z.string().min(5, enServerText.enterBusinessAddress),
+  industry: z.string().min(2, enServerText.enterIndustry),
   websiteUrl: z.string().optional(),
-  intendedUsage: z.string().min(20, "Describe what you intend to send, in a sentence or two."),
+  intendedUsage: z.string().min(20, enServerText.describeIntendedUsage),
 });
 
 /**
@@ -123,7 +123,7 @@ export async function signupAction(_prev: ActionState, formData: FormData): Prom
   const email = parsed.data.email.toLowerCase();
   const existing = await db.select({ id: users.id }).from(users).where(eq(users.email, email));
   if (existing.length > 0) {
-    return { error: "An account already exists for that email address. Sign in instead." };
+    return { error: enServerText.accountExists };
   }
 
   const passwordHash = await hashPassword(parsed.data.password);
@@ -221,7 +221,7 @@ export async function verifyEmailAction(token: string): Promise<{ ok: boolean; m
   if (!record || record.consumedAt || record.expiresAt < new Date()) {
     return {
       ok: false,
-      message: "That verification link has expired or has already been used. Request a new one.",
+      message: enServerText.verificationLinkExpired,
     };
   }
 

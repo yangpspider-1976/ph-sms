@@ -43,6 +43,14 @@ function labelFor(labels: Record<string, string>, words: string): string {
   return labels[words.toUpperCase().replace(/ /g, "_")] ?? words;
 }
 
+/** What a rate limit counts ("sign-in attempts"), in the reader's language. */
+function limitSubject(t: Dictionary, english: string): string {
+  const key = (Object.keys(enServerText.limitSubjects) as Array<keyof Text["limitSubjects"]>).find(
+    (k) => enServerText.limitSubjects[k] === english,
+  );
+  return key ? t.serverText.limitSubjects[key] : english;
+}
+
 const PATTERNS: Pattern[] = [
   [/^(\d+) job\(s\) due more than (\d+)s ago and unclaimed\. Is the worker running\?$/, (s, m) => s.overdueJobs(m[1]!, m[2]!)],
   [/^(\d+) submission\(s\) unresolved; their cost stays held pending reconciliation\.$/, (s, m) => s.unresolvedSubmissions(m[1]!)],
@@ -69,6 +77,8 @@ const PATTERNS: Pattern[] = [
   ],
   [/^Must be at least (\d+)\.$/, (s, m) => s.mustBeAtLeast(m[1]!)],
   [/^Must be at most (\d+)\.$/, (s, m) => s.mustBeAtMost(m[1]!)],
+  // The send page's refusal ends with what to do; read before the summary alone.
+  [/^(.+\.) Edit the message and try again\.$/, (s, m, t) => s.refusedEditMessage(localizeServerText(m[1]!, t))],
   // A held or refused campaign lists its reasons, each one a message above.
   [/^Held for approval: (.+)\.$/, (s, m, t) => s.held(m[1]!.split("; ").map((r) => localizeServerText(r, t)).join("; "))],
   [/^Refused: (.+)\.$/, (s, m, t) => s.refused(m[1]!.split("; ").map((r) => localizeServerText(r, t)).join("; "))],
@@ -91,6 +101,54 @@ const PATTERNS: Pattern[] = [
   [/^(\d+) blocked platform-wide\.$/, (s, m) => s.platformBlocked(m[1]!)],
   [/^(\d+) blocked platform-wide, (\d+) not valid\.$/, (s, m) => s.platformBlockedSomeInvalid(m[1]!, m[2]!)],
   [/^Recovery code accepted\. (\d+) remaining — re-enrol soon\.$/, (s, m) => s.recoveryCodeAccepted(m[1]!)],
+  [/^Recorded: ([a-z ]+)\.$/, (s, m, t) => s.decisionRecorded(labelFor(t.status.org, m[1]!))],
+  // What a form says when it has not worked.
+  [
+    /^Your role \(([A-Z_]+)\) cannot perform this action\.$/,
+    (s, m, t) => s.roleCannot((t.roles.labels as Record<string, string>)[m[1]!] ?? m[1]!),
+  ],
+  [
+    /^This organization is ([a-z ]+) and cannot perform this action\.$/,
+    (s, m, t) => s.organizationCannot(labelFor(t.status.org, m[1]!)),
+  ],
+  [/^Too many (.+)\. Try again in about (\d+) minutes?\.$/, (s, m, t) => s.tooMany(limitSubject(t, m[1]!), m[2]!)],
+  [/^"(.+)" has no contacts in it yet\.$/, (s, m) => s.groupEmpty(m[1]!)],
+  [/^You already have a group called "(.+)"\.$/, (s, m) => s.groupNameTaken(m[1]!)],
+  [/^That file is larger than the (\d+) MiB limit\.$/, (s, m) => s.uploadTooLarge(m[1]!)],
+  [/^The file is larger than the (\d+) MiB limit\.$/, (s, m) => s.fileTooLarge(m[1]!)],
+  [/^The header row repeats a column: (.+)\.$/, (s, m) => s.repeatedColumn(m[1]!)],
+  [/^The file needs a (.+) column\.$/, (s, m) => s.missingColumn(m[1]!)],
+  [
+    /^This file has columns we do not use: (.+)\. Confirm that they should be ignored\.$/,
+    (s, m) => s.unknownColumns(m[1]!),
+  ],
+  [/^The file has ([\d,]+) data rows; the limit is ([\d,]+)\.$/, (s, m) => s.tooManyRows(m[1]!, m[2]!)],
+  [/^Custom field (\d+)$/, (s, m) => s.columnCustom(m[1]!)],
+  [/^Scheduling is limited to (\d+) days ahead\.$/, (s, m) => s.scheduleTooFar(m[1]!)],
+  [
+    /^This send has ([\d,]+) unique destinations, above the self-service limit of ([\d,]+)\. Request a bulk quote for a list this size\.$/,
+    (s, m) => s.overSelfServiceLimit(m[1]!, m[2]!),
+  ],
+  [
+    /^This send needs (\d+) destinations but only (\d+) remain in today's limit \((\d+)\)\.$/,
+    (s, m) => s.dailyQuota(m[1]!, m[2]!, m[3]!),
+  ],
+  [
+    /^This send needs (\d+) destinations but only (\d+) remain in this month's limit \((\d+)\)\.$/,
+    (s, m) => s.monthlyQuota(m[1]!, m[2]!, m[3]!),
+  ],
+  [/^This message is (\d+) segments; the limit is (\d+)\.$/, (s, m) => s.tooManySegments(m[1]!, m[2]!)],
+  [
+    /^This campaign is ([a-z ]+), not awaiting approval\.$/,
+    (s, m, t) => s.notAwaitingApproval(labelFor(t.status.campaign, m[1]!)),
+  ],
+  [/^That code did not match\. (\d+) attempts? left\.$/, (s, m) => s.codeMismatchAttemptsLeft(m[1]!)],
+  [/^You have already applied for (.+)\.$/, (s, m) => s.alreadyApplied(m[1]!)],
+  [/^This payment is already ([a-z ]+)\.$/, (s, m, t) => s.paymentAlready(labelFor(t.status.payment, m[1]!))],
+  [/^The gateway event was not accepted \((.+)\)\.$/, (s, m) => s.gatewayNotAccepted(m[1]!)],
+  [/^(.+) approved \(demo mode only\)\.$/, (s, m) => s.senderApprovedDemo(m[1]!)],
+  // Last: the policy editor's "field: problem", where only the problem is wording.
+  [/^([A-Za-z0-9_.]+): (.+)$/, (s, m, t) => s.policyIssue(m[1]!, localizeServerText(m[2]!, t))],
 ];
 
 export function localizeServerText(text: string, t: Dictionary): string;

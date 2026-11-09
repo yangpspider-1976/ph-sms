@@ -12,11 +12,11 @@ export type SupportResult =
   | { ok: false; message: string };
 
 const schema = z.object({
-  subject: z.string().min(3, "Say briefly what this is about.").max(200),
+  subject: z.string().min(3, enServerText.sayBriefly).max(200),
   category: z.enum(["DELIVERY", "BILLING", "ACCOUNT", "SENDER_ID", "OTHER"]),
   // A campaign or reference the customer is asking about. Optional.
   relatedRef: z.string().max(100).optional(),
-  detail: z.string().min(20, "Tell us what happened, in a sentence or two.").max(4000),
+  detail: z.string().min(20, enServerText.tellUsWhatHappened).max(4000),
 });
 
 /**
@@ -43,7 +43,7 @@ export async function submitSupportRequestAction(
   });
 
   if (!parsed.success) {
-    return { ok: false, message: parsed.error.issues[0]?.message ?? "Check the form." };
+    return { ok: false, message: parsed.error.issues[0]?.message ?? enServerText.checkTheForm };
   }
 
   const reference = referenceId();

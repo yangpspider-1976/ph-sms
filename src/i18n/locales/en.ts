@@ -122,6 +122,7 @@ export const en = {
   components: {
     demoMark: "Design preview • Sample content • Demo — no real SMS or payments",
     copyright: (year: number) => `© ${year} PH SMS. All rights reserved.`,
+    supportReference: (reference: string) => `Support reference: ${reference}`,
     fileDrop: {
       browse: "Browse files",
       change: "Choose a different file",
@@ -1211,6 +1212,7 @@ export const en = {
     accept: "Accept invitation",
     joining: "Joining…",
     noTokenBody: "Use the link from your invitation email.",
+    linkNotValid: "That link is not valid.",
     backToLogin: "Back to log in",
     joinTitle: (organization: string) => `Join ${organization}`,
     invitedAs: (role: string) => `You were invited as ${role}.`,

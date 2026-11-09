@@ -81,6 +81,7 @@ export function SendWizard({
   initialGroupId?: string;
 }) {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [step, setStep] = useState(0);
   const [mode, setMode] = useState<"manual" | "csv" | "group">(
@@ -405,7 +406,7 @@ export function SendWizard({
                     {groupError ? (
                       <div className="mt-3">
                         <Notice tone="warning" title={t.send.groupNotUsed}>
-                          {groupError}
+                          {localizeServerText(groupError)}
                         </Notice>
                       </div>
                     ) : null}
@@ -483,7 +484,7 @@ export function SendWizard({
                 ) : null}
                 {body.trim() && !bodyCheck.ok ? (
                   <p className="mt-2 text-[12.5px] font-medium text-danger-fg">
-                    {bodyCheck.message}
+                    {localizeServerText(bodyCheck.message)}
                   </p>
                 ) : null}
               </div>
@@ -586,7 +587,7 @@ export function SendWizard({
           {error ? (
             <div className="mt-5">
               <Notice tone="danger" title={t.send.notAccepted}>
-                {error.message}
+                {localizeServerText(error.message)}
               </Notice>
             </div>
           ) : null}

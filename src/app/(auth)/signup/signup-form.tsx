@@ -3,13 +3,17 @@
 import { useActionState, useEffect, useRef } from "react";
 import { signupAction, type ActionState } from "@/server/actions/auth";
 import { Button, Field, Input, Notice, Textarea } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { focusFirstInvalid, keepValuesOnSubmit } from "@/components/form-submit";
 
 export function SignupForm() {
   const t = useT();
+  const localizeServerText = useServerText();
   const [state, action, pending] = useActionState<ActionState, FormData>(signupAction, null);
-  const err = (field: string) => state?.fieldErrors?.[field];
+  const err = (field: string) => {
+    const message = state?.fieldErrors?.[field];
+    return message ? localizeServerText(message) : undefined;
+  };
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -20,7 +24,7 @@ export function SignupForm() {
     <form ref={formRef} action={action} onSubmit={keepValuesOnSubmit(action)} className="space-y-4">
       {state?.error ? (
         <Notice tone="danger" title={t.auth.signup.failed}>
-          {state.error}
+          {localizeServerText(state.error)}
         </Notice>
       ) : null}
 

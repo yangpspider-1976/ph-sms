@@ -3,6 +3,7 @@ import { and, eq, gte, sql } from "drizzle-orm";
 import { db } from "@/server/db";
 import { rateLimitHits } from "@/server/db/schema";
 import { sha256 } from "./crypto";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 /**
  * Rate limiting (SEC-06).
@@ -37,17 +38,17 @@ export type LimitRule = { max: number; windowSeconds: number; description: strin
 /** Provisional values. Tune against real traffic before live. */
 export const LIMITS: Record<LimitName, LimitRule> = {
   // Tight: this is the credential-guessing surface.
-  login: { max: 10, windowSeconds: 300, description: "sign-in attempts" },
-  mfa: { max: 10, windowSeconds: 300, description: "two-factor attempts" },
-  signup: { max: 5, windowSeconds: 3600, description: "registrations" },
-  upload: { max: 20, windowSeconds: 3600, description: "file uploads" },
-  preview: { max: 60, windowSeconds: 300, description: "previews" },
-  quote: { max: 60, windowSeconds: 300, description: "price checks" },
+  login: { max: 10, windowSeconds: 300, description: enServerText.limitSubjects.login },
+  mfa: { max: 10, windowSeconds: 300, description: enServerText.limitSubjects.mfa },
+  signup: { max: 5, windowSeconds: 3600, description: enServerText.limitSubjects.signup },
+  upload: { max: 20, windowSeconds: 3600, description: enServerText.limitSubjects.upload },
+  preview: { max: 60, windowSeconds: 300, description: enServerText.limitSubjects.preview },
+  quote: { max: 60, windowSeconds: 300, description: enServerText.limitSubjects.quote },
   // A test send costs real money and real delivery.
-  "test-send": { max: 10, windowSeconds: 3600, description: "test sends" },
-  dispatch: { max: 30, windowSeconds: 300, description: "campaign submissions" },
-  export: { max: 20, windowSeconds: 3600, description: "exports" },
-  inquiry: { max: 5, windowSeconds: 600, description: "inquiries" },
+  "test-send": { max: 10, windowSeconds: 3600, description: enServerText.limitSubjects.testSend },
+  dispatch: { max: 30, windowSeconds: 300, description: enServerText.limitSubjects.dispatch },
+  export: { max: 20, windowSeconds: 3600, description: enServerText.limitSubjects.export },
+  inquiry: { max: 5, windowSeconds: 600, description: enServerText.limitSubjects.inquiry },
 };
 
 export type RateLimitResult = {
@@ -100,7 +101,7 @@ export async function checkRateLimit(
     retryAfterSeconds: rule.windowSeconds,
     message: allowed
       ? ""
-      : `Too many ${rule.description}. Try again in about ${minutes} minute${minutes === 1 ? "" : "s"}.`,
+      : enServerText.tooMany(rule.description, String(minutes)),
   };
 }
 
@@ -141,7 +142,7 @@ export async function peekRateLimit(
     retryAfterSeconds: rule.windowSeconds,
     message: allowed
       ? ""
-      : `Too many ${rule.description}. Try again in about ${minutes} minute${minutes === 1 ? "" : "s"}.`,
+      : enServerText.tooMany(rule.description, String(minutes)),
   };
 }
 

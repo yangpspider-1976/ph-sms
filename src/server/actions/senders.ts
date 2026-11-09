@@ -29,16 +29,16 @@ const schema = z.object({
   value: z
     .string()
     .trim()
-    .min(3, "A sender ID is at least 3 characters.")
-    .max(11, "Alphanumeric sender IDs are at most 11 characters.")
+    .min(3, enServerText.senderIdTooShort)
+    .max(11, enServerText.senderIdTooLong)
     .regex(
       /^[A-Za-z0-9][A-Za-z0-9 ]*[A-Za-z0-9]$/,
-      "Use letters, numbers and single spaces only.",
+      enServerText.senderIdCharacters,
     ),
   evidenceNote: z
     .string()
     .trim()
-    .min(20, "Explain how this name relates to your registered business.")
+    .min(20, enServerText.explainSenderId)
     .max(1000),
 });
 
@@ -51,7 +51,7 @@ export async function applyForSenderAction(formData: FormData): Promise<SenderRe
     evidenceNote: String(formData.get("evidenceNote") ?? ""),
   });
   if (!parsed.success) {
-    return { ok: false, message: parsed.error.issues[0]?.message ?? "That application is not valid." };
+    return { ok: false, message: parsed.error.issues[0]?.message ?? enServerText.applicationNotValid };
   }
 
   const value = parsed.data.value.toUpperCase();
@@ -80,7 +80,7 @@ export async function applyForSenderAction(formData: FormData): Promise<SenderRe
     });
   } catch (err) {
     if (isUniqueViolation(err)) {
-      return { ok: false, message: `You have already applied for ${value}.` };
+      return { ok: false, message: enServerText.alreadyApplied(value) };
     }
     throw err;
   }
@@ -99,12 +99,12 @@ export async function applyForSenderAction(formData: FormData): Promise<SenderRe
  */
 export async function approveSenderForDemoAction(senderId: string): Promise<SenderResult> {
   if (!demoFeaturesEnabled()) {
-    return { ok: false, message: "Not available in this mode." };
+    return { ok: false, message: enServerText.notInThisMode };
   }
 
   const auth = await authorize("sender.apply");
   if (!auth.ok) return { ok: false, message: auth.error.message };
-  if (!isUuid(senderId)) return { ok: false, message: "That sender is not awaiting review." };
+  if (!isUuid(senderId)) return { ok: false, message: enServerText.senderNotAwaiting };
 
   const updated = await db
     .update(senderIdentities)
@@ -120,7 +120,7 @@ export async function approveSenderForDemoAction(senderId: string): Promise<Send
     .returning({ id: senderIdentities.id, value: senderIdentities.value });
 
   if (updated.length === 0) {
-    return { ok: false, message: "That sender is not awaiting review." };
+    return { ok: false, message: enServerText.senderNotAwaiting };
   }
 
   await recordAudit({
@@ -133,5 +133,5 @@ export async function approveSenderForDemoAction(senderId: string): Promise<Send
   });
 
   revalidatePath("/app/settings/senders");
-  return { ok: true, message: `${updated[0]!.value} approved (demo mode only).` };
+  return { ok: true, message: enServerText.senderApprovedDemo(updated[0]!.value) };
 }

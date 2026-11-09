@@ -12,6 +12,7 @@
 import Papa from "papaparse";
 import { CSV_KNOWN_COLUMNS, CSV_REQUIRED_COLUMNS, type AppConfig } from "@/server/config";
 import { normalizePhone, REJECTION_TEXT, type PhoneRejection } from "./phone";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 export type ParsedRow = {
   sourceRowNumber: number;
@@ -91,28 +92,28 @@ export function parseContactCsv(
   config: AppConfig,
   options: { acknowledgedUnknownColumns?: boolean } = {},
 ): CsvParseResult {
-  if (bytes.length === 0) return fail("EMPTY_FILE", "The file is empty.");
+  if (bytes.length === 0) return fail("EMPTY_FILE", enServerText.fileEmpty);
   if (bytes.length > config.maxUploadBytes) {
     return fail(
       "TOO_LARGE",
-      `The file is larger than the ${Math.round(config.maxUploadBytes / (1024 * 1024))} MiB limit.`,
+      enServerText.fileTooLarge(String(Math.round(config.maxUploadBytes / (1024 * 1024)))),
     );
   }
   if (looksLikeOfficeDocument(bytes)) {
     return fail(
       "UNSUPPORTED_FORMAT",
-      "This is a spreadsheet file, not a CSV. Export it as CSV (UTF-8) and upload again.",
+      enServerText.spreadsheetNotCsv,
     );
   }
   if (bytes.includes(0x00)) {
-    return fail("NUL_BYTES", "The file contains NUL bytes and is not valid text.");
+    return fail("NUL_BYTES", enServerText.nulBytes);
   }
 
   const text = decodeUtf8(bytes);
   if (text === null) {
     return fail(
       "NOT_UTF8",
-      "The file is not valid UTF-8. Re-export it as CSV UTF-8 and upload again.",
+      enServerText.notUtf8,
     );
   }
 
@@ -128,7 +129,7 @@ export function parseContactCsv(
   if (repeated.length > 0) {
     return fail(
       "DUPLICATE_HEADER",
-      `The header row repeats a column: ${[...new Set(repeated)].join(", ")}.`,
+      enServerText.repeatedColumn([...new Set(repeated)].join(", ")),
     );
   }
 
@@ -146,21 +147,21 @@ export function parseContactCsv(
   if (quoteErrors.length > 0) {
     return fail(
       "BROKEN_QUOTING",
-      "The file has an unclosed quoted field, so the rows cannot be read reliably.",
+      enServerText.brokenQuoting,
       quoteErrors.slice(0, 5).map((e) => `row ${(e.row ?? 0) + 2}: ${e.message}`),
     );
   }
 
   const headers = (parsed.meta.fields ?? []).map((h) => h.trim());
   if (headers.length === 0) {
-    return fail("EMPTY_FILE", "The file has no header row.");
+    return fail("EMPTY_FILE", enServerText.noHeaderRow);
   }
 
   const missing = CSV_REQUIRED_COLUMNS.filter((c) => !headers.includes(c));
   if (missing.length > 0) {
     return fail(
       "MISSING_REQUIRED_COLUMN",
-      `The file needs a ${missing.join(", ")} column.`,
+      enServerText.missingColumn(missing.join(", ")),
       headers,
     );
   }
@@ -169,7 +170,7 @@ export function parseContactCsv(
   if (unknownColumns.length > 0 && !options.acknowledgedUnknownColumns) {
     return fail(
       "UNKNOWN_COLUMNS",
-      `This file has columns we do not use: ${unknownColumns.join(", ")}. Confirm that they should be ignored.`,
+      enServerText.unknownColumns(unknownColumns.join(", ")),
       unknownColumns,
     );
   }
@@ -178,7 +179,7 @@ export function parseContactCsv(
   if (data.length > config.maxDataRows) {
     return fail(
       "TOO_MANY_ROWS",
-      `The file has ${data.length.toLocaleString()} data rows; the limit is ${config.maxDataRows.toLocaleString()}.`,
+      enServerText.tooManyRows(data.length.toLocaleString("en-US"), config.maxDataRows.toLocaleString("en-US")),
     );
   }
 

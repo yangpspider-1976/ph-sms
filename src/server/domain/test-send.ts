@@ -6,6 +6,7 @@ import { decrypt } from "@/server/security/crypto";
 import { issueQuote, QuoteError } from "./quote";
 import { submitCampaign, SubmitError } from "./submit";
 import type { AppConfig } from "@/server/config";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 /**
  * Test send (MSG-04).
@@ -113,7 +114,7 @@ export async function sendTest(params: {
 
   if (!row) {
     throw new TestSendError(
-      "That person is not a member of this organization.",
+      enServerText.notAMember,
       "NOT_A_MEMBER",
     );
   }
@@ -121,8 +122,8 @@ export async function sendTest(params: {
   if (!row.verifiedAt || !row.encrypted) {
     throw new TestSendError(
       targetUserId === params.userId
-        ? "Verify your mobile number before sending a test, so tests can only reach a phone you own."
-        : "That member has not verified a mobile number yet.",
+        ? enServerText.verifyMobileFirst
+        : enServerText.memberNotVerified,
       "NOT_VERIFIED",
     );
   }

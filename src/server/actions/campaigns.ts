@@ -14,6 +14,7 @@ import { getEffectiveConfig } from "@/server/domain/app-config";
 import { recordAudit } from "@/server/audit";
 import { checkRateLimit } from "@/server/security/rate-limit";
 import { isUuid } from "@/server/uuid";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 /**
  * Send-path server actions.
@@ -51,9 +52,9 @@ export type QuoteResult =
   | { ok: false; error: string; code: string; supportRef?: string };
 
 const quoteInput = z.object({
-  senderIdentityId: z.string().uuid("Choose a sender identity."),
-  body: z.string().min(1, "Enter a message."),
-  recipients: z.array(z.string()).min(1, "Add at least one recipient."),
+  senderIdentityId: z.string().uuid(enServerText.chooseSender),
+  body: z.string().min(1, enServerText.enterMessage),
+  recipients: z.array(z.string()).min(1, enServerText.addRecipient),
   scheduledAt: z.string().optional().nullable(),
 });
 
@@ -72,7 +73,7 @@ export async function createQuoteAction(raw: unknown): Promise<QuoteResult> {
   if (!parsed.success) {
     return {
       ok: false,
-      error: parsed.error.issues[0]?.message ?? "That request was not valid.",
+      error: parsed.error.issues[0]?.message ?? enServerText.requestNotValid,
       code: "INVALID_INPUT",
     };
   }
@@ -161,7 +162,7 @@ export async function confirmSendAction(raw: unknown): Promise<ConfirmResult> {
 
   const parsed = confirmInput.safeParse(raw);
   if (!parsed.success) {
-    return { ok: false, error: "That confirmation was not valid.", code: "INVALID_INPUT" };
+    return { ok: false, error: enServerText.confirmationNotValid, code: "INVALID_INPUT" };
   }
 
   try {
@@ -198,7 +199,7 @@ export type StopResult =
 export async function stopCampaignAction(campaignId: string): Promise<StopResult> {
   const auth = await authorize("campaign.cancel");
   if (!auth.ok) return { ok: false, error: auth.error.message };
-  if (!isUuid(campaignId)) return { ok: false, error: "That campaign was not found." };
+  if (!isUuid(campaignId)) return { ok: false, error: enServerText.campaignNotFound };
 
   const result = await stopCampaign(campaignId, auth.ctx.org.organizationId);
 

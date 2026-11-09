@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { env } from "@/server/env";
 import { roleHas, type Permission } from "./rbac";
 import { getMemberships, getSessionUser, type OrgContext, type SessionUser } from "./session";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 export const ACTIVE_ORG_COOKIE = "ph_sms_org";
 
@@ -82,7 +83,7 @@ export async function requirePermission(permission: Permission): Promise<AuthCon
   const ctx = await requireOrgContext();
   if (!ctx.can(permission)) {
     throw new AuthorizationError(
-      `Your role (${ctx.org.role}) cannot perform this action.`,
+      enServerText.roleCannot(ctx.org.role),
       "FORBIDDEN",
     );
   }
@@ -128,14 +129,14 @@ export async function authorize(
   if (!ctx) {
     return {
       ok: false,
-      error: new AuthorizationError("Sign in to continue.", "NOT_AUTHENTICATED"),
+      error: new AuthorizationError(enServerText.signInToContinue, "NOT_AUTHENTICATED"),
     };
   }
   if (ctx.org.organizationStatus !== "ACTIVE") {
     return {
       ok: false,
       error: new AuthorizationError(
-        `This organization is ${ctx.org.organizationStatus.toLowerCase().replace("_", " ")} and cannot perform this action.`,
+        enServerText.organizationCannot(ctx.org.organizationStatus.toLowerCase().replace("_", " ")),
         "ORG_NOT_ACTIVE",
       ),
     };
@@ -144,7 +145,7 @@ export async function authorize(
     return {
       ok: false,
       error: new AuthorizationError(
-        `Your role (${ctx.org.role}) cannot perform this action.`,
+        enServerText.roleCannot(ctx.org.role),
         "FORBIDDEN",
       ),
     };

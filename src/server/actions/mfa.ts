@@ -61,12 +61,12 @@ export async function confirmMfaEnrolmentAction(formData: FormData): Promise<Mfa
     secret: String(formData.get("secret") ?? ""),
     code: String(formData.get("code") ?? ""),
   });
-  if (!parsed.success) return { ok: false, message: "Enter the 6-digit code from your app." };
+  if (!parsed.success) return { ok: false, message: enServerText.enterAppCode };
 
   if (!verifyTotp(parsed.data.secret, parsed.data.code)) {
     return {
       ok: false,
-      message: "That code did not match. Check your device's clock and try the current code.",
+      message: enServerText.codeMismatchCheckClock,
     };
   }
 
@@ -110,7 +110,7 @@ export async function confirmMfaEnrolmentAction(formData: FormData): Promise<Mfa
 export async function verifyMfaAction(formData: FormData): Promise<MfaResult> {
   const user = await requireUser();
   const submitted = String(formData.get("code") ?? "").trim();
-  if (!submitted) return { ok: false, message: "Enter your code." };
+  if (!submitted) return { ok: false, message: enServerText.enterYourCode };
 
   // A 6-digit code is only a million guesses; without a limit an attacker
   // holding a stolen password could simply try them. Only wrong codes count —
@@ -121,7 +121,7 @@ export async function verifyMfaAction(formData: FormData): Promise<MfaResult> {
 
   const row = (await db.select().from(users).where(eq(users.id, user.id)).limit(1))[0];
   if (!row?.totpSecretEncrypted) {
-    return { ok: false, message: "This account is not enrolled yet." };
+    return { ok: false, message: enServerText.notEnrolled };
   }
 
   if (verifyTotp(decrypt(row.totpSecretEncrypted), submitted)) {
@@ -177,5 +177,5 @@ export async function verifyMfaAction(formData: FormData): Promise<MfaResult> {
     objectType: "user",
     objectId: user.id,
   });
-  return { ok: false, message: "That code did not match." };
+  return { ok: false, message: enServerText.codeMismatch };
 }

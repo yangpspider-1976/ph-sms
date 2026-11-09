@@ -5,6 +5,7 @@ import { contactGroupMembers, contactGroups, contacts } from "@/server/db/schema
 import { isUniqueViolation } from "./wallet";
 import { recordAudit } from "@/server/audit";
 import { decrypt } from "@/server/security/crypto";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 /**
  * Contact groups.
@@ -68,7 +69,7 @@ export async function createGroup(input: {
 }): Promise<GroupSummary> {
   const name = input.name.trim();
   if (name.length === 0) {
-    throw new GroupError("Give the group a name.", "INVALID_NAME");
+    throw new GroupError(enServerText.giveGroupName, "INVALID_NAME");
   }
 
   try {
@@ -94,7 +95,7 @@ export async function createGroup(input: {
     return { ...group!, memberCount: 0 };
   } catch (err) {
     if (isUniqueViolation(err)) {
-      throw new GroupError(`You already have a group called "${name}".`, "DUPLICATE_NAME");
+      throw new GroupError(enServerText.groupNameTaken(name), "DUPLICATE_NAME");
     }
     throw err;
   }
@@ -108,7 +109,7 @@ export async function renameGroup(input: {
   description?: string | null;
 }): Promise<void> {
   const name = input.name.trim();
-  if (name.length === 0) throw new GroupError("Give the group a name.", "INVALID_NAME");
+  if (name.length === 0) throw new GroupError(enServerText.giveGroupName, "INVALID_NAME");
 
   try {
     const updated = await db
@@ -122,7 +123,7 @@ export async function renameGroup(input: {
       )
       .returning({ id: contactGroups.id });
 
-    if (updated.length === 0) throw new GroupError("That group no longer exists.", "NOT_FOUND");
+    if (updated.length === 0) throw new GroupError(enServerText.groupGone, "NOT_FOUND");
 
     await recordAudit({
       action: "contacts.group_renamed",
@@ -134,7 +135,7 @@ export async function renameGroup(input: {
     });
   } catch (err) {
     if (isUniqueViolation(err)) {
-      throw new GroupError(`You already have a group called "${name}".`, "DUPLICATE_NAME");
+      throw new GroupError(enServerText.groupNameTaken(name), "DUPLICATE_NAME");
     }
     throw err;
   }
@@ -156,7 +157,7 @@ export async function deleteGroup(input: {
     )
     .returning({ id: contactGroups.id });
 
-  if (deleted.length === 0) throw new GroupError("That group no longer exists.", "NOT_FOUND");
+  if (deleted.length === 0) throw new GroupError(enServerText.groupGone, "NOT_FOUND");
 
   await recordAudit({
     action: "contacts.group_deleted",
@@ -194,7 +195,7 @@ export async function addToGroup(input: {
     )
     .limit(1);
 
-  if (!group) throw new GroupError("That group no longer exists.", "NOT_FOUND");
+  if (!group) throw new GroupError(enServerText.groupGone, "NOT_FOUND");
 
   const owned = await db
     .select({ id: contacts.id })

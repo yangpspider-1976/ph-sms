@@ -13,6 +13,7 @@ import { newToken, tokenLookup } from "@/server/security/crypto";
 import { hashPassword } from "@/server/auth/session";
 import { recordAudit } from "@/server/audit";
 import { sendMail } from "@/server/providers/mail";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 /**
  * Team membership and invitations.
@@ -103,7 +104,7 @@ export async function inviteMember(input: {
       and(eq(memberships.organizationId, input.organizationId), eq(users.email, email)),
     );
   if (existing.length > 0) {
-    throw new TeamError("That person is already on the team.", "ALREADY_MEMBER");
+    throw new TeamError(enServerText.alreadyOnTeam, "ALREADY_MEMBER");
   }
 
   const pending = await db
@@ -117,7 +118,7 @@ export async function inviteMember(input: {
       ),
     );
   if (pending.length > 0) {
-    throw new TeamError("An invitation is already open for that address.", "INVITE_EXISTS");
+    throw new TeamError(enServerText.inviteAlreadyOpen, "INVITE_EXISTS");
   }
 
   const { token, lookup } = newToken();
@@ -195,13 +196,13 @@ export async function peekInvite(token: string): Promise<InviteDetails> {
 
   const invite = rows[0];
   if (!invite || !invite.organizationId || !invite.role) {
-    throw new TeamError("That invitation link is not valid.", "INVITE_INVALID");
+    throw new TeamError(enServerText.inviteLinkNotValid, "INVITE_INVALID");
   }
   if (invite.consumedAt) {
-    throw new TeamError("That invitation has already been used.", "INVITE_USED");
+    throw new TeamError(enServerText.inviteUsed, "INVITE_USED");
   }
   if (invite.expiresAt.getTime() <= Date.now()) {
-    throw new TeamError("That invitation has expired. Ask for a new one.", "INVITE_EXPIRED");
+    throw new TeamError(enServerText.inviteExpiredAskAgain, "INVITE_EXPIRED");
   }
 
   const existingUser = await db
@@ -242,13 +243,13 @@ export async function acceptInvite(input: {
 
     const invite = rows[0];
     if (!invite || !invite.organizationId || !invite.role) {
-      throw new TeamError("That invitation link is not valid.", "INVITE_INVALID");
+      throw new TeamError(enServerText.inviteLinkNotValid, "INVITE_INVALID");
     }
     if (invite.consumedAt) {
-      throw new TeamError("That invitation has already been used.", "INVITE_USED");
+      throw new TeamError(enServerText.inviteUsed, "INVITE_USED");
     }
     if (invite.expiresAt.getTime() <= Date.now()) {
-      throw new TeamError("That invitation has expired.", "INVITE_EXPIRED");
+      throw new TeamError(enServerText.inviteExpired, "INVITE_EXPIRED");
     }
 
     let user = (
@@ -257,7 +258,7 @@ export async function acceptInvite(input: {
 
     if (!user) {
       if (!input.password || input.password.length < 12) {
-        throw new TeamError("Choose a password of at least 12 characters.", "INVITE_INVALID");
+        throw new TeamError(enServerText.invitePassword, "INVITE_INVALID");
       }
       const inserted = await tx
         .insert(users)
@@ -348,12 +349,12 @@ export async function changeRole(input: {
         .limit(1)
     )[0];
 
-    if (!current) throw new TeamError("That member was not found.", "NOT_A_MEMBER");
+    if (!current) throw new TeamError(enServerText.memberNotFound, "NOT_A_MEMBER");
     if (current.role === input.role) return;
 
     if (current.role === "OWNER" && (await ownerCount(tx, input.organizationId)) <= 1) {
       throw new TeamError(
-        "This is the last owner. Promote someone else before changing this role.",
+        enServerText.lastOwnerRole,
         "LAST_OWNER",
       );
     }
@@ -398,11 +399,11 @@ export async function removeMember(input: {
         .limit(1)
     )[0];
 
-    if (!current) throw new TeamError("That member was not found.", "NOT_A_MEMBER");
+    if (!current) throw new TeamError(enServerText.memberNotFound, "NOT_A_MEMBER");
 
     if (current.role === "OWNER" && (await ownerCount(tx, input.organizationId)) <= 1) {
       throw new TeamError(
-        "This is the last owner. An organization must keep at least one.",
+        enServerText.lastOwnerRemove,
         "LAST_OWNER",
       );
     }

@@ -8,7 +8,7 @@ import {
   type ApprovalResult,
 } from "@/server/actions/approval";
 import { Button, Input, Notice } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 export function ApprovalDecision({
@@ -21,6 +21,7 @@ export function ApprovalDecision({
   canSelfApprove: boolean;
 }) {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [rejecting, setRejecting] = useState(false);
   const [result, setResult] = useState<ApprovalResult | null>(null);
@@ -52,7 +53,7 @@ export function ApprovalDecision({
     <div className="space-y-3">
       {result ? (
         <Notice tone="danger" title={t.approvals.notRecorded}>
-          {result.message}
+          {localizeServerText(result.message)}
         </Notice>
       ) : null}
 

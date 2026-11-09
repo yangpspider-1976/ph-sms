@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { approveSenderForDemoAction, type SenderResult } from "@/server/actions/senders";
 import { Button, Notice } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 
 /**
  * Demo shortcut.
@@ -16,6 +16,7 @@ import { useT } from "@/i18n/client";
  */
 export function DemoApproveButton({ senderId, value }: { senderId: string; value: string }) {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [result, setResult] = useState<SenderResult | null>(null);
   const [pending, startTransition] = useTransition();
@@ -32,7 +33,7 @@ export function DemoApproveButton({ senderId, value }: { senderId: string; value
   if (result && !result.ok) {
     return (
       <Notice tone="danger" title={t.settings.senders.notApproved}>
-        {result.message}
+        {localizeServerText(result.message)}
       </Notice>
     );
   }

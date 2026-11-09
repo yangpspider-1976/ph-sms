@@ -5,6 +5,7 @@ import { campaigns, dispatchJobs, messageItems, reservations } from "@/server/db
 import { releaseReservation } from "./wallet";
 import { releaseQuota } from "./quota";
 import { recordAudit } from "@/server/audit";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 /**
  * Campaign approval.
@@ -96,16 +97,16 @@ export async function approveCampaign(input: {
         .limit(1)
     )[0];
 
-    if (!campaign) throw new ApprovalError("That campaign was not found.", "NOT_FOUND");
+    if (!campaign) throw new ApprovalError(enServerText.campaignNotFound, "NOT_FOUND");
     if (campaign.status !== "PENDING_APPROVAL") {
       throw new ApprovalError(
-        `This campaign is ${campaign.status.toLowerCase().replace("_", " ")}, not awaiting approval.`,
+        enServerText.notAwaitingApproval(campaign.status.toLowerCase().replace("_", " ")),
         "NOT_PENDING",
       );
     }
     if (!input.allowSelfApproval && campaign.createdBy === input.approverUserId) {
       throw new ApprovalError(
-        "You created this campaign, so you cannot approve it. Ask another approver.",
+        enServerText.ownCampaign,
         "SELF_APPROVAL",
       );
     }
@@ -175,10 +176,10 @@ export async function rejectCampaign(input: {
         .limit(1)
     )[0];
 
-    if (!campaign) throw new ApprovalError("That campaign was not found.", "NOT_FOUND");
+    if (!campaign) throw new ApprovalError(enServerText.campaignNotFound, "NOT_FOUND");
     if (campaign.status !== "PENDING_APPROVAL") {
       throw new ApprovalError(
-        `This campaign is ${campaign.status.toLowerCase().replace("_", " ")}, not awaiting approval.`,
+        enServerText.notAwaitingApproval(campaign.status.toLowerCase().replace("_", " ")),
         "NOT_PENDING",
       );
     }

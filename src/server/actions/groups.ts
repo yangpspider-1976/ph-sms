@@ -19,7 +19,7 @@ import { enServerText } from "@/i18n/locales/en-server-text";
 export type GroupResult = { ok: boolean; message: string; groupId?: string };
 
 const nameSchema = z.object({
-  name: z.string().min(1, "Give the group a name.").max(80),
+  name: z.string().min(1, enServerText.giveGroupName).max(80),
   description: z.string().max(300).optional(),
 });
 
@@ -32,7 +32,7 @@ export async function createGroupAction(formData: FormData): Promise<GroupResult
     description: String(formData.get("description") ?? ""),
   });
   if (!parsed.success) {
-    return { ok: false, message: parsed.error.issues[0]?.message ?? "That was not valid." };
+    return { ok: false, message: parsed.error.issues[0]?.message ?? enServerText.notValid };
   }
 
   try {
@@ -60,7 +60,7 @@ export async function renameGroupAction(formData: FormData): Promise<GroupResult
     description: String(formData.get("description") ?? ""),
   });
   if (!groupId.success || !parsed.success) {
-    return { ok: false, message: "That change was not valid." };
+    return { ok: false, message: enServerText.changeWasNotValid };
   }
 
   try {
@@ -85,7 +85,7 @@ export async function deleteGroupAction(groupId: string): Promise<GroupResult> {
   if (!auth.ok) return { ok: false, message: auth.error.message };
 
   const parsed = z.string().uuid().safeParse(groupId);
-  if (!parsed.success) return { ok: false, message: "That group is not valid." };
+  if (!parsed.success) return { ok: false, message: enServerText.groupNotValid };
 
   try {
     await deleteGroup({
@@ -112,7 +112,7 @@ export async function addToGroupAction(raw: unknown): Promise<GroupResult> {
   if (!auth.ok) return { ok: false, message: auth.error.message };
 
   const parsed = membershipSchema.safeParse(raw);
-  if (!parsed.success) return { ok: false, message: "That selection was not valid." };
+  if (!parsed.success) return { ok: false, message: enServerText.selectionNotValid };
 
   try {
     const { added } = await addToGroup({
@@ -142,7 +142,7 @@ export async function removeFromGroupAction(raw: unknown): Promise<GroupResult> 
   if (!auth.ok) return { ok: false, message: auth.error.message };
 
   const parsed = membershipSchema.safeParse(raw);
-  if (!parsed.success) return { ok: false, message: "That selection was not valid." };
+  if (!parsed.success) return { ok: false, message: enServerText.selectionNotValid };
 
   const { removed } = await removeFromGroup({
     organizationId: auth.ctx.org.organizationId,
@@ -180,7 +180,7 @@ export async function updateContactAction(formData: FormData): Promise<ContactRe
     consentSource: String(formData.get("consentSource") ?? ""),
     tags: String(formData.get("tags") ?? ""),
   });
-  if (!parsed.success) return { ok: false, message: "That change was not valid." };
+  if (!parsed.success) return { ok: false, message: enServerText.changeWasNotValid };
 
   const result = await updateContact({
     organizationId: auth.ctx.org.organizationId,
@@ -192,7 +192,7 @@ export async function updateContactAction(formData: FormData): Promise<ContactRe
     tags: (parsed.data.tags ?? "").split(",").map((t) => t.trim()).filter(Boolean),
   });
 
-  if (!result.ok) return { ok: false, message: "That contact no longer exists." };
+  if (!result.ok) return { ok: false, message: enServerText.contactGone };
 
   revalidatePath("/app/contacts");
   revalidatePath(`/app/contacts/${parsed.data.contactId}`);
@@ -218,11 +218,11 @@ export async function loadGroupRecipientsAction(
   if (!auth.ok) return { ok: false, message: auth.error.message };
 
   const parsed = z.string().uuid().safeParse(groupId);
-  if (!parsed.success) return { ok: false, message: "That group is not valid." };
+  if (!parsed.success) return { ok: false, message: enServerText.groupNotValid };
 
   const groups = await listGroups(auth.ctx.org.organizationId);
   const group = groups.find((g) => g.id === parsed.data);
-  if (!group) return { ok: false, message: "That group no longer exists." };
+  if (!group) return { ok: false, message: enServerText.groupGone };
 
   const numbers = await groupRecipients({
     organizationId: auth.ctx.org.organizationId,
@@ -230,7 +230,7 @@ export async function loadGroupRecipientsAction(
   });
 
   if (numbers.length === 0) {
-    return { ok: false, message: `"${group.name}" has no contacts in it yet.` };
+    return { ok: false, message: enServerText.groupEmpty(group.name) };
   }
 
   return { ok: true, numbers, name: group.name };

@@ -14,6 +14,7 @@ import { IconBlock, IconDownload } from "@/components/icons";
 import { OptOutForm } from "./opt-out-form";
 import { ContactsTabs } from "../contacts-tabs";
 import { getDictionary, getI18n } from "@/i18n/server";
+import { localizeServerText } from "@/i18n/server-text";
 import { formatDateTime } from "@/i18n/format";
 import type { Dictionary } from "@/i18n/dictionaries";
 
@@ -79,7 +80,7 @@ export default async function OptOutsPage() {
               {rows.map((row) => (
                 <tr key={row.id}>
                   <td className="font-mono text-[12.5px]">{row.numberMasked}</td>
-                  <td className="cell-text">{row.reason}</td>
+                  <td className="cell-text">{localizeServerText(row.reason, t)}</td>
                   <td className="text-muted">{sourceLabel(t, row.source)}</td>
                   <td className="whitespace-nowrap text-muted">{formatDateTime(row.createdAt, locale)}</td>
                 </tr>

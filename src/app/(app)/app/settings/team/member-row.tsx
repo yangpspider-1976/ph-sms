@@ -10,7 +10,7 @@ import {
 import { Button, Notice, Pill, Select } from "@/components/ui";
 import { ROLE_ORDER, ROLE_TONES } from "@/server/auth/rbac";
 import type { OrgRole } from "@/server/db/schema";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 
 const ROLE_TONE = ROLE_TONES;
 
@@ -36,6 +36,7 @@ export function MemberRow({
   canManage: boolean;
 }) {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [result, setResult] = useState<TeamResult | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -128,7 +129,7 @@ export function MemberRow({
       {result && !result.ok ? (
         <div className="mt-3">
           <Notice tone="danger" title={t.settings.team.notChanged}>
-            {result.message}
+            {localizeServerText(result.message)}
           </Notice>
         </div>
       ) : null}

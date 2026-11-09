@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { decideVerificationAction, type AdminResult } from "@/server/actions/admin";
 import { Button, Input, Notice, Select } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useServerText, useT } from "@/i18n/client";
 import { keepValuesOnSubmit } from "@/components/form-submit";
 
 const OPTIONS = [
@@ -28,6 +28,7 @@ export function VerificationDecision({
   name: string;
 }) {
   const t = useT();
+  const localizeServerText = useServerText();
 
   const [decision, setDecision] = useState<string>("ACTIVE");
   const [result, setResult] = useState<AdminResult | null>(null);
@@ -101,7 +102,7 @@ export function VerificationDecision({
 
       {result ? (
         <Notice tone="danger" title={t.common.notRecorded}>
-          {result.message}
+          {localizeServerText(result.message)}
         </Notice>
       ) : null}
     </form>

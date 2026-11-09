@@ -49,13 +49,13 @@ export async function decideVerificationAction(formData: FormData): Promise<Admi
       reason: String(formData.get("reason") ?? ""),
     });
 
-  if (!parsed.success) return { ok: false, message: "That decision was not valid." };
+  if (!parsed.success) return { ok: false, message: enServerText.decisionNotValid };
 
   const { organizationId, decision, reason } = parsed.data;
 
   // A rejection or suspension without a reason is not reviewable later.
   if (decision !== "ACTIVE" && !reason?.trim()) {
-    return { ok: false, message: "Give a reason so the decision can be reviewed later." };
+    return { ok: false, message: enServerText.giveDecisionReason };
   }
 
   await db.transaction(async (tx) => {
@@ -115,7 +115,7 @@ export async function decideVerificationAction(formData: FormData): Promise<Admi
 
   revalidatePath("/admin/verification");
   revalidatePath("/admin");
-  return { ok: true, message: `Recorded: ${decision.toLowerCase().replace("_", " ")}.` };
+  return { ok: true, message: enServerText.decisionRecorded(decision.toLowerCase().replace("_", " ")) };
 }
 
 /** Approve, reject or revoke a sender identity. */
@@ -136,7 +136,7 @@ export async function decideSenderAction(formData: FormData): Promise<AdminResul
       supportsInboundReplies: formData.get("supportsInboundReplies") === "on",
     });
 
-  if (!parsed.success) return { ok: false, message: "That decision was not valid." };
+  if (!parsed.success) return { ok: false, message: enServerText.decisionNotValid };
 
   const sender = (
     await db
@@ -145,7 +145,7 @@ export async function decideSenderAction(formData: FormData): Promise<AdminResul
       .where(eq(senderIdentities.id, parsed.data.senderId))
       .limit(1)
   )[0];
-  if (!sender) return { ok: false, message: "That sender identity no longer exists." };
+  if (!sender) return { ok: false, message: enServerText.senderIdentityGone };
 
   await db.transaction(async (tx) => {
     await tx
@@ -211,7 +211,7 @@ export async function updateInquiryAction(formData: FormData): Promise<AdminResu
       note: String(formData.get("note") ?? ""),
     });
 
-  if (!parsed.success) return { ok: false, message: "That update was not valid." };
+  if (!parsed.success) return { ok: false, message: enServerText.updateNotValid };
 
   await db.transaction(async (tx) => {
     await tx
@@ -251,10 +251,10 @@ export async function addPlatformSuppressionAction(formData: FormData): Promise<
 
   const raw = String(formData.get("numbers") ?? "");
   const reason = String(formData.get("reason") ?? "").trim();
-  if (!reason) return { ok: false, message: "Give a reason for the block." };
+  if (!reason) return { ok: false, message: enServerText.giveBlockReason };
 
   const entries = splitPastedNumbers(raw);
-  if (entries.length === 0) return { ok: false, message: "Enter at least one number." };
+  if (entries.length === 0) return { ok: false, message: enServerText.enterNumber };
 
   let added = 0;
   let invalid = 0;
@@ -315,9 +315,9 @@ export async function updateLimitsAction(formData: FormData): Promise<AdminResul
       monthly: formData.get("monthly"),
     });
 
-  if (!parsed.success) return { ok: false, message: "Those limits were not valid." };
+  if (!parsed.success) return { ok: false, message: enServerText.limitsNotValid };
   if (parsed.data.daily > parsed.data.monthly) {
-    return { ok: false, message: "The daily limit cannot exceed the monthly limit." };
+    return { ok: false, message: enServerText.dailyOverMonthly };
   }
 
   await db.transaction(async (tx) => {
@@ -351,7 +351,7 @@ export async function updateLimitsAction(formData: FormData): Promise<AdminResul
 /** Lifts a sending freeze once an operator has settled the debt. */
 export async function clearSendingFreezeAction(organizationId: string): Promise<AdminResult> {
   const admin = await requirePlatformAdmin();
-  if (!isUuid(organizationId)) return { ok: false, message: "That account was not found." };
+  if (!isUuid(organizationId)) return { ok: false, message: enServerText.accountNotFound };
 
   await db.transaction(async (tx) => {
     await tx

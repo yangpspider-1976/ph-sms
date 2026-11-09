@@ -10,6 +10,7 @@ import { demoFeaturesEnabled } from "@/server/env";
 import { db } from "@/server/db";
 import { payments } from "@/server/db/schema";
 import { and, eq } from "drizzle-orm";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 /** Starts a top-up. Owner-only: buying credit is a billing action. */
 export async function startTopUpAction(formData: FormData): Promise<void> {
@@ -45,7 +46,7 @@ export type DemoPayResult = { ok: boolean; message: string };
  */
 export async function completeDemoPaymentAction(reference: string): Promise<DemoPayResult> {
   if (!demoFeaturesEnabled()) {
-    return { ok: false, message: "Demo payments are not available in this mode." };
+    return { ok: false, message: enServerText.demoPaymentsUnavailable };
   }
 
   const auth = await authorize("billing.manage");
@@ -65,9 +66,9 @@ export async function completeDemoPaymentAction(reference: string): Promise<Demo
       .limit(1)
   )[0];
 
-  if (!payment) return { ok: false, message: "That payment could not be found." };
+  if (!payment) return { ok: false, message: enServerText.paymentNotFound };
   if (payment.status !== "PENDING") {
-    return { ok: false, message: `This payment is already ${payment.status.toLowerCase()}.` };
+    return { ok: false, message: enServerText.paymentAlready(payment.status.toLowerCase()) };
   }
 
   const { body, signature } = MockPaymentProvider.signedCallback({
@@ -89,10 +90,10 @@ export async function completeDemoPaymentAction(reference: string): Promise<Demo
   revalidatePath("/app/credits");
 
   if (outcome.status === "CREDITED") {
-    return { ok: true, message: "Demo credit added. No real payment was taken." };
+    return { ok: true, message: enServerText.demoCreditAdded };
   }
   if (outcome.status === "DUPLICATE" || outcome.status === "ALREADY_SETTLED") {
-    return { ok: true, message: "This payment was already settled." };
+    return { ok: true, message: enServerText.paymentAlreadySettled };
   }
-  return { ok: false, message: `The gateway event was not accepted (${outcome.status}).` };
+  return { ok: false, message: enServerText.gatewayNotAccepted(outcome.status) };
 }

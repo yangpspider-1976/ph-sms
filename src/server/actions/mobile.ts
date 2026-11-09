@@ -33,7 +33,7 @@ export async function startMobileVerificationAction(
   if (!limit.allowed) return { ok: false, message: limit.message };
 
   const parsed = startSchema.safeParse({ number: String(formData.get("number") ?? "") });
-  if (!parsed.success) return { ok: false, message: "Enter your mobile number." };
+  if (!parsed.success) return { ok: false, message: enServerText.enterYourMobile };
 
   try {
     const result = await startMobileVerification({
@@ -64,7 +64,7 @@ export async function confirmMobileVerificationAction(
   const user = await requireUser();
 
   const code = String(formData.get("code") ?? "").trim();
-  if (!/^\d{6}$/.test(code)) return { ok: false, message: "Enter the 6-digit code." };
+  if (!/^\d{6}$/.test(code)) return { ok: false, message: enServerText.enterSixDigitCode };
 
   try {
     const { mask } = await confirmMobileVerification({ userId: user.id, code });

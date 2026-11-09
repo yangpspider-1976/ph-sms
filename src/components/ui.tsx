@@ -246,12 +246,17 @@ export function Notice({
   tone = "info",
   title,
   children,
-  supportRef,
+  support,
 }: {
   tone?: Tone;
   title: string;
   children?: ReactNode;
-  supportRef?: string;
+  /**
+   * The reference the reader can quote to support, as a whole line in their
+   * language: `t.components.supportReference(ref)`. This component is shared
+   * by server and client pages, so it cannot look the wording up itself.
+   */
+  support?: string;
 }) {
   // A square box on the tone's tint: the title takes the tone colour, the
   // message stays in body grey, which reads at 6:1 or better on every tint.
@@ -262,9 +267,7 @@ export function Notice({
         <div className="min-w-0">
           <p className={cx("text-[15px] font-bold", TONES[tone].split(" ")[1])}>{title}</p>
           {children ? <div className="mt-1 text-[13.5px] text-body">{children}</div> : null}
-          {supportRef ? (
-            <p className="mt-2 text-[12px] text-body">Support reference: {supportRef}</p>
-          ) : null}
+          {support ? <p className="mt-2 text-[12px] text-body">{support}</p> : null}
         </div>
       </div>
     </div>

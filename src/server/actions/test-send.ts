@@ -17,8 +17,8 @@ export type TestSendActionResult =
   | { ok: false; message: string };
 
 const schema = z.object({
-  senderIdentityId: z.string().uuid("Choose a sender identity."),
-  body: z.string().min(1, "Enter a message.").max(2000),
+  senderIdentityId: z.string().uuid(enServerText.chooseSender),
+  body: z.string().min(1, enServerText.enterMessage).max(2000),
   recipientUserId: z.string().uuid().optional(),
   idempotencyKey: z.string().min(8).max(200),
 });
@@ -32,7 +32,7 @@ export async function sendTestAction(raw: unknown): Promise<TestSendActionResult
 
   const parsed = schema.safeParse(raw);
   if (!parsed.success) {
-    return { ok: false, message: parsed.error.issues[0]?.message ?? "That request was not valid." };
+    return { ok: false, message: parsed.error.issues[0]?.message ?? enServerText.requestNotValid };
   }
 
   try {

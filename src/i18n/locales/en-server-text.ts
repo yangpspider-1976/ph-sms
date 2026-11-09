@@ -58,6 +58,8 @@ export const enServerText = {
   approvedInDemo: "Approved in demo mode",
 
   optedOut: "This number has opted out",
+  // The opt-out list's reason when the person adding a number gives none.
+  requestedToStop: "Requested to stop",
   noPhone: "No phone number in this row",
   sameAsRow: (row: string) => `Same number as row ${row}`,
   blank: "Blank value",
@@ -154,4 +156,239 @@ export const enServerText = {
   mfaVerified: "Verified.",
   recoveryCodeAccepted: (remaining: string) =>
     `Recovery code accepted. ${remaining} remaining — re-enrol soon.`,
+
+  // Successes no form shows today: the page states the outcome itself, or the
+  // row simply leaves the list. Listed so that a form which starts showing one
+  // needs no new translation.
+  decisionRecorded: (status: string) => `Recorded: ${status.toLowerCase()}.`,
+  approvedScheduled: "Approved. It will send at the scheduled time.",
+  approvedQueued: "Approved. It has been queued for sending.",
+  rejectedCreditReturned: "Rejected. Nothing was sent and the reserved credit has been returned.",
+  senderApprovedDemo: (value: string) => `${value} approved (demo mode only).`,
+  demoCreditAdded: "Demo credit added. No real payment was taken.",
+  paymentAlreadySettled: "This payment was already settled.",
+  invitationRevoked: "Invitation revoked.",
+  roleUpdated: "Role updated.",
+  memberRemoved: "Member removed.",
+  templateRemoved: "Template removed.",
+
+  // What a form says when it has not worked. The actions, the domain errors
+  // they pass on and the validation schemas all build their messages from
+  // these entries. A role or status arrives as the server names it (a code,
+  // or its words in lower case) and is shown by its label.
+  signInToContinue: "Sign in to continue.",
+  roleCannot: (role: string) => `Your role (${role}) cannot perform this action.`,
+  organizationCannot: (status: string) =>
+    `This organization is ${status.toLowerCase()} and cannot perform this action.`,
+  tooMany: (subject: string, minutes: string) =>
+    `Too many ${subject}. Try again in about ${minutes} minute${minutes === "1" ? "" : "s"}.`,
+  // What each rate limit counts, named inside tooMany. Matched on its own.
+  limitSubjects: {
+    login: "sign-in attempts",
+    mfa: "two-factor attempts",
+    signup: "registrations",
+    upload: "file uploads",
+    preview: "previews",
+    quote: "price checks",
+    testSend: "test sends",
+    dispatch: "campaign submissions",
+    export: "exports",
+    inquiry: "inquiries",
+  },
+
+  // Signing in and signing up.
+  enterValidEmail: "Enter a valid email address.",
+  enterPassword: "Enter your password.",
+  loginMismatch: "That email address and password do not match.",
+  enterYourName: "Enter your name.",
+  enterValidWorkEmail: "Enter a valid work email address.",
+  passwordTooShort: "Use at least 12 characters.",
+  passwordTooLong: "That password is too long.",
+  enterRegisteredName: "Enter your registered business name.",
+  enterRegistrationId: "Enter your SEC or DTI registration number.",
+  enterBusinessAddress: "Enter your business address.",
+  enterIndustry: "Enter your industry.",
+  describeIntendedUsage: "Describe what you intend to send, in a sentence or two.",
+  accountExists: "An account already exists for that email address. Sign in instead.",
+  verificationLinkExpired:
+    "That verification link has expired or has already been used. Request a new one.",
+
+  // Contact groups.
+  giveGroupName: "Give the group a name.",
+  notValid: "That was not valid.",
+  changeWasNotValid: "That change was not valid.",
+  groupNotValid: "That group is not valid.",
+  selectionNotValid: "That selection was not valid.",
+  contactGone: "That contact no longer exists.",
+  groupGone: "That group no longer exists.",
+  groupEmpty: (name: string) => `"${name}" has no contacts in it yet.`,
+  groupNameTaken: (name: string) => `You already have a group called "${name}".`,
+
+  // Contacts, opt-outs and uploading a contact list.
+  chooseCsv: "Choose a CSV file to upload.",
+  uploadTooLarge: (mib: string) => `That file is larger than the ${mib} MiB limit.`,
+  importNotValid: "That import is not valid.",
+  enterMobileNumbers: "Enter at least one mobile number.",
+  fileEmpty: "The file is empty.",
+  fileTooLarge: (mib: string) => `The file is larger than the ${mib} MiB limit.`,
+  spreadsheetNotCsv:
+    "This is a spreadsheet file, not a CSV. Export it as CSV (UTF-8) and upload again.",
+  nulBytes: "The file contains NUL bytes and is not valid text.",
+  notUtf8: "The file is not valid UTF-8. Re-export it as CSV UTF-8 and upload again.",
+  repeatedColumn: (columns: string) => `The header row repeats a column: ${columns}.`,
+  brokenQuoting:
+    "The file has an unclosed quoted field, so the rows cannot be read reliably.",
+  noHeaderRow: "The file has no header row.",
+  missingColumn: (columns: string) => `The file needs a ${columns} column.`,
+  unknownColumns: (columns: string) =>
+    `This file has columns we do not use: ${columns}. Confirm that they should be ignored.`,
+  tooManyRows: (rows: string, limit: string) =>
+    `The file has ${rows} data rows; the limit is ${limit}.`,
+  // What the upload preview says each column of the file is used for.
+  columnPhone: "Mobile number",
+  columnFirstName: "First name",
+  columnLastName: "Last name",
+  columnConsentSource: "How they agreed to hear from you",
+  columnConsentDate: "When they agreed",
+  columnCustom: (n: string) => `Custom field ${n}`,
+  columnIgnored: "Ignored",
+
+  // Pricing and sending a campaign.
+  chooseSender: "Choose a sender identity.",
+  enterMessage: "Enter a message.",
+  addRecipient: "Add at least one recipient.",
+  requestNotValid: "That request was not valid.",
+  confirmationNotValid: "That confirmation was not valid.",
+  campaignNotFound: "That campaign was not found.",
+  promotionalNeedsInquiry:
+    "Promotional messages are handled as an inquiry, not self-service. Request a bulk quote instead.",
+  senderNotApproved: "That sender identity is not approved for this organization.",
+  pickFutureTime: "Pick a time in the future.",
+  scheduleTooFar: (days: string) => `Scheduling is limited to ${days} days ahead.`,
+  overSelfServiceLimit: (count: string, limit: string) =>
+    `This send has ${count} unique destinations, above the self-service limit of ${limit}. Request a bulk quote for a list this size.`,
+  noEligibleRecipients:
+    "No eligible recipients remain after validation and opt-outs, so there is nothing to send.",
+  quoteNotFound: "That quote could not be found.",
+  quoteOtherUser: "That quote was issued to a different user.",
+  quoteUsed: "That quote has already been used for a campaign.",
+  quoteExpired: "This quote has expired. Review the send again to get current pricing.",
+  quoteRecipientsChanged: "This quote's recipient list does not match.",
+  quoteMessageChanged: "This quote's message does not match.",
+  dailyQuota: (count: string, remaining: string, limit: string) =>
+    `This send needs ${count} destinations but only ${remaining} remain in today's limit (${limit}).`,
+  monthlyQuota: (count: string, remaining: string, limit: string) =>
+    `This send needs ${count} destinations but only ${remaining} remain in this month's limit (${limit}).`,
+  noVariables:
+    "Personalization variables are not available yet, so {{name}} would be sent literally. Remove the variable and write the message out in full.",
+  gsmOnly: "This sender only supports the basic GSM character set.",
+  ucs2Strict:
+    "This provider supports strict UCS-2 only, which cannot carry emoji outside the basic multilingual plane. Remove them.",
+  tooManySegments: (segments: string, limit: string) =>
+    `This message is ${segments} segments; the limit is ${limit}.`,
+  // A message the content checks refuse: their summary ("Refused: …."), then this.
+  refusedEditMessage: (summary: string) => `${summary} Edit the message and try again.`,
+  requestKeyReused: "That request key has already been used for a different send.",
+  requestInProgress: "That request is already being processed.",
+  organizationCannotSend: "This organization is not active and cannot send.",
+  senderNoLongerApproved: "That sender identity is no longer approved. Review the send again.",
+  allOptedOut:
+    "Every recipient on this quote has since opted out, so there is nothing to send.",
+  creditShort: "Your available credit does not cover this send. Top up and review again.",
+  sendingFrozen: "Sending is frozen on this account. Contact support.",
+  alreadySubmitted: "That request has already been submitted.",
+
+  // Approving or rejecting a held campaign.
+  campaignNotValid: "That campaign is not valid.",
+  giveRejectionReason: "Give a reason so the sender knows what to change.",
+  rejectionNotValid: "That rejection is not valid.",
+  notAwaitingApproval: (status: string) =>
+    `This campaign is ${status.toLowerCase()}, not awaiting approval.`,
+  ownCampaign: "You created this campaign, so you cannot approve it. Ask another approver.",
+
+  // The team and invitations.
+  invitationNotValid: "That invitation is not valid.",
+  changeIsNotValid: "That change is not valid.",
+  memberNotFound: "That member was not found.",
+  inviteLinkNotValid: "That invitation link is not valid.",
+  alreadyOnTeam: "That person is already on the team.",
+  inviteAlreadyOpen: "An invitation is already open for that address.",
+  inviteUsed: "That invitation has already been used.",
+  inviteExpiredAskAgain: "That invitation has expired. Ask for a new one.",
+  inviteExpired: "That invitation has expired.",
+  invitePassword: "Choose a password of at least 12 characters.",
+  lastOwnerRole: "This is the last owner. Promote someone else before changing this role.",
+  lastOwnerRemove: "This is the last owner. An organization must keep at least one.",
+
+  // Verifying a mobile number, and test sends.
+  enterYourMobile: "Enter your mobile number.",
+  enterSixDigitCode: "Enter the 6-digit code.",
+  enterPhilippineMobile: "Enter a Philippine mobile number, for example 0917 123 4567.",
+  numberVerifiedElsewhere: "That number is already verified on another account.",
+  noVerificationInProgress:
+    "There is no verification in progress. Start again to get a new code.",
+  codeExpired: "That code has expired. Send a new one.",
+  codeMismatchAttemptsLeft: (left: string) =>
+    `That code did not match. ${left} attempt${left === "1" ? "" : "s"} left.`,
+  tooManyIncorrectCodes: "Too many incorrect codes. Send a new one.",
+  notAMember: "That person is not a member of this organization.",
+  verifyMobileFirst:
+    "Verify your mobile number before sending a test, so tests can only reach a phone you own.",
+  memberNotVerified: "That member has not verified a mobile number yet.",
+
+  // Sender identities.
+  senderIdTooShort: "A sender ID is at least 3 characters.",
+  senderIdTooLong: "Alphanumeric sender IDs are at most 11 characters.",
+  senderIdCharacters: "Use letters, numbers and single spaces only.",
+  explainSenderId: "Explain how this name relates to your registered business.",
+  applicationNotValid: "That application is not valid.",
+  alreadyApplied: (value: string) => `You have already applied for ${value}.`,
+  notInThisMode: "Not available in this mode.",
+  senderNotAwaiting: "That sender is not awaiting review.",
+
+  // Templates, support requests and the bulk quote form.
+  giveTemplateName: "Give the template a name.",
+  writeTheMessage: "Write the message.",
+  templateNotValid: "That template is not valid.",
+  sayBriefly: "Say briefly what this is about.",
+  tellUsWhatHappened: "Tell us what happened, in a sentence or two.",
+  checkTheForm: "Check the form.",
+  enterBusinessName: "Enter your business name.",
+  enterContactName: "Enter a contact name.",
+  enterVolume: "Enter roughly how many messages you expect to send.",
+  howOften: "How often would you send?",
+  describeAudience: "Describe who receives these messages.",
+  pasteExample: "Paste an example message.",
+  consentHow: "Tell us how these people agreed to hear from you.",
+  checkHighlighted: "Check the highlighted fields.",
+
+  // Demo payments.
+  demoPaymentsUnavailable: "Demo payments are not available in this mode.",
+  paymentNotFound: "That payment could not be found.",
+  paymentAlready: (status: string) => `This payment is already ${status.toLowerCase()}.`,
+  gatewayNotAccepted: (outcome: string) => `The gateway event was not accepted (${outcome}).`,
+
+  // The admin console.
+  enterAppCode: "Enter the 6-digit code from your app.",
+  codeMismatchCheckClock:
+    "That code did not match. Check your device's clock and try the current code.",
+  enterYourCode: "Enter your code.",
+  notEnrolled: "This account is not enrolled yet.",
+  codeMismatch: "That code did not match.",
+  decisionNotValid: "That decision was not valid.",
+  giveDecisionReason: "Give a reason so the decision can be reviewed later.",
+  senderIdentityGone: "That sender identity no longer exists.",
+  updateNotValid: "That update was not valid.",
+  giveBlockReason: "Give a reason for the block.",
+  enterNumber: "Enter at least one number.",
+  limitsNotValid: "Those limits were not valid.",
+  dailyOverMonthly: "The daily limit cannot exceed the monthly limit.",
+  accountNotFound: "That account was not found.",
+  notJson: "That is not valid JSON.",
+  policyNotValid: "That policy is not valid.",
+  // The content policy editor names the field a problem is in ("rules.2.flags").
+  policyIssue: (field: string, problem: string) => `${field}: ${problem}`,
+  patternNested:
+    "That pattern nests one repetition inside another, which can take a very long time to run. Simplify it.",
+  onlyFlags: "Only the i, m, s and u flags are allowed.",
 };

@@ -12,8 +12,8 @@ import { enServerText } from "@/i18n/locales/en-server-text";
 export type TemplateResult = { ok: boolean; message: string };
 
 const schema = z.object({
-  name: z.string().min(2, "Give the template a name.").max(120),
-  body: z.string().min(1, "Write the message.").max(2000),
+  name: z.string().min(2, enServerText.giveTemplateName).max(120),
+  body: z.string().min(1, enServerText.writeTheMessage).max(2000),
 });
 
 /**
@@ -34,7 +34,7 @@ export async function saveTemplateAction(formData: FormData): Promise<TemplateRe
     body: String(formData.get("body") ?? ""),
   });
   if (!parsed.success) {
-    return { ok: false, message: parsed.error.issues[0]?.message ?? "That template is not valid." };
+    return { ok: false, message: parsed.error.issues[0]?.message ?? enServerText.templateNotValid };
   }
 
   const check = validateMessageBody(parsed.data.body, {
@@ -72,5 +72,5 @@ export async function archiveTemplateAction(templateId: string): Promise<Templat
   if (!removed) return { ok: false, message: enServerText.templateGone };
 
   revalidatePath("/app/templates");
-  return { ok: true, message: "Template removed." };
+  return { ok: true, message: enServerText.templateRemoved };
 }

@@ -24,8 +24,10 @@ export function InquiryForm() {
     });
   }
 
-  const err = (field: string) =>
-    result && !result.ok ? result.fieldErrors?.[field] : undefined;
+  const err = (field: string) => {
+    const message = result && !result.ok ? result.fieldErrors?.[field] : undefined;
+    return message ? localizeServerText(message) : undefined;
+  };
 
   if (result?.ok) {
     return (

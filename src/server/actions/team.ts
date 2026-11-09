@@ -31,13 +31,13 @@ export async function inviteMemberAction(formData: FormData): Promise<TeamResult
 
   const parsed = z
     .object({
-      email: z.string().email("Enter a valid email address."),
+      email: z.string().email(enServerText.enterValidEmail),
       role: z.enum(ROLES),
     })
     .safeParse({ email: formData.get("email"), role: formData.get("role") });
 
   if (!parsed.success) {
-    return { ok: false, message: parsed.error.issues[0]?.message ?? "That invitation is not valid." };
+    return { ok: false, message: parsed.error.issues[0]?.message ?? enServerText.invitationNotValid };
   }
 
   try {
@@ -70,7 +70,7 @@ export async function revokeInviteAction(inviteId: string): Promise<TeamResult> 
   });
 
   revalidatePath("/app/settings/team");
-  return { ok: true, message: "Invitation revoked." };
+  return { ok: true, message: enServerText.invitationRevoked };
 }
 
 export async function changeRoleAction(formData: FormData): Promise<TeamResult> {
@@ -81,7 +81,7 @@ export async function changeRoleAction(formData: FormData): Promise<TeamResult> 
     .object({ membershipId: z.string().uuid(), role: z.enum(ROLES) })
     .safeParse({ membershipId: formData.get("membershipId"), role: formData.get("role") });
 
-  if (!parsed.success) return { ok: false, message: "That change is not valid." };
+  if (!parsed.success) return { ok: false, message: enServerText.changeIsNotValid };
 
   try {
     await changeRole({
@@ -96,13 +96,13 @@ export async function changeRoleAction(formData: FormData): Promise<TeamResult> 
   }
 
   revalidatePath("/app/settings/team");
-  return { ok: true, message: "Role updated." };
+  return { ok: true, message: enServerText.roleUpdated };
 }
 
 export async function removeMemberAction(membershipId: string): Promise<TeamResult> {
   const auth = await authorize("team.manage");
   if (!auth.ok) return { ok: false, message: auth.error.message };
-  if (!isUuid(membershipId)) return { ok: false, message: "That member was not found." };
+  if (!isUuid(membershipId)) return { ok: false, message: enServerText.memberNotFound };
 
   try {
     await removeMember({
@@ -116,7 +116,7 @@ export async function removeMemberAction(membershipId: string): Promise<TeamResu
   }
 
   revalidatePath("/app/settings/team");
-  return { ok: true, message: "Member removed." };
+  return { ok: true, message: enServerText.memberRemoved };
 }
 
 export type AcceptResult = { ok: false; message: string };
@@ -141,7 +141,7 @@ export async function acceptInviteAction(formData: FormData): Promise<AcceptResu
       password: String(formData.get("password") ?? ""),
     });
 
-  if (!parsed.success) return { ok: false, message: "That invitation link is not valid." };
+  if (!parsed.success) return { ok: false, message: enServerText.inviteLinkNotValid };
 
   let result: { userId: string; organizationId: string };
   try {

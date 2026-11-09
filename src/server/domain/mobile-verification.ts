@@ -6,6 +6,7 @@ import { encrypt, numberHash, numberHashCandidates, sha256 } from "@/server/secu
 import { maskNormalized, normalizePhone } from "./phone";
 import { recordAudit } from "@/server/audit";
 import type { SmsProvider } from "@/server/providers/sms";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 /**
  * Optional mobile verification (AUTH-02).
@@ -68,7 +69,7 @@ export async function startMobileVerification(params: {
   const normalized = normalizePhone(params.rawNumber);
   if (!normalized.ok) {
     throw new MobileVerificationError(
-      "Enter a Philippine mobile number, for example 0917 123 4567.",
+      enServerText.enterPhilippineMobile,
       "INVALID_NUMBER",
     );
   }
@@ -88,7 +89,7 @@ export async function startMobileVerification(params: {
 
   if (taken[0] && taken[0].id !== params.userId) {
     throw new MobileVerificationError(
-      "That number is already verified on another account.",
+      enServerText.numberVerifiedElsewhere,
       "IN_USE",
     );
   }
@@ -163,7 +164,7 @@ export async function confirmMobileVerification(params: {
       return {
         ok: false as const,
         code: "NO_PENDING" as const,
-        message: "There is no verification in progress. Start again to get a new code.",
+        message: enServerText.noVerificationInProgress,
       };
     }
 
@@ -175,7 +176,7 @@ export async function confirmMobileVerification(params: {
       return {
         ok: false as const,
         code: "EXPIRED" as const,
-        message: "That code has expired. Send a new one.",
+        message: enServerText.codeExpired,
       };
     }
 
@@ -197,8 +198,8 @@ export async function confirmMobileVerification(params: {
         code: left > 0 ? ("WRONG_CODE" as const) : ("TOO_MANY_ATTEMPTS" as const),
         message:
           left > 0
-            ? `That code did not match. ${left} attempt${left === 1 ? "" : "s"} left.`
-            : "Too many incorrect codes. Send a new one.",
+            ? enServerText.codeMismatchAttemptsLeft(String(left))
+            : enServerText.tooManyIncorrectCodes,
       };
     }
 

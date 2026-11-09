@@ -241,7 +241,7 @@ export async function setContentPolicy(input: {
   const parsed = contentPolicySchema.safeParse(input.policy);
   if (!parsed.success) {
     throw new ConfigError(
-      parsed.error.issues[0]?.message ?? "That policy is not valid.",
+      parsed.error.issues[0]?.message ?? enServerText.policyNotValid,
       "INVALID_VALUE",
     );
   }
