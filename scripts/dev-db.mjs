@@ -13,6 +13,7 @@
  *   node scripts/dev-db.mjs reset    # delete the cluster and re-create it
  */
 import EmbeddedPostgres from "embedded-postgres";
+import postgres from "postgres";
 import { existsSync, rmSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -39,6 +40,9 @@ export function createServer() {
     password: DEV_DB.password,
     port: DEV_DB.port,
     persistent: true,
+    // UTF-8, as the hosted database is. Without this, initdb on Windows takes
+    // the system code page (WIN1252), which cannot store Korean.
+    initdbFlags: ["--encoding=UTF8", "--locale=C"],
     onLog: () => {},
     onError: () => {},
   });
@@ -50,14 +54,44 @@ export async function startServer() {
   const fresh = !existsSync(dataDir);
   if (fresh) await pg.initialise();
   await pg.start();
-  for (const db of [DEV_DB.database, DEV_DB.testDatabase, DEV_DB.e2eDatabase]) {
-    try {
-      await pg.createDatabase(db);
-    } catch (err) {
-      if (!String(err?.message ?? err).includes("already exists")) throw err;
-    }
+  const admin = postgres(devDatabaseUrl("postgres"), { max: 1, onnotice: () => {} });
+  try {
+    await ensureUtf8Database(admin, DEV_DB.database, { disposable: false });
+    await ensureUtf8Database(admin, DEV_DB.testDatabase, { disposable: true });
+    await ensureUtf8Database(admin, DEV_DB.e2eDatabase, { disposable: true });
+  } finally {
+    await admin.end();
   }
   return pg;
+}
+
+/**
+ * Creates a database as UTF-8, whatever the cluster's own default.
+ *
+ * A cluster initialised before `initdbFlags` above is WIN1252, and so is every
+ * database it created. The test databases are migrated and seeded afresh by
+ * every run, so one in another encoding is re-created. The development
+ * database holds whatever was put in it, so it is only reported.
+ */
+async function ensureUtf8Database(admin, name, { disposable }) {
+  const rows = await admin`
+    select pg_encoding_to_char(encoding) as encoding from pg_database where datname = ${name}`;
+  const encoding = rows[0]?.encoding;
+  if (encoding === "UTF8") return;
+  if (encoding && !disposable) {
+    console.warn(
+      `${name} stores text as ${encoding}, so Korean cannot be saved in it. ` +
+        "`node scripts/dev-db.mjs reset` re-creates the cluster as UTF-8, deleting its data.",
+    );
+    return;
+  }
+  if (encoding) {
+    await admin.unsafe(`drop database "${name}" with (force)`);
+    console.log(`re-creating ${name} as UTF-8 (it was ${encoding})`);
+  }
+  await admin.unsafe(
+    `create database "${name}" encoding 'UTF8' lc_collate 'C' lc_ctype 'C' template template0`,
+  );
 }
 
 const command = process.argv[2] ?? "start";
