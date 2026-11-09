@@ -6,6 +6,7 @@ import { recordAudit } from "@/server/audit";
 import { checkRateLimit } from "@/server/security/rate-limit";
 import { sendMail } from "@/server/providers/mail";
 import { enServerText } from "@/i18n/locales/en-server-text";
+import { getDictionary } from "@/i18n/server";
 
 export type SupportResult =
   | { ok: true; reference: string; message: string }
@@ -64,17 +65,28 @@ export async function submitSupportRequestAction(
     },
   });
 
+  // The copy goes to the person asking, in the language they asked in. The
+  // category shows by the label they chose it under.
+  const t = await getDictionary();
+  const categories = {
+    DELIVERY: t.supportPage.categoryDelivery,
+    BILLING: t.supportPage.categoryBilling,
+    ACCOUNT: t.supportPage.categoryAccount,
+    SENDER_ID: t.supportPage.categorySenderId,
+    OTHER: t.supportPage.categoryOther,
+  } satisfies Record<typeof parsed.data.category, string>;
+
   await sendMail({
     to: auth.ctx.user.email,
     subject: `[${reference}] ${parsed.data.subject}`,
     body: [
-      `We have your request and someone will reply to this address.`,
+      t.emails.supportReceived,
       ``,
-      `Reference: ${reference}`,
-      `Category: ${parsed.data.category}`,
-      parsed.data.relatedRef ? `About: ${parsed.data.relatedRef}` : null,
+      t.emails.supportReference(reference),
+      t.emails.supportCategory(categories[parsed.data.category]),
+      parsed.data.relatedRef ? t.emails.supportAbout(parsed.data.relatedRef) : null,
       ``,
-      `What you told us:`,
+      t.emails.supportYouToldUs,
       parsed.data.detail,
     ]
       .filter((line) => line !== null)

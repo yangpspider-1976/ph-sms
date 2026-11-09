@@ -16,6 +16,7 @@ import {
 } from "@/server/domain/team";
 import { isUuid } from "@/server/uuid";
 import { enServerText } from "@/i18n/locales/en-server-text";
+import { getLocale } from "@/i18n/server";
 
 export type TeamResult = { ok: boolean; message: string };
 
@@ -46,6 +47,7 @@ export async function inviteMemberAction(formData: FormData): Promise<TeamResult
       invitedBy: auth.ctx.user.id,
       email: parsed.data.email,
       role: parsed.data.role,
+      locale: await getLocale(),
     });
   } catch (err) {
     if (err instanceof TeamError) return { ok: false, message: err.message };

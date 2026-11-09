@@ -4,6 +4,7 @@ import { closeDb, db, resetDb } from "@/test/db";
 import { createTenant, type Tenant } from "@/test/fixtures";
 import { mailSink, memberships, users, verificationTokens } from "@/server/db/schema";
 import { tokenLookup } from "@/server/security/crypto";
+import { ko } from "@/i18n/locales/ko";
 import {
   acceptInvite,
   changeRole,
@@ -54,6 +55,27 @@ describe("sending invitations", () => {
     const mail = await db.select().from(mailSink);
     expect(mail[0]!.toEmail).toBe("newbie@example.test");
     expect(mail[0]!.link).toContain(token);
+  });
+
+  it("writes the invitation in the inviting member's language, naming the role by its label", async () => {
+    await invite("english@example.test");
+    await inviteMember({
+      organizationId: tenant.organizationId,
+      invitedBy: tenant.userId,
+      email: "korean@example.test",
+      role: "SENDER",
+      locale: "ko",
+    });
+
+    const mail = await db.select().from(mailSink);
+    const english = mail.find((m) => m.toEmail === "english@example.test")!;
+    const korean = mail.find((m) => m.toEmail === "korean@example.test")!;
+
+    expect(english.subject).toMatch(/^You have been invited to /);
+    expect(english.body).toBe("You were invited as Sender. The link expires in 7 days.");
+    expect(korean.subject).toMatch(/초대되었습니다$/);
+    expect(korean.body).toContain(ko.roles.labels.SENDER);
+    expect(korean.body).not.toMatch(/[A-Za-z]{3,}/);
   });
 
   it("expires after seven days", async () => {

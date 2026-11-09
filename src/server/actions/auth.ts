@@ -27,6 +27,7 @@ import {
 } from "@/server/security/rate-limit";
 import { headers } from "next/headers";
 import { enServerText } from "@/i18n/locales/en-server-text";
+import { getDictionary } from "@/i18n/server";
 
 export type ActionState = { error?: string; fieldErrors?: Record<string, string> } | null;
 
@@ -128,6 +129,7 @@ export async function signupAction(_prev: ActionState, formData: FormData): Prom
 
   const passwordHash = await hashPassword(parsed.data.password);
   const { token, lookup } = newToken();
+  const t = await getDictionary();
 
   await db.transaction(async (tx) => {
     const [org] = await tx
@@ -164,11 +166,12 @@ export async function signupAction(_prev: ActionState, formData: FormData): Prom
 
     // Goes through the configured transport: the sink in mock mode, real SMTP
     // when one is set up. Nothing leaves the machine in mock mode.
+    // In the language the person signed up in.
     await sendMail(
       {
         to: email,
-        subject: "Verify your email address",
-        body: "Confirm your email address to continue setting up your account.",
+        subject: t.emails.verifySubject,
+        body: t.emails.verifyBody,
         link: `/verify-email?token=${token}`,
       },
       tx,

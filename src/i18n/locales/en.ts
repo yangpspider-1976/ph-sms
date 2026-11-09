@@ -1191,8 +1191,26 @@ export const en = {
     openVerificationLink: "Open verification link",
     openInvitationLink: "Open invitation link",
     openLink: "Open link",
+    mailTo: (email: string) => `to ${email}`,
     continueToLogin: "Continue to log in",
     backToLogin: "Back to log in",
+  },
+
+  // The emails the platform sends. Each is written while someone is using the
+  // site, in the language they have on screen: the person signing up, the
+  // person asking for support, or the member sending an invitation (the
+  // invitee has no account yet, so no language of their own).
+  emails: {
+    verifySubject: "Verify your email address",
+    verifyBody: "Confirm your email address to continue setting up your account.",
+    inviteSubject: (organization: string) => `You have been invited to ${organization}`,
+    anOrganization: "an organization",
+    inviteBody: (role: string) => `You were invited as ${role}. The link expires in 7 days.`,
+    supportReceived: "We have your request and someone will reply to this address.",
+    supportReference: (reference: string) => `Reference: ${reference}`,
+    supportCategory: (category: string) => `Category: ${category}`,
+    supportAbout: (about: string) => `About: ${about}`,
+    supportYouToldUs: "What you told us:",
   },
 
   invite: {

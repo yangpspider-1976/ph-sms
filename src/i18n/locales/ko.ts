@@ -1170,8 +1170,22 @@ export const ko: Dictionary = {
     openVerificationLink: "인증 링크 열기",
     openInvitationLink: "초대 링크 열기",
     openLink: "링크 열기",
+    mailTo: (email: string) => `받는 사람: ${email}`,
     continueToLogin: "로그인하러 가기",
     backToLogin: "로그인으로 돌아가기",
+  },
+
+  emails: {
+    verifySubject: "이메일 주소 인증 안내",
+    verifyBody: "계정 설정을 계속하려면 이메일 주소를 인증하세요.",
+    inviteSubject: (organization: string) => `${organization}에 초대되었습니다`,
+    anOrganization: "조직",
+    inviteBody: (role: string) => `${role}(으)로 초대되었습니다. 링크는 7일 후 만료됩니다.`,
+    supportReceived: "요청이 접수되었습니다. 담당자가 이 주소로 답변드리겠습니다.",
+    supportReference: (reference: string) => `접수 번호: ${reference}`,
+    supportCategory: (category: string) => `분류: ${category}`,
+    supportAbout: (about: string) => `관련 캠페인 또는 참조번호: ${about}`,
+    supportYouToldUs: "보내 주신 내용:",
   },
 
   invite: {

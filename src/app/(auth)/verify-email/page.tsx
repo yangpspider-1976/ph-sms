@@ -82,7 +82,7 @@ async function MailSinkPanel() {
         {recent.map((mail) => (
           <li key={mail.id} className="text-[12.5px]">
             <span className="block font-semibold text-ink">{mail.subject}</span>
-            <span className="block text-muted">to {mail.toEmail}</span>
+            <span className="block text-muted">{t.verifyEmail.mailTo(mail.toEmail)}</span>
             {mail.link ? (
               <Link href={mail.link} className="font-semibold text-brand-700 hover:underline">
                 {linkLabel(mail.link, t)}

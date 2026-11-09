@@ -120,6 +120,31 @@ test("the page-not-found screen is in the reader's language", async ({ browser }
   await context.close();
 });
 
+test("someone who signs up in Korean gets their verification email in Korean", async ({ browser }) => {
+  const context = await browser.newContext({ locale: "ko-KR" });
+  const page = await context.newPage();
+  const email = `ko-signup-${Date.now()}@example.test`;
+
+  await page.goto("/signup");
+  await page.locator("#fullName").fill("김민지");
+  await page.locator("#email").fill(email);
+  await page.locator("#password").fill("CorrectHorse!42");
+  await page.locator("#company").fill("Seoul Mart Manila");
+  await page.locator("#registrationId").fill(`KO-${Date.now()}`);
+  await page.locator("#address").fill("1 Sample Street, Makati City");
+  await page.locator("#industry").fill("Retail");
+  await page.locator("#intendedUsage").fill("Order and delivery updates to customers who opted in at checkout.");
+  await page.locator("form:has(#fullName) button[type=submit]").click();
+  await expect(page).toHaveURL(/\/verify-email/);
+
+  // The demo shows the mail sink instead of sending: this email, in Korean.
+  const mail = page.locator("li", { hasText: `받는 사람: ${email}` });
+  await expect(mail).toContainText("이메일 주소 인증 안내");
+  await expect(mail.getByRole("link", { name: "인증 링크 열기" })).toBeVisible();
+
+  await context.close();
+});
+
 test("the signed-in app is translated too, not just the marketing site", async ({ page }) => {
   await page.goto("/login");
   await page.getByLabel("Work email").fill("owner@demo.test");

@@ -308,7 +308,8 @@ describe("localizeServerText", () => {
  */
 describe("failure messages come from the list", () => {
   const SHAPES = [
-    /\b(?:message|error|description):\s*(["'`])([A-Z][^"'`]*\s[^"'`]*)\1/g,
+    // An email's subject and body, and a notification's title, count too.
+    /\b(?:message|error|description|subject|body|title):\s*(["'`])([A-Z][^"'`]*\s[^"'`]*)\1/g,
     /\.(?:min|max|email|uuid|url|positive|regex|length)\([^()"'`]*?(["'`])([A-Z][^"'`]*\s[^"'`]*)\1\)/g,
     /new (?:Group|Team|Quote|Quota|Submit|Approval|MobileVerification|TestSend|Config|Authorization)Error\(\s*(["'`])([^"'`]*)\1/g,
     /\bfail\(\s*"[A-Z_]+",\s*(["'`])([^"'`]*)\1/g,

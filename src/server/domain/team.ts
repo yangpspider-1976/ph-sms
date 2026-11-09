@@ -14,6 +14,8 @@ import { hashPassword } from "@/server/auth/session";
 import { recordAudit } from "@/server/audit";
 import { sendMail } from "@/server/providers/mail";
 import { enServerText } from "@/i18n/locales/en-server-text";
+import { dictionaryFor } from "@/i18n/dictionaries";
+import type { Locale } from "@/i18n/config";
 
 /**
  * Team membership and invitations.
@@ -93,6 +95,8 @@ export async function inviteMember(input: {
   invitedBy: string;
   email: string;
   role: OrgRole;
+  /** The language the inviting member has on screen; the email is written in it. */
+  locale?: Locale;
 }): Promise<{ token: string }> {
   const email = input.email.trim().toLowerCase();
 
@@ -143,11 +147,12 @@ export async function inviteMember(input: {
       createdBy: input.invitedBy,
     });
 
+    const t = dictionaryFor(input.locale);
     await sendMail(
       {
         to: email,
-        subject: `You have been invited to ${org?.name ?? "an organization"}`,
-        body: `You were invited as ${input.role.toLowerCase()}. The link expires in 7 days.`,
+        subject: t.emails.inviteSubject(org?.name ?? t.emails.anOrganization),
+        body: t.emails.inviteBody(t.roles.labels[input.role]),
         link: `/invite?token=${token}`,
       },
       tx,
