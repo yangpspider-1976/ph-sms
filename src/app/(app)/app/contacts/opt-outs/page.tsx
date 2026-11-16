@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { requireOrgContext } from "@/server/auth/context";
 import { listOrganizationSuppressions } from "@/server/domain/suppression";
 import {
-  ButtonLink,
   Card,
   CardHeader,
   DataTable,
+  DownloadButton,
   EmptyState,
   Notice,
   PageHeader,
@@ -37,9 +37,9 @@ export default async function OptOutsPage() {
         description={t.contacts.optOuts.subheading}
         action={
           ctx.can("reports.export.masked") ? (
-            <ButtonLink href="/app/exports?kind=suppression" variant="ghost" size="sm" prefetch={false}>
+            <DownloadButton href="/app/exports?kind=suppression">
               <IconDownload size={15} /> {t.common.export}
-            </ButtonLink>
+            </DownloadButton>
           ) : null
         }
       />

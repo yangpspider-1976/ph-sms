@@ -65,6 +65,28 @@ export function ButtonLink({
   );
 }
 
+/**
+ * A button that downloads a file the server makes, such as an export.
+ *
+ * A plain link, not a ButtonLink. The router fetches an address itself before
+ * going to it, and when the answer is a file it goes there a second time, so
+ * every export ran twice: two entries in the audit log, and two against the
+ * hourly limit.
+ */
+export function DownloadButton({
+  variant = "ghost",
+  size = "sm",
+  className,
+  ...props
+}: ComponentProps<"a"> & { variant?: ButtonVariant; size?: ButtonSize }) {
+  return (
+    <a
+      className={cx(BUTTON_BASE, BUTTON_VARIANTS[variant], BUTTON_SIZES[size], className)}
+      {...props}
+    />
+  );
+}
+
 /* -------------------------------------------------------------------------- */
 /* Surfaces                                                                   */
 /* -------------------------------------------------------------------------- */

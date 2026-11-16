@@ -6,10 +6,10 @@ import { listGroups } from "@/server/domain/groups";
 import { listOrganizationSuppressions } from "@/server/domain/suppression";
 import { getEffectiveConfig } from "@/server/domain/app-config";
 import {
-  ButtonLink,
   Card,
   CardHeader,
   DataTable,
+  DownloadButton,
   EmptyState,
   PageHeader,
   Pill,
@@ -49,9 +49,9 @@ export default async function ContactsPage() {
         description={t.contacts.subheading}
         action={
           ctx.can("reports.export.masked") ? (
-            <ButtonLink href="/app/exports?kind=contacts" variant="ghost" size="sm" prefetch={false}>
+            <DownloadButton href="/app/exports?kind=contacts">
               <IconDownload size={15} /> {t.common.export}
-            </ButtonLink>
+            </DownloadButton>
           ) : null
         }
       />

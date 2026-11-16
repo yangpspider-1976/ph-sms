@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   commitImportAction,
@@ -121,13 +120,13 @@ export function ImportPanel({
           <Button type="submit" disabled={pending}>
             {pending ? t.contacts.importPanel.reading : t.contacts.importPanel.upload}
           </Button>
-          <Link
+          {/* A plain link: the router would fetch the file once before downloading it. */}
+          <a
             href="/app/exports?kind=template"
-            prefetch={false}
             className="flex items-center gap-1.5 py-1 text-[13px] font-semibold text-brand-600 hover:underline"
           >
             <IconDocument size={15} /> {t.send.downloadTemplate}
-          </Link>
+          </a>
         </div>
       </form>
 
