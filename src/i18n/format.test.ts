@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PLATFORM_TIME_ZONE, platformWallTimeToDate } from "./format";
+import { dateToPlatformWallTime, PLATFORM_TIME_ZONE, platformWallTimeToDate } from "./format";
 
 /**
  * Reading a typed date and time.
@@ -55,6 +55,19 @@ describe("platformWallTimeToDate", () => {
   it("refuses a date that does not exist rather than rolling it forward", () => {
     for (const value of ["2026-02-31T10:00", "2026-13-01T10:00", "2026-10-08T24:00", "2026-10-08T10:60"]) {
       expect(platformWallTimeToDate(value), value).toBeNull();
+    }
+  });
+});
+
+describe("dateToPlatformWallTime", () => {
+  it("writes a moment as Manila time, eight hours ahead of UTC", () => {
+    expect(dateToPlatformWallTime(new Date("2026-11-13T02:05:09.750Z"))).toBe("2026-11-13T10:05:09");
+    expect(dateToPlatformWallTime(new Date("2025-12-31T16:30:00Z"))).toBe("2026-01-01T00:30:00");
+  });
+
+  it("reverses platformWallTimeToDate", () => {
+    for (const typed of ["2026-01-15T09:05:00", "2026-07-31T23:59:59", "2026-12-25T12:30:00"]) {
+      expect(dateToPlatformWallTime(platformWallTimeToDate(typed)!), typed).toBe(typed);
     }
   });
 });

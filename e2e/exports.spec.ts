@@ -71,6 +71,36 @@ test("the sample CSV template needs a signed-in user", async ({ page }) => {
   expect(signedIn.body).toContain("phone_number");
 });
 
+test("a campaign's results download from its page, in one request", async ({ page }) => {
+  await login(page);
+  // Demo Business starts with no campaigns, so send one. Its name is left
+  // empty, so the default name ends up in the file name.
+  await page.goto("/app/send");
+  await page.getByLabel("Mobile numbers").fill("+639170000811\n+639170000812");
+  await page.getByRole("button", { name: "Continue to message" }).click();
+  await page.getByLabel("Message", { exact: true }).fill("Your order is ready for pickup.");
+  await page.getByLabel("I am authorized to contact these recipients.").check();
+  await page.getByRole("button", { name: "Review message" }).click();
+  await page.getByRole("button", { name: "Send 2 messages" }).click();
+  await expect(page).toHaveURL(/\/app\/campaigns\/[0-9a-f-]+$/);
+  // The page refreshes itself while messages are waiting; let it settle.
+  await expect(async () => {
+    await page.reload();
+    await expect(page.getByText("Waiting", { exact: true })).toHaveCount(0);
+  }).toPass({ timeout: 45_000 });
+  const recipientRows = page.getByRole("row").filter({ hasText: /\+63 9\d\d \*\*\* \d{4}/ });
+  await expect(recipientRows).toHaveCount(2);
+
+  const { filename, content, requests } = await clickDownload(page, "Export");
+  expect(filename).toMatch(/^campaign-send-[a-z0-9-]+-\d{4}(-\d{2}){5}\.csv$/);
+  const lines = content.trim().split(/\r?\n/);
+  expect(lines[0]).toContain("phone_number_masked");
+  expect(lines).toHaveLength(3);
+  expect(content).toContain("0811");
+  expect(content).not.toMatch(/\+?639\d{9}/);
+  expect(requests).toHaveLength(1);
+});
+
 test("the Contacts and opt-out exports each download in one request", async ({ page }) => {
   await login(page);
   for (const [path, name] of [

@@ -11,6 +11,8 @@ import {
 } from "./mobile-verification";
 import { listTestRecipients, sendTest, TestSendError } from "./test-send";
 import { getWallet } from "./wallet";
+import { exportCampaignReport } from "./exports";
+import { dateToPlatformWallTime, formatDateTime } from "@/i18n/format";
 
 /**
  * MSG-04. A test send is a real send, so the questions that matter are where it
@@ -93,6 +95,48 @@ describe("sendTest", () => {
       .from(campaigns)
       .where(eq(campaigns.id, result.campaignId));
     expect(campaign!.isTestSend).toBe(true);
+  });
+
+  it("records its name, and names its download, in Manila time", async () => {
+    await verifyMobile(tenant.userId, NUMBERS.ok(20));
+
+    const before = new Date();
+    const result = await sendTest({
+      organizationId: tenant.organizationId,
+      userId: tenant.userId,
+      senderIdentityId: tenant.senderIdentityId,
+      body: "Named in Manila time.",
+      purpose: "INFORMATIONAL",
+      idempotencyKey: "test-key-0020",
+    });
+    const file = await exportCampaignReport({
+      campaignId: result.campaignId,
+      organizationId: tenant.organizationId,
+      actorUserId: tenant.userId,
+      scope: "MASKED",
+    });
+    const after = new Date();
+
+    // Pages write a test send's name themselves (campaignName); the stored one
+    // is a record. It used to give the time in UTC, eight hours behind Manila.
+    const [campaign] = await db
+      .select()
+      .from(campaigns)
+      .where(eq(campaigns.id, result.campaignId));
+    const named = (at: Date) => `Test send — ${formatDateTime(at, "en")}`;
+    expect([named(before), named(after)]).toContain(campaign!.name);
+
+    const minute = (at: Date) => dateToPlatformWallTime(at).slice(0, 16).replace(/[:T]/g, "-");
+    const stamp = /^campaign-test-send-(\d{4}-\d{2}-\d{2}-\d{2}-\d{2})-\d{2}\.csv$/.exec(file!.filename);
+    expect(stamp, file!.filename).not.toBeNull();
+    expect([minute(before), minute(after)]).toContain(stamp![1]);
+
+    // One recipient, shown masked.
+    const lines = file!.content.trim().split(/\r?\n/);
+    expect(lines).toHaveLength(2);
+    expect(lines[0]).toContain("phone_number_masked");
+    expect(lines[1]).toContain(result.mask);
+    expect(file!.content).not.toContain(NUMBERS.ok(20).slice(1));
   });
 
   it("will not send to a number outside the organization", async () => {

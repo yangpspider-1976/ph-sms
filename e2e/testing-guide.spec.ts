@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 
 /**
@@ -185,6 +186,16 @@ test.describe("Part A — core tests", () => {
       }).first(),
     ).toBeVisible();
     await expect(page.getByText("Awaiting receipt").first()).toBeVisible();
+
+    // The results download: one row for each number, masked as on the page.
+    const downloading = page.waitForEvent("download");
+    await page.getByRole("link", { name: "Export", exact: true }).click();
+    const download = await downloading;
+    expect(download.suggestedFilename()).toMatch(/^campaign-.+\.csv$/);
+    const file = readFileSync(await download.path(), "utf8");
+    expect(file.trim().split(/\r?\n/)).toHaveLength(3);
+    expect(file).toContain("+63 917 *** 0601");
+    expect(file).not.toContain("639170000601");
   });
 
   test("Test 4 — credits and billing", async ({ page }) => {

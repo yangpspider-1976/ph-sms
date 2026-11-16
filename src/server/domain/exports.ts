@@ -13,6 +13,7 @@ import { decrypt } from "@/server/security/crypto";
 import { toCsv } from "./csv";
 import { formatCentavos, formatManila } from "@/server/config";
 import { recordAudit } from "@/server/audit";
+import { dateToPlatformWallTime } from "@/i18n/format";
 
 /**
  * Exports.
@@ -32,8 +33,25 @@ export type ExportFile = {
   contentType: string;
 };
 
+/** When the file was made, in Manila time like every other time a customer sees. */
 function stamp(): string {
-  return new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+  return dateToPlatformWallTime(new Date()).replace(/[:T]/g, "-");
+}
+
+/**
+ * A campaign's name as it can appear in a file name, followed by a dash.
+ *
+ * The file name travels in a response header, so only plain letters and digits
+ * are kept. A name with none, such as one written in Korean, is left out rather
+ * than becoming a row of dashes. A test send's stored name is only a record
+ * (see campaignName), so its file just says test-send.
+ */
+function nameForFile(campaign: { name: string; isTestSend: boolean }): string {
+  const slug = (campaign.isTestSend ? "test send" : campaign.name)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+  return slug ? `${slug}-` : "";
 }
 
 /** Per-recipient results for one campaign. */
@@ -106,7 +124,7 @@ export async function exportCampaignReport(input: {
   });
 
   return {
-    filename: `campaign-${campaign.name.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-${stamp()}.csv`,
+    filename: `campaign-${nameForFile(campaign)}${stamp()}.csv`,
     content: toCsv(headers, rows),
     contentType: "text/csv; charset=utf-8",
   };

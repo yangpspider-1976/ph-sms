@@ -13,12 +13,14 @@ import {
   CardHeader,
   DataTable,
   DetailRow,
+  DownloadButton,
   Notice,
   PageHeader,
   Pill,
   Stat,
   type Tone,
 } from "@/components/ui";
+import { IconDownload } from "@/components/icons";
 import { StopCampaignButton } from "./stop-button";
 import { RefreshWhileSending } from "./refresh-while-sending";
 import { getI18n } from "@/i18n/server";
@@ -78,6 +80,10 @@ export default async function CampaignDetailPage({
   const stoppable = ["SCHEDULED", "QUEUED", "PROCESSING", "PAUSED_REVIEW"].includes(
     campaign.status,
   );
+  const canStop = stoppable && ctx.can("campaign.cancel");
+  // Every recipient's result, not only the rows the table below shows. Masked,
+  // like the Contacts and opt-out exports.
+  const canExport = ctx.can("reports.export.masked");
   const sending =
     campaign.status === "QUEUED" ||
     campaign.status === "PROCESSING" ||
@@ -94,8 +100,15 @@ export default async function CampaignDetailPage({
           campaign.encoding === "GSM7" ? "GSM-7" : t.common.unicode
         }`}
         action={
-          stoppable && ctx.can("campaign.cancel") ? (
-            <StopCampaignButton campaignId={campaign.id} />
+          canExport || canStop ? (
+            <div className="flex flex-wrap items-center gap-3">
+              {canExport ? (
+                <DownloadButton href={`/app/exports?kind=campaign&campaignId=${campaign.id}`}>
+                  <IconDownload size={15} /> {t.common.export}
+                </DownloadButton>
+              ) : null}
+              {canStop ? <StopCampaignButton campaignId={campaign.id} /> : null}
+            </div>
           ) : null
         }
       />

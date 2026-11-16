@@ -12,6 +12,8 @@ import {
   listContacts,
 } from "./contacts";
 import { addSuppression } from "./suppression";
+import { issueQuote } from "./quote";
+import { submitCampaign } from "./submit";
 import {
   exportCampaignReport,
   exportContacts,
@@ -479,6 +481,45 @@ describe("exports", () => {
       scope: "MASKED",
     });
     expect(file).toBeNull();
+  });
+
+  it("names a campaign's results file after the campaign", async () => {
+    async function sendAndExport(name: string, idempotencyKey: string) {
+      const quote = await issueQuote({
+        organizationId: tenant.organizationId,
+        userId: tenant.userId,
+        senderIdentityId: tenant.senderIdentityId,
+        purpose: "INFORMATIONAL",
+        body: "Your order is ready for pickup.",
+        rawRecipients: [NUMBERS.ok(1), NUMBERS.ok(2)],
+      });
+      const { campaignId } = await submitCampaign({
+        quoteId: quote.id,
+        organizationId: tenant.organizationId,
+        userId: tenant.userId,
+        name,
+        idempotencyKey,
+      });
+      return exportCampaignReport({
+        campaignId,
+        organizationId: tenant.organizationId,
+        actorUserId: tenant.userId,
+        scope: "MASKED",
+      });
+    }
+
+    const stamp = String.raw`\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}`;
+    const named = await sendAndExport("Store opening!", "export-name-1");
+    expect(named!.filename).toMatch(new RegExp(`^campaign-store-opening-${stamp}\\.csv$`));
+
+    // A name with nothing a file name can carry is left out, not turned into dashes.
+    const korean = await sendAndExport("추석 할인 안내", "export-name-2");
+    expect(korean!.filename).toMatch(new RegExp(`^campaign-${stamp}\\.csv$`));
+
+    // Every recipient, masked.
+    expect(named!.content.trim().split(/\r?\n/)).toHaveLength(3);
+    expect(named!.content).toContain("+63 917 *** ");
+    expect(named!.content).not.toContain(NUMBERS.ok(1));
   });
 });
 

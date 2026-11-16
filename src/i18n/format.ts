@@ -85,6 +85,15 @@ export function platformWallTimeToDate(value: string): Date | null {
   return new Date(wall.getTime() - PLATFORM_UTC_OFFSET_MINUTES * 60_000);
 }
 
+/**
+ * A moment as platform wall time, `YYYY-MM-DDTHH:MM:SS`: the reverse of
+ * platformWallTimeToDate. For places a formatted date cannot go, such as a
+ * file name.
+ */
+export function dateToPlatformWallTime(at: Date): string {
+  return new Date(at.getTime() + PLATFORM_UTC_OFFSET_MINUTES * 60_000).toISOString().slice(0, 19);
+}
+
 export function formatNumber(value: number, locale: Locale): string {
   return new Intl.NumberFormat(LOCALE_TAGS[locale]).format(value);
 }

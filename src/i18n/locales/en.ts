@@ -1111,7 +1111,7 @@ export const en = {
       "On the Contacts page, upload a UTF-8 CSV file with a phone_number column; the sample file there shows the layout. first_name, last_name, consent_source, consent_date and custom_1 to custom_5 are optional, and any other column is ignored. A preview shows how every row was read, and nothing is saved until you confirm it.",
     exportTitle: "Can I download my contacts?",
     exportBody:
-      "Yes. Use Export on the Contacts page, and the one on the opt-out list for that list. Numbers in these files are masked.",
+      "Yes. Use Export on the Contacts page, and the one on the opt-out list for that list. Each campaign's page has one for its results. Numbers in these files are masked.",
     optOutTitle: "What happens to a number on the opt-out list?",
     optOutBody:
       "It is left out of every send: when the send is priced, and again just before each message leaves. The list belongs to your business alone, and deleting or re-importing the contact does not remove the opt-out. Add a number as soon as someone asks you to stop.",
