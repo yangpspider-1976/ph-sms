@@ -18,6 +18,7 @@ import {
 import { IconChat } from "@/components/icons";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
+import { campaignName } from "@/i18n/campaign-name";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -46,6 +47,7 @@ export default async function ActivityPage() {
       .select({
         id: campaigns.id,
         name: campaigns.name,
+        isTestSend: campaigns.isTestSend,
         status: campaigns.status,
         includedCount: campaigns.includedCount,
         createdAt: campaigns.createdAt,
@@ -145,27 +147,30 @@ export default async function ActivityPage() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((row) => (
-                  <tr key={row.id}>
-                    <td className="cell-title" title={row.name}>
-                      {row.name}
-                    </td>
-                    <td className="cell-title text-muted" title={row.organizationName}>
-                      {row.organizationName}
-                    </td>
-                    <td>
-                      <Pill tone={TONE[row.status] ?? "neutral"}>
-                        {t.status.campaign[row.status]}
-                      </Pill>
-                    </td>
-                    <td>{row.includedCount}</td>
-                    <td>{row.accepted}</td>
-                    <td className={row.unresolved > 0 ? "font-semibold text-warning-fg" : "text-muted"}>
-                      {row.unresolved}
-                    </td>
-                    <td className="whitespace-nowrap text-muted">{formatDateTime(row.createdAt, locale)}</td>
-                  </tr>
-                ))}
+                {rows.map((row) => {
+                  const name = campaignName(row, t, locale);
+                  return (
+                    <tr key={row.id}>
+                      <td className="cell-title" title={name}>
+                        {name}
+                      </td>
+                      <td className="cell-title text-muted" title={row.organizationName}>
+                        {row.organizationName}
+                      </td>
+                      <td>
+                        <Pill tone={TONE[row.status] ?? "neutral"}>
+                          {t.status.campaign[row.status]}
+                        </Pill>
+                      </td>
+                      <td>{row.includedCount}</td>
+                      <td>{row.accepted}</td>
+                      <td className={row.unresolved > 0 ? "font-semibold text-warning-fg" : "text-muted"}>
+                        {row.unresolved}
+                      </td>
+                      <td className="whitespace-nowrap text-muted">{formatDateTime(row.createdAt, locale)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </DataTable>
         )}

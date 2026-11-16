@@ -6,6 +6,7 @@ import { campaigns, inquiries, organizations, senderIdentities } from "@/server/
 import { requirePlatformAdmin } from "@/server/auth/context";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDate } from "@/i18n/format";
+import { campaignName } from "@/i18n/campaign-name";
 import {
   Button,
   ButtonLink,
@@ -79,6 +80,8 @@ export default async function AdminOverviewPage() {
       .select({
         id: campaigns.id,
         name: campaigns.name,
+        isTestSend: campaigns.isTestSend,
+        createdAt: campaigns.createdAt,
         status: campaigns.status,
         includedCount: campaigns.includedCount,
         purpose: campaigns.purpose,
@@ -237,7 +240,7 @@ export default async function AdminOverviewPage() {
                         {/* Activity is a single feed with no per-campaign route;
                             link to the feed rather than a 404 path. */}
                         <Link href="/admin/activity" className="hover:text-brand-700">
-                          {campaign.name}
+                          {campaignName(campaign, t, locale)}
                         </Link>
                       </td>
                       <td>{campaign.organizationName ?? "—"}</td>

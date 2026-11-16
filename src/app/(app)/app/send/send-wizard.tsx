@@ -25,10 +25,11 @@ import {
 import { TestSendPanel } from "./test-send-panel";
 import type { TestRecipient } from "@/server/domain/test-send";
 import { loadGroupRecipientsAction } from "@/server/actions/groups";
-import { useServerText, useT } from "@/i18n/client";
-import { platformWallTimeToDate } from "@/i18n/format";
+import { useLocale, useServerText, useT } from "@/i18n/client";
+import { formatDateTime, platformWallTimeToDate } from "@/i18n/format";
 import { FileDrop } from "@/components/file-drop";
 import type { Dictionary } from "@/i18n/dictionaries";
+import type { Locale } from "@/i18n/config";
 import {
   IconArrowRight,
   IconCalculator,
@@ -81,6 +82,7 @@ export function SendWizard({
   initialGroupId?: string;
 }) {
   const t = useT();
+  const { locale } = useLocale();
   const localizeServerText = useServerText();
 
   const [step, setStep] = useState(0);
@@ -208,7 +210,7 @@ export function SendWizard({
     startTransition(async () => {
       const result = await confirmSendAction({
         quoteId: quote.quoteId,
-        name: campaignName.trim() || defaultCampaignName(),
+        name: campaignName.trim() || defaultCampaignName(t, locale),
         idempotencyKey,
       });
       if (!result.ok) {
@@ -600,7 +602,7 @@ export function SendWizard({
             onNameChange={setCampaignName}
             onConfirm={confirmSend}
             pending={pending}
-            defaultName={defaultCampaignName()}
+            defaultName={defaultCampaignName(t, locale)}
           />
         ) : null}
       </div>
@@ -644,12 +646,9 @@ export function SendWizard({
   );
 }
 
-function defaultCampaignName(): string {
-  return `Send ${new Intl.DateTimeFormat("en-PH", {
-    timeZone: "Asia/Manila",
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date())}`;
+/** The name a send gets when the sender leaves the field empty. */
+function defaultCampaignName(t: Dictionary, locale: Locale): string {
+  return t.send.defaultCampaignName(formatDateTime(new Date(), locale));
 }
 
 /**
@@ -673,13 +672,9 @@ function ReviewPanel({
 }) {
   const t = useT();
   const localizeServerText = useServerText();
+  const { locale } = useLocale();
   const expires = new Date(quote.expiresAt);
-  const manila = (iso: string) =>
-    new Intl.DateTimeFormat("en-PH", {
-      timeZone: "Asia/Manila",
-      dateStyle: "medium",
-      timeStyle: "short",
-    }).format(new Date(iso));
+  const manila = (iso: string) => formatDateTime(iso, locale);
 
   return (
     <Card className="p-5">

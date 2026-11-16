@@ -540,6 +540,14 @@ test.describe("Part B — extra tests", () => {
     await page.getByRole("button", { name: "Send test" }).click();
     await expect(page.getByText("Test sent").first()).toBeVisible();
     await expect(page.getByText(/charged like one/).first()).toBeVisible();
+
+    // Its name gives the time in Manila, like the When column beside it. It
+    // used to give the time in UTC, eight hours behind.
+    await page.goto("/app/campaigns");
+    const testRow = page.getByRole("row").filter({ hasText: "Test send —" }).first();
+    await expect(testRow).toBeVisible();
+    const when = (await testRow.locator("td").last().innerText()).trim();
+    await expect(testRow.locator("td").first()).toHaveText(`Test send — ${when}`);
   });
 
   test("Test 14 — invite a team member", async ({ page, browser }) => {

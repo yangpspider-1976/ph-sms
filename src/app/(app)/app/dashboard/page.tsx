@@ -30,6 +30,7 @@ import {
 import { NotificationsPanel } from "@/components/notifications";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
+import { campaignName } from "@/i18n/campaign-name";
 
 export async function generateMetadata() {
   const t = await getDictionary();
@@ -208,22 +209,25 @@ export default async function DashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {recent.map((campaign) => (
-                <tr key={campaign.id}>
-                  <td className="cell-title" title={campaign.name}>
-                    <Link href={`/app/campaigns/${campaign.id}`} className="hover:text-brand-700">
-                      {campaign.name}
-                    </Link>
-                  </td>
-                  <td>
-                    <Pill tone={CAMPAIGN_TONE[campaign.status] ?? "neutral"}>
-                      {t.status.campaign[campaign.status]}
-                    </Pill>
-                  </td>
-                  <td>{campaign.includedCount}</td>
-                  <td className="text-muted">{formatDateTime(campaign.createdAt, locale)}</td>
-                </tr>
-              ))}
+              {recent.map((campaign) => {
+                const name = campaignName(campaign, t, locale);
+                return (
+                  <tr key={campaign.id}>
+                    <td className="cell-title" title={name}>
+                      <Link href={`/app/campaigns/${campaign.id}`} className="hover:text-brand-700">
+                        {name}
+                      </Link>
+                    </td>
+                    <td>
+                      <Pill tone={CAMPAIGN_TONE[campaign.status] ?? "neutral"}>
+                        {t.status.campaign[campaign.status]}
+                      </Pill>
+                    </td>
+                    <td>{campaign.includedCount}</td>
+                    <td className="text-muted">{formatDateTime(campaign.createdAt, locale)}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </DataTable>
         )}

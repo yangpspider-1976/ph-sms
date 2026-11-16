@@ -16,6 +16,7 @@ import {
 import { IconMegaphone } from "@/components/icons";
 import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
+import { campaignName } from "@/i18n/campaign-name";
 import { CampaignsTabs } from "./campaigns-tabs";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -99,25 +100,28 @@ export default async function CampaignsPage({
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => (
-                <tr key={row.id}>
-                  <td className="cell-title" title={row.name}>
-                    <Link href={`/app/campaigns/${row.id}`} className="hover:text-brand-700">
-                      {row.name}
-                    </Link>
-                  </td>
-                  <td>
-                    <Pill tone={TONE[row.status] ?? "neutral"}>{t.status.campaign[row.status]}</Pill>
-                  </td>
-                  <td>{row.includedCount}</td>
-                  <td>{row.accepted}</td>
-                  <td>{row.delivered}</td>
-                  <td>{formatCentavos(row.cost)}</td>
-                  <td className="whitespace-nowrap text-muted">
-                    {formatDateTime(row.scheduledAt ?? row.createdAt, locale)}
-                  </td>
-                </tr>
-              ))}
+              {rows.map((row) => {
+                const name = campaignName(row, t, locale);
+                return (
+                  <tr key={row.id}>
+                    <td className="cell-title" title={name}>
+                      <Link href={`/app/campaigns/${row.id}`} className="hover:text-brand-700">
+                        {name}
+                      </Link>
+                    </td>
+                    <td>
+                      <Pill tone={TONE[row.status] ?? "neutral"}>{t.status.campaign[row.status]}</Pill>
+                    </td>
+                    <td>{row.includedCount}</td>
+                    <td>{row.accepted}</td>
+                    <td>{row.delivered}</td>
+                    <td>{formatCentavos(row.cost)}</td>
+                    <td className="whitespace-nowrap text-muted">
+                      {formatDateTime(row.scheduledAt ?? row.createdAt, locale)}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </DataTable>
         )}

@@ -231,6 +231,8 @@ export const en = {
     colReserved: "Reserved",
     colWhen: "When",
     colCreated: "Created",
+    /** The system names a test send, so its name is written in the reader's language. */
+    testSendName: (when: string) => `Test send — ${when}`,
   },
 
   approvals: {
@@ -539,6 +541,8 @@ export const en = {
       `This quote is fixed until ${when}. Changing the message or the recipients after this point means a new quote.`,
     campaignName: "Campaign name",
     campaignNameHint: "For your own reports.",
+    /** Used when the sender leaves the name empty. */
+    defaultCampaignName: (when: string) => `Send ${when}`,
     rowSender: "Sender",
     rowRecipients: "Recipients",
     rowEncoding: "Encoding",

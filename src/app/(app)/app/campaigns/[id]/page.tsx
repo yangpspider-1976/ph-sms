@@ -23,6 +23,7 @@ import { StopCampaignButton } from "./stop-button";
 import { RefreshWhileSending } from "./refresh-while-sending";
 import { getI18n } from "@/i18n/server";
 import { formatDateTime } from "@/i18n/format";
+import { campaignName } from "@/i18n/campaign-name";
 import { localizeServerText } from "@/i18n/server-text";
 
 export const dynamic = "force-dynamic";
@@ -88,7 +89,7 @@ export default async function CampaignDetailPage({
     <>
       {sending ? <RefreshWhileSending /> : null}
       <PageHeader
-        title={campaign.name}
+        title={campaignName(campaign, t, locale)}
         description={`${campaign.senderValueSnapshot} · ${t.status.purpose[campaign.purpose]} · ${
           campaign.encoding === "GSM7" ? "GSM-7" : t.common.unicode
         }`}

@@ -36,6 +36,7 @@ export async function listCampaignsForOrg(
     .select({
       id: campaigns.id,
       name: campaigns.name,
+      isTestSend: campaigns.isTestSend,
       status: campaigns.status,
       includedCount: campaigns.includedCount,
       scheduledAt: campaigns.scheduledAt,

@@ -227,6 +227,7 @@ export const ko: Dictionary = {
     colReserved: "예치 금액",
     colWhen: "일시",
     colCreated: "생성일",
+    testSendName: (when: string) => `테스트 발송 — ${when}`,
   },
 
   approvals: {
@@ -531,6 +532,8 @@ export const ko: Dictionary = {
       `이 견적은 ${when}까지 고정됩니다. 이후 메시지나 수신자를 변경하면 새 견적이 필요합니다.`,
     campaignName: "캠페인 이름",
     campaignNameHint: "내부 보고용입니다.",
+    // Korean puts the time first: "2026. 11. 13. 오전 10:00 발송".
+    defaultCampaignName: (when: string) => `${when} 발송`,
     rowSender: "발신자",
     rowRecipients: "수신자 수",
     rowEncoding: "인코딩",

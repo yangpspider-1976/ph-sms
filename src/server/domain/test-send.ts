@@ -7,6 +7,8 @@ import { issueQuote, QuoteError } from "./quote";
 import { submitCampaign, SubmitError } from "./submit";
 import type { AppConfig } from "@/server/config";
 import { enServerText } from "@/i18n/locales/en-server-text";
+import { en } from "@/i18n/locales/en";
+import { testSendName } from "@/i18n/campaign-name";
 
 /**
  * Test send (MSG-04).
@@ -151,7 +153,9 @@ export async function sendTest(params: {
       quoteId: quote.id,
       organizationId: params.organizationId,
       userId: params.userId,
-      name: `Test send — ${new Date().toISOString().slice(0, 16).replace("T", " ")}`,
+      // Kept in English as a record. Pages show a test send's name in the
+      // reader's language instead (campaignName).
+      name: testSendName(new Date(), en, "en"),
       idempotencyKey: params.idempotencyKey,
       config: params.config,
     });
