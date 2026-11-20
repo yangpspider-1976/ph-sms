@@ -17,10 +17,15 @@ Business SMS to Philippine mobile numbers, for verified businesses.
 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Deploying to Vercel, and what the Hobby plan costs |
 | [docs/TEST-REPORT.md](docs/TEST-REPORT.md) | What is tested, and what is not |
 | [docs/LIVE-READINESS.md](docs/LIVE-READINESS.md) | What must be true before going live |
+| [docs/STAGING-DEPLOYMENT.md](docs/STAGING-DEPLOYMENT.md) | Isolated staging setup, validation and rollback procedure |
+| [docs/MONITORING.md](docs/MONITORING.md) | Admin dashboard, alert rules and later external routing |
+| [docs/SECURITY-PRIVACY-CHECKLIST.md](docs/SECURITY-PRIVACY-CHECKLIST.md) | Review checklist and dependency inventory |
+| [docs/UAT-CHECKLIST.md](docs/UAT-CHECKLIST.md) | Human acceptance steps, including the new features |
+| [docs/FINAL-DEFECT-REPORT.md](docs/FINAL-DEFECT-REPORT.md) | Fixes, validation and remaining limitations |
 
 ## Requirements
 
-Node 20+ and a PostgreSQL 15+ database.
+Node 24.x and a UTF-8 PostgreSQL 15+ database. Older local WIN1252 databases cannot store Korean text; preserve their data and move it to UTF-8 before Korean testing.
 
 ## Setup
 
@@ -161,11 +166,26 @@ remainingToday: (n: number) => `${n} remaining today (Asia/Manila)`,
 `npm test` also fails if a component renders a literal instead of reading the dictionary.
 `node scripts/find-hardcoded-strings.mjs` prints the same report on demand.
 
-**Not yet translated:** messages the server returns as data — validation errors from server
-actions, domain error messages and email bodies. They are rendered through a `Notice` or sent to
-an inbox, so a reader in Korean still sees those in English. The domain errors already carry
-stable codes, so finishing this means mapping code to wording in the dictionary rather than
-restructuring anything.
+Server-returned validation messages, downloaded file headings/statuses/reasons and
+download refusal pages are localized too. Admins can edit English and Korean
+email wording at `/admin/emails`; secure account links are added by the system.
+Customer-entered names, notes and message bodies keep their original wording.
+
+## Personalized messages and reports
+
+Import saved contacts first, then use `{{first_name}}`, `{{last_name}}` or
+`{{custom_1}}` through `{{custom_5}}` in a message/template. Review validates and
+prices each rendered message and shows sample texts. Missing values block the
+quote; contact edits after review do not change the quoted message snapshot.
+Promotional campaigns go through the bulk quote unless an admin allows them
+under Admin → Settings → Promotional messages; then each contact needs a recorded
+consent source, and consent and suppression are checked again before sending.
+
+`/app/reports` filters campaign totals and downloads by Manila creation dates,
+status and purpose. `/admin/pricing` edits demo rates, `/admin/emails` edits
+notification wording, and `/admin/health` shows operational alerts. Settings
+includes a provider-wide pace shared by workers. None of these activates live
+SMS, payments or external email/alerts.
 
 ## Modes
 

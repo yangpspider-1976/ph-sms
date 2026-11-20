@@ -2,6 +2,31 @@
 
 Decisions that were not already settled by the specification, and why.
 
+## Scope update — 2026-11-17
+
+The user's latest instruction supersedes earlier deferrals of personalization
+and the remaining original-request screens. Saved contact fields now render into
+immutable encrypted per-recipient snapshots; the exact rendered messages
+determine segments, content checks and cost. Reports, admin Pricing/Emails,
+editable CSV mapping, inquiry notifications, shared provider pacing and
+monitoring definitions are included.
+
+**Promotional campaigns still go to the bulk inquiry by default (decided
+2026-11-19).** The client's request routes promotional campaigns to the inquiry
+and manual review, and makes the categories that take that route an admin
+setting. Admin → Settings → Promotional messages is that setting, off by
+default. When an admin turns it on, every recipient needs a saved contact with a
+recorded consent source, checked at the quote, at confirmation and again before
+each message leaves, and the existing approval, quota and suppression checks
+still apply. A consent source is a recorded claim, not proof of consent; the
+DPO's approval of what counts remains a going-live input.
+
+Live activation remains explicitly deferred: no real provider integration,
+production infrastructure or external alert routing was added. The demo pace
+does not establish a partner contract. Updated remaining work is recorded in
+`IMPLEMENTATION_STATUS.md`; staging/security/UAT documents are handover procedures,
+not evidence that staging or external reviews have occurred.
+
 ## Stack
 
 **Next.js 16 (App Router) + TypeScript + PostgreSQL 18 + Drizzle.** The repository was empty, so
@@ -68,7 +93,7 @@ home-made crypto scheme, which is what the specification prohibits.
 - **"PH SMS", not "FirstG SMS".** The designs use PH SMS throughout. The name is a single
   constant in `src/components/brand.tsx` and remains configurable.
 - **One seeded campaign detail line changed.** The design shows "Customer promo announcement"
-  against a self-service scheduled campaign. Promotional sending is inquiry-only in the MVP, so
+  against a self-service scheduled campaign. Promotional sending is inquiry-only by default, so
   seeding that would contradict a rule the code enforces. The campaign name is unchanged; the
   detail line reads "Customer update announcement" and the campaign's purpose is INFORMATIONAL.
 - **Demo marker wording.** The designs show "Design preview • Sample content"; the specification

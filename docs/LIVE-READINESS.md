@@ -3,6 +3,13 @@
 What must be true before `APP_MODE=LIVE`. Nothing on this list blocks further
 work in mock mode — the application is complete and testable without any of it.
 
+Updated scope note, 2026-11-17: going-live implementation is explicitly deferred.
+The prioritized input/owner/evidence table is in
+[IMPLEMENTATION_STATUS.md](../IMPLEMENTATION_STATUS.md). The monitoring dashboard
+and alert definitions now exist in [MONITORING.md](MONITORING.md); external
+routing, managed infrastructure and sandbox/live integrations remain unconfigured.
+Use [STAGING-DEPLOYMENT.md](STAGING-DEPLOYMENT.md) for a future isolated rehearsal.
+
 Items are marked by who owns them. Most are not engineering tasks.
 
 ## Blocking — from the SMS partner

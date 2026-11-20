@@ -23,7 +23,7 @@ Open <http://localhost:3000>.
 
 - **Pricing** says "Contact us for current pricing". That is deliberate: no
   approved rate exists, and publishing the demo price would be inventing one.
-- **Bulk SMS** is the inquiry route for high-volume and promotional sending. Note
+- **Bulk SMS** is the inquiry route for campaigns above account limits. Note
   that it takes no attachment and says plainly that it does not want your
   recipient list.
 
@@ -61,8 +61,12 @@ Type anything. Watch the counter: it reports characters, segments and encoding
 separately. Now paste an emoji. The encoding flips to Unicode and the limit drops
 from 160 to 70, because that is what actually happens on the wire.
 
-Try typing `{{first_name}}`. It is rejected, with the reason: personalization is
-not built, so the variable would be sent to your customer literally.
+After importing saved contacts with names, try `Hello {{first_name}}`.
+Review shows resolved message samples and exact per-recipient segment pricing.
+Missing values block review. `{{last_name}}` and `{{custom_1}}` through
+`{{custom_5}}` work too. Promotional messages go through the bulk quote unless an
+admin allows them in Settings; then each saved contact needs a recorded consent
+source, and content checks, approvals and opt-outs still apply.
 
 Tick the authorization checkbox and press **Review message**.
 
@@ -159,15 +163,15 @@ The `9002` case is the important one. A timeout is not a failure and not a
 success, and treating it as either would mean either charging for nothing or
 sending someone the same message twice.
 
-## What you will not find
+## New reporting and administration
 
-Because it is not built, rather than hidden:
+Open **Campaigns → Reports** for date/status/purpose filters and an aggregate CSV.
+Admin **Pricing** changes demo rates for new quotes; **Emails** edits localized
+notification wording and previews sample values. **System health** shows current
+alerts and response instructions. Admin Overview's export downloads its campaign
+summary. On Contacts, unfamiliar CSV columns can be matched before import.
 
-- Team invitations
-- Personalization and contact groups
-- Recurring campaigns and automatic top-ups
-- A customer API
-- Promotional self-service — it is inquiry-only by design
-
-Screens for deferred features say so plainly instead of showing a button that
-does nothing.
+Team invitations and contact groups are also available. Recurring campaigns,
+automatic top-ups and a public customer API remain outside this requested scope.
+Real SMS/payment integrations and production deployment remain deferred; see
+[LIVE-READINESS.md](LIVE-READINESS.md) and [UAT-CHECKLIST.md](UAT-CHECKLIST.md).
