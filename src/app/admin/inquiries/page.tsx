@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { db } from "@/server/db";
-import { inquiries } from "@/server/db/schema";
+import { inquiries, users } from "@/server/db/schema";
 import { requirePlatformAdmin } from "@/server/auth/context";
 import { Card, CardHeader, EmptyState, Notice, PageHeader, Pill, type Tone } from "@/components/ui";
 import { IconDocument } from "@/components/icons";
@@ -30,7 +30,14 @@ export default async function InquiriesPage() {
 
   await requirePlatformAdmin();
 
-  const rows = await db.select().from(inquiries).orderBy(desc(inquiries.createdAt)).limit(50);
+  const [rows, operators] = await Promise.all([
+    db.select().from(inquiries).orderBy(desc(inquiries.createdAt)).limit(50),
+    db
+      .select({ id: users.id, name: users.fullName })
+      .from(users)
+      .where(eq(users.isPlatformAdmin, true))
+      .orderBy(users.fullName),
+  ]);
 
   return (
     <>
@@ -101,6 +108,8 @@ export default async function InquiriesPage() {
                     inquiryId={inquiry.id}
                     status={inquiry.status}
                     note={inquiry.internalNote}
+                    ownerUserId={inquiry.ownerUserId}
+                    operators={operators}
                   />
                 </div>
               </div>

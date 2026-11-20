@@ -8,11 +8,11 @@ import { getDictionary, getI18n } from "@/i18n/server";
 import { formatDate } from "@/i18n/format";
 import { campaignName } from "@/i18n/campaign-name";
 import {
-  Button,
   ButtonLink,
   Card,
   CardHeader,
   DataTable,
+  DownloadButton,
   EmptyState,
   NavTile,
   PageHeader,
@@ -212,9 +212,9 @@ export default async function AdminOverviewPage() {
             <CardHeader
               title={t.adminExtra.campaignsTitle}
               action={
-                <Button variant="ghost" size="sm" className="gap-1.5">
+                <DownloadButton href="/admin/exports?kind=campaigns" className="gap-1.5">
                   <IconDownload size={15} /> {t.adminExtra.exportReport}
-                </Button>
+                </DownloadButton>
               }
             />
             {recentCampaigns.length === 0 ? (

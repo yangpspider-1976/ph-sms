@@ -67,10 +67,10 @@ test("a bulk inquiry reaches the admin pipeline without sending anything", async
   });
   expect(before).toBe(200);
 
-  await card.getByRole("combobox").selectOption("CONTRACTED");
+  await card.getByLabel("Pipeline status").selectOption("CONTRACTED");
   await card.getByRole("button", { name: "Update" }).click();
 
-  await expect(page.getByText("No SMS was sent.").first()).toBeVisible();
+  await expect(page.getByText(/no SMS was sent\./i).first()).toBeVisible();
 
   /* --- Confirm no campaign was created for it ----------------------------- */
 

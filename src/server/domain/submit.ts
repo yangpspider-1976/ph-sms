@@ -19,6 +19,8 @@ import { limitsFor, reserveQuota, QuotaError } from "./quota";
 import { isUniqueViolation, reserveFunds, WalletError } from "./wallet";
 import { recordAudit } from "@/server/audit";
 import { enServerText } from "@/i18n/locales/en-server-text";
+import { hasRecordedConsent } from "./consent";
+import { promotionalSelfServiceEnabled } from "./app-config";
 
 /**
  * Campaign submission.
@@ -196,10 +198,20 @@ export async function submitCampaign(input: SubmitInput): Promise<SubmitResult> 
 
       /* --- Price the confirmed set --------------------------------------- */
 
+      // An admin may have switched promotional self-service off since the
+      // quote; consent may have been withdrawn since, too.
+      if (quote.purpose === "PROMOTIONAL" && !(await promotionalSelfServiceEnabled(tx))) {
+        throw new SubmitError(enServerText.promotionalNeedsInquiry, "QUOTE_INVALID");
+      }
+      if (quote.purpose === "PROMOTIONAL" && !(await hasRecordedConsent(tx, input.organizationId, included))) {
+        throw new SubmitError(enServerText.promotionalConsentRequired, "QUOTE_INVALID");
+      }
+
       // Never more than the customer authorized: the quote's price per segment
       // is fixed, and dropping recipients can only reduce the total.
-      const costCentavos = quote.segmentsPerMessage * quote.unitPriceCentavos;
-      const totalCentavos = included.length * costCentavos;
+      const includedSet = new Set(included);
+      const messages = quote.messages.filter((message) => includedSet.has(message.number));
+      const totalCentavos = messages.reduce((sum, message) => sum + message.segments * quote.unitPriceCentavos, 0);
       const runAt = quote.scheduledAt ?? new Date();
 
       /* --- Reserve funds and quota, snapshot, enqueue -------------------- */
@@ -279,15 +291,16 @@ export async function submitCampaign(input: SubmitInput): Promise<SubmitResult> 
       // One immutable row per recipient. The unique index on
       // (campaign_id, number_hash) is what actually prevents a duplicate send.
       await tx.insert(messageItems).values(
-        included.map((normalized) => ({
+        messages.map((message) => ({
           campaignId: campaign!.id,
           organizationId: input.organizationId,
-          stableKey: stableKeyFor(campaign!.id, normalized),
-          numberHash: numberHash(normalized),
-          numberEncrypted: encrypt(normalized),
-          numberMasked: maskNormalized(normalized),
-          segments: quote.segmentsPerMessage,
-          costCentavos,
+          stableKey: stableKeyFor(campaign!.id, message.number),
+          numberHash: numberHash(message.number),
+          numberEncrypted: encrypt(message.number),
+          numberMasked: maskNormalized(message.number),
+          bodyEncrypted: quote.messageSnapshot ? encrypt(message.body) : null,
+          segments: message.segments,
+          costCentavos: message.segments * quote.unitPriceCentavos,
           submissionStatus: "PENDING" as const,
           deliveryStatus: "PENDING" as const,
         })),

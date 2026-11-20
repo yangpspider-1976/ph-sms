@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { analyzeMessage, validateMessageBody } from "@/server/domain/segments";
+import { personalizationFields } from "@/server/domain/personalization";
 import { normalizePhone, splitPastedNumbers } from "@/server/domain/phone";
 import {
   confirmSendAction,
@@ -73,6 +74,7 @@ export function SendWizard({
   testRecipients,
   groups,
   initialGroupId,
+  promotionalAllowed = false,
 }: {
   senders: Sender[];
   templates: Template[];
@@ -80,6 +82,8 @@ export function SendWizard({
   testRecipients: TestRecipient[];
   groups: Array<{ id: string; name: string; memberCount: number }>;
   initialGroupId?: string;
+  /** Whether an admin has allowed promotional messages through normal sending. */
+  promotionalAllowed?: boolean;
 }) {
   const t = useT();
   const { locale } = useLocale();
@@ -100,6 +104,7 @@ export function SendWizard({
   const [fileError, setFileError] = useState<string | null>(null);
   const [senderId, setSenderId] = useState(senders[0]?.id ?? "");
   const [body, setBody] = useState("");
+  const [purpose, setPurpose] = useState<"INFORMATIONAL" | "PROMOTIONAL">("INFORMATIONAL");
   const [timing, setTiming] = useState<"now" | "later">("now");
   const [scheduledAt, setScheduledAt] = useState("");
   const [authorized, setAuthorized] = useState(false);
@@ -115,6 +120,12 @@ export function SendWizard({
    * instead of sending twice.
    */
   const [idempotencyKey, setIdempotencyKey] = useState("");
+
+  // A change after review requires a new offer, so confirmation never sends stale text.
+  useEffect(() => {
+    setQuote(null);
+    setStep((current) => current === 2 ? 1 : current);
+  }, [body, senderId, purpose, timing, scheduledAt, pasted, fileRows, groupRows, mode]);
 
   const rawEntries =
     mode === "manual"
@@ -144,11 +155,13 @@ export function SendWizard({
   }, [rawEntries]);
 
   const info = analyzeMessage(body);
+  const personalized = personalizationFields(body).length > 0;
   const sender = senders.find((s) => s.id === senderId);
   const bodyCheck = validateMessageBody(body || " ", {
     maxSegments: limits.maxSegments,
     supportsNonBmp: true,
     supportsUnicode: true,
+    allowVariables: true,
   });
 
   const includedCount = Math.min(recipients.unique.length, limits.ceiling);
@@ -191,6 +204,7 @@ export function SendWizard({
       const result = await createQuoteAction({
         senderIdentityId: senderId,
         body,
+        purpose,
         recipients: rawEntries,
         scheduledAt: scheduledFor ? scheduledFor.toISOString() : null,
       });
@@ -434,6 +448,27 @@ export function SendWizard({
               {t.send.messageSubheading}
             </p>
 
+            {/* Promotions go through the bulk quote unless an admin has allowed
+                them here; the server refuses them either way when it has not. */}
+            {promotionalAllowed ? (
+              <div className="mt-4 max-w-lg">
+                <Field label={t.bulk.purpose} htmlFor="purpose">
+                  <Select id="purpose" value={purpose} onChange={(event) => setPurpose(event.target.value as typeof purpose)}>
+                    <option value="INFORMATIONAL">{t.bulk.purposeInformational}</option>
+                    <option value="PROMOTIONAL">{t.bulk.purposePromotional}</option>
+                  </Select>
+                </Field>
+                {purpose === "PROMOTIONAL" ? <p className="mt-2 text-[12.5px] text-muted">{t.personalization.promotionalHint}</p> : null}
+              </div>
+            ) : (
+              <p className="mt-4 text-[12.5px] text-muted">
+                {t.personalization.promotionalViaBulk}{" "}
+                <Link href="/bulk" className="font-semibold text-brand-600 hover:underline">
+                  {t.home.requestBulkQuote}
+                </Link>
+              </p>
+            )}
+
             <div className="mt-4 grid gap-4 md:grid-cols-[minmax(0,220px)_minmax(0,1fr)]">
               <Field
                 label={t.send.senderIdLabel}
@@ -470,6 +505,7 @@ export function SendWizard({
                   onChange={(e) => setBody(e.target.value)}
                   placeholder={t.send.bodyPlaceholder}
                 />
+                <p className="mt-2 text-[12.5px] text-muted">{t.personalization.hint}</p>
                 {templates.length > 0 ? (
                   <div className="mt-2 flex flex-wrap gap-2">
                     {templates.map((t) => (
@@ -514,6 +550,7 @@ export function SendWizard({
                     <p className="mt-1.5 text-[12.5px] text-muted">
                       {t.send.scheduleHint(limits.maxScheduleDays)}
                     </p>
+                    <ManilaClock />
                   </div>
                 ) : null}
               </div>
@@ -626,7 +663,8 @@ export function SendWizard({
             <p className="text-[14px] font-bold text-ink">{t.send.estimatedCost}</p>
             <p className="mt-0.5 text-[12.5px] text-muted">{t.send.finalCostNote}</p>
             <p className="mt-0.5 text-[12.5px] text-muted">{t.send.basedOnSegments}</p>
-            {includedCount > 0 && info.segments > 0 ? (
+            {personalized ? <p className="mt-2 text-[12.5px] text-muted">{t.personalization.costHint}</p> : null}
+            {!personalized && includedCount > 0 && info.segments > 0 ? (
               <p className="mt-2 text-[15px] font-extrabold text-ink">
                 {peso(estimatedCost)}
                 <span className="ml-1 text-[12px] font-medium text-muted">
@@ -634,7 +672,7 @@ export function SendWizard({
                 </span>
               </p>
             ) : null}
-            {estimatedCost > limits.availableCentavos ? (
+            {!personalized && estimatedCost > limits.availableCentavos ? (
               <p className="mt-2 text-[12.5px] font-semibold text-danger-fg">
                 {t.send.overAvailable(peso(limits.availableCentavos))}
               </p>
@@ -643,6 +681,31 @@ export function SendWizard({
         </Card>
       </div>
     </div>
+  );
+}
+
+/**
+ * The time in Manila now, beside the schedule field. The field takes Manila
+ * time whatever the computer's own zone, and someone in Seoul otherwise has to
+ * work out the difference. Set after mounting and every 15 seconds, so the
+ * server's render and the browser's never disagree about the minute.
+ */
+function ManilaClock() {
+  const t = useT();
+  const { locale } = useLocale();
+  const [now, setNow] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setNow(new Date());
+    const timer = setInterval(() => setNow(new Date()), 15_000);
+    return () => clearInterval(timer);
+  }, []);
+
+  if (!now) return null;
+  return (
+    <p className="mt-1 text-[12.5px] text-muted" aria-live="off">
+      {t.send.manilaNow(formatDateTime(now, locale))}
+    </p>
   );
 }
 
@@ -699,7 +762,7 @@ function ReviewPanel({
         <DetailRow label={t.send.rowRecipients} value={quote.recipientCount} />
         <DetailRow
           label={t.send.rowEncoding}
-          value={t.send.encodingValue(
+          value={quote.personalized ? t.personalization.maxSegments(quote.segmentsPerMessage) : t.send.encodingValue(
             quote.encoding === "GSM7" ? "GSM-7" : t.common.unicode,
             quote.segmentsPerMessage,
           )}
@@ -740,6 +803,23 @@ function ReviewPanel({
             : ""}
         </p>
       </div>
+
+      {quote.personalized ? (
+        <div className="mt-4 space-y-3">
+          <h3 className="text-[13px] font-semibold text-ink">{t.personalization.samples}</h3>
+          {quote.sampleMessages.map((message) => (
+            <div key={message.numberMasked} className="border border-line p-3">
+              <p className="text-[12px] text-muted">
+                {message.longest ? (
+                  <span className="mr-1.5 font-semibold text-ink">{t.personalization.longest} ·</span>
+                ) : null}
+                {message.numberMasked} · {t.send.encodingValue(message.encoding === "GSM7" ? "GSM-7" : t.common.unicode, message.segments)}
+              </p>
+              <p className="mt-1 whitespace-pre-wrap break-words text-[13px]">{message.body}</p>
+            </div>
+          ))}
+        </div>
+      ) : null}
 
       {/* Only offered when the sender can actually receive a reply. */}
       {quote.senderAcceptsReplies ? null : (

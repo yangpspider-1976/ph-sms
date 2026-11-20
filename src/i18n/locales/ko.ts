@@ -7,6 +7,118 @@ import type { Dictionary } from "./en";
  * English source defines has a Korean counterpart.
  */
 export const ko: Dictionary = {
+  personalization: {
+    hint: "저장된 연락처의 {{first_name}}, {{last_name}}, {{custom_1}}부터 {{custom_5}}까지 사용할 수 있습니다. 먼저 연락처를 가져오고 검토 전에 누락된 값을 수정하세요.",
+    costHint: "이름과 사용자 지정 필드를 채운 후 메시지별로 요금을 계산합니다. 검토 단계에서 정확한 합계와 메시지 예시를 확인하세요.",
+    samples: "개인화 메시지 예시",
+    maxSegments: (n: number) => `수신자당 최대 ${n}개 세그먼트 · 인코딩은 다를 수 있음`,
+    promotionalHint: "마케팅 동의가 기록된 연락처에만 혜택을 보내세요. 사업체가 확인하는 명확한 수신 거부 방법을 포함하세요.",
+    promotionalViaBulk: "광고성 메시지를 보내시나요? 광고성 메시지는 대량 발송 견적으로 처리합니다.",
+    longest: "가장 긴 메시지",
+  },
+
+  adminPromotional: {
+    title: "광고성 메시지",
+    description:
+      "고객사가 광고성 캠페인을 보내는 방식입니다. 의뢰 내용에 따라 기본적으로 대량 발송 견적으로 처리하며, 담당자가 하나씩 검토합니다.",
+    inquiry: "대량 발송 견적만 허용 (기본값)",
+    inquiryHint: "고객사는 광고성 메시지에 대해 대량 발송 견적을 요청합니다. 일반 발송에서는 정보성 메시지만 보낼 수 있습니다.",
+    selfService: "수신 동의가 기록된 경우 일반 발송 허용",
+    selfServiceHint:
+      "모든 수신자가 수신 동의 경로가 기록된 저장 연락처여야 합니다. 견적을 낼 때, 발송을 확인할 때, 각 메시지가 나가기 직전에 확인합니다.",
+    save: "저장",
+  },
+  reports: {
+    title: "보고서",
+    description: "조직의 캠페인 결과와 청구 내역입니다. 날짜는 마닐라 시간 기준 캠페인 생성일을 선택합니다.",
+    from: "시작일", to: "종료일", status: "상태", purpose: "목적", apply: "필터 적용",
+    invalidFilters: "최대 366일 이내의 올바른 날짜 범위와 유효한 상태 및 목적을 선택하세요.",
+    download: "필터된 보고서 다운로드", exportLimit: "한 번에 최대 10,000개 캠페인을 다운로드할 수 있습니다. 필요한 경우 날짜 범위를 줄이세요.",
+    tooMany: "보고서가 10,000개 캠페인을 초과합니다. 다운로드하려면 날짜 범위를 줄이세요.",
+    campaigns: "캠페인 수", recipients: "수신자 수", accepted: "접수됨", delivered: "전달됨",
+    notDelivered: "전달 실패", unresolved: "미확정", charged: "청구액", authorized: "최대 승인 금액",
+    campaign: "캠페인", created: "생성일 (마닐라)", details: "수신자별 결과",
+    accountingNote: "청구액은 공급자의 접수가 확인된 금액입니다. 최대 승인 금액은 최초 지출 한도이며 현재 보류액이나 최종 청구액이 아닙니다. 접수된 메시지도 전달 확인을 기다릴 수 있습니다. 테스트 발송도 포함됩니다.",
+    emptyTitle: "이 기간에 캠페인이 없습니다", emptyBody: "다른 캠페인 결과를 보려면 날짜나 필터를 변경하세요.",
+    results: "캠페인별 내역", previous: "이전", next: "다음",
+    page: (page: number, pages: number, total: number) => `${pages}페이지 중 ${page}페이지 · 캠페인 ${total}개`,
+    totalsNote: "합계에는 다른 페이지를 포함한 모든 일치 캠페인이 반영됩니다.",
+  },
+  monitoring: {
+    alertsTitle: "활성 알림", alertsDescription: "현재 운영 점검 결과로 알림 규칙을 평가합니다. 이 페이지가 표시되는 동안 30초마다 새로 고칩니다.",
+    deliveryNote: "이 대시보드는 앱 내에서 알림을 표시합니다. 외부 호출 및 이메일 알림은 연결되어 있지 않습니다. 알림 서비스 선택과 전달 테스트는 실제 운영 전 작업으로 남아 있습니다.",
+    noAlerts: "활성 운영 알림이 없습니다.", critical: "긴급", warning: "주의", refresh: "점검 새로 고침",
+    rulesTitle: "알림 규칙", rule: "점검 항목", threshold: "발동 조건", response: "운영자 조치", severity: "심각도",
+    open: "관련 페이지 열기", triggered: (value: string) => `관측값: ${value}`,
+    names: {
+      database: "데이터베이스 사용 불가", dispatch_worker: "발송 작업 지연", unresolved_submissions: "미확정 제출",
+      quarantined_delivery_events: "격리된 전달 이벤트", paused_campaigns: "검토 대기 캠페인",
+      frozen_accounts: "발송 동결", rejected_payment_events_24h: "거부된 결제 이벤트",
+      failed_jobs: "발송 재시도 소진", key_rotation: "키 교체 미완료", live_readiness_gaps: "실제 운영 설정 미완료",
+    },
+    thresholds: {
+      database: "데이터베이스 연결 확인 실패", dispatch_worker: "작업 예정 시각 또는 임대 만료 시각이 120초 이상 지남",
+      unresolved_submissions: "미확정 제출이 하나 이상 있음", quarantined_delivery_events: "격리된 수신 확인이 하나 이상 있음",
+      paused_campaigns: "검토로 일시 중지된 캠페인이 하나 이상 있음", frozen_accounts: "동결된 지갑이 하나 이상 있음",
+      rejected_payment_events_24h: "24시간 이내 거부된 결제 이벤트가 하나 이상 있음", failed_jobs: "실패한 작업이 하나 이상 있음",
+      key_rotation: "이전 키가 아직 설정되어 있음", live_readiness_gaps: "실제 운영 모드에서 준비 미충족 항목이 하나 이상 있음",
+    },
+    responses: {
+      database: "데이터베이스 가용성과 앱 연결을 확인하세요. 접근을 복구할 수 없다면 즉시 담당자에게 알리세요.",
+      dispatch_worker: "워커 또는 예약 발송 실행과 만료된 임대를 확인하세요. 재시도 전에 진행 중인 제출을 대사하세요.",
+      unresolved_submissions: "공급자 상태를 조회하고 대사하세요. 결과가 불확실한 제출을 무작정 재발송하지 마세요.",
+      quarantined_delivery_events: "이벤트 참조와 서명을 확인하세요. 이벤트 적용 전에 원본 메시지와 대사하세요.",
+      paused_campaigns: "조직, 발신자 및 콘텐츠 점검을 검토하고 캠페인 재개 가능 여부를 결정하세요.",
+      frozen_accounts: "발송 동결을 해제하기 전에 채무, 분쟁 및 지갑 대사를 검토하세요.",
+      rejected_payment_events_24h: "가맹점, 통화, 금액 및 참조가 결제 공급자와 일치하는지 확인하세요.",
+      failed_jobs: "마지막 오류와 공급자 상태를 확인한 후 안전한 재시도 여부를 결정하세요.",
+      key_rotation: "키 교체 리허설을 완료하고 이전 키 데이터가 남지 않았는지 확인한 후 이전 키를 제거하세요.",
+      live_readiness_gaps: "필수 입력과 승인이 모두 확인될 때까지 실제 발송을 비활성 상태로 유지하세요.",
+    },
+  },
+  adminEmails: {
+    title: "이메일",
+    description: "고객과 담당자에게 보내는 이메일 문구를 언어별로 수정하세요.",
+    linksTitle: "계정 링크는 안전하게 유지됩니다",
+    linksNote: "인증 및 초대 링크는 자동으로 추가됩니다. 변경 내용은 이후 이메일부터 적용됩니다. 데모에서는 이메일이 로컬 발송 기록에만 저장됩니다.",
+    kind: "이메일 종류",
+    language: "이메일 언어",
+    subject: "제목",
+    body: "본문",
+    custom: "수정된 문구",
+    builtIn: "기본 문구",
+    placeholders: (names: string) => `사용 가능한 변수: ${names}. 이중 중괄호를 유지하세요.`,
+    noPlaceholders: "이 이메일에는 변수가 없습니다. 보안 링크는 자동으로 추가됩니다.",
+    preview: "예시 값으로 미리 보기",
+    previewNote: "미리 보기에서는 이메일을 보내지 않습니다. 예시 값은 화면 언어로 표시됩니다.",
+    kinds: {
+      verify: "이메일 인증",
+      invite: "팀 초대",
+      supportReceived: "지원 요청 접수 확인",
+      inquiryCustomer: "고객용 문의 상태 안내",
+      inquiryOperator: "담당자용 문의 상태 안내",
+    },
+    examples: {
+      organization: "예시 기업", role: "발송자", reference: "예시-123",
+      subject: "캠페인 문의", category: "발송", about: "관련: 예시 캠페인",
+      details: "이 캠페인을 검토해 주세요.", name: "지민", company: "예시 기업",
+      status: "검토 중", statusNote: "담당자가 요청을 검토하고 있습니다.", changedBy: "예시 관리자",
+    },
+  },
+  adminPricing: {
+    title: "요금",
+    description: "이 환경의 세그먼트 단가와 견적 유효 시간을 관리하세요.",
+    demoTitle: "데모 요금",
+    demoNote: "테스트용 값입니다. 단가를 저장해도 상용 요금이 승인되거나 실제 결제가 활성화되지 않습니다.",
+    current: "현재 단가",
+    snapshotNote: "새 견적에는 변경된 단가가 적용됩니다. 기존 견적과 제출된 캠페인은 견적 만료 또는 캠페인 완료까지 기록된 가격을 유지합니다.",
+    history: "단가 변경 기록",
+    historyNote: "최근 저장한 변경 사항부터 표시됩니다. 기본값 복원은 활동 기록에 남습니다.",
+    noHistory: "아직 단가 변경 기록이 없습니다",
+    noHistoryNote: "관리자가 다른 단가를 저장하기 전까지 기본 데모 단가가 사용됩니다.",
+    changedAt: "변경 시각",
+    revision: "변경 번호",
+  },
   meta: {
     tagline: "필리핀 기업용 SMS 서비스",
     titleSuffix: "필리핀 기업용 SMS",
@@ -382,7 +494,16 @@ export const ko: Dictionary = {
         "이 시점에 수신 거부를 다시 확인하므로, 검토 중에 수신 거부한 사람은 그대로 제외됩니다.",
       summaryLine: (read: number, imported: number, excluded: number) =>
         `읽은 행 ${read} · 가져올 항목 ${imported} · 제외 ${excluded}`,
-      ignoreUnknown: "인식하지 못한 열은 무시하고 나머지를 가져옵니다.",
+      matchTitle: "열 맞추기",
+      matchIntro:
+        "파일의 각 열에 무엇이 들어 있는지 고르세요. 미리보기를 확인하기 전에는 아무것도 가져오지 않습니다.",
+      colColumn: "파일의 열",
+      colExamples: "처음 값",
+      colImportAs: "가져올 항목",
+      importAsLabel: (header: string) => `${header} 열을 가져올 항목`,
+      dontImport: "가져오지 않음",
+      previewWithColumns: "이 열 설정으로 미리보기",
+      changeMatching: "열 맞추기 변경",
       upload: "업로드 후 미리보기",
       reading: "읽는 중…",
     },
@@ -509,6 +630,7 @@ export const ko: Dictionary = {
     scheduleLater: "나중으로 예약",
     scheduledAtLabel: "예약 날짜 및 시간",
     scheduleHint: (days: number) => `아시아/마닐라 기준. 최대 ${days}일 이후까지.`,
+    manilaNow: (when: string) => `지금 마닐라 시각은 ${when}입니다.`,
     timezoneLabel: "시간대",
     timezoneValue: "아시아/마닐라 (PHT)",
     authorizedLabel: "이 수신자들에게 연락할 권한이 있음을 확인합니다.",
@@ -872,6 +994,74 @@ export const ko: Dictionary = {
     keepSending: "계속 발송",
   },
 
+  exportFiles: {
+    sampleConsent: "마케팅 수신 동의 양식",
+    yes: "예",
+    no: "아니요",
+    campaign: {
+      row: "행",
+      phone: "전화번호",
+      phoneMasked: "전화번호(마스킹)",
+      submission: "접수 상태",
+      delivery: "전달 상태",
+      segments: "세그먼트",
+      cost: "비용",
+      charged: "차감 여부",
+      errorCode: "오류 코드",
+      excludedReason: "제외 사유",
+      acceptedAt: "접수 시각",
+      deliveredAt: "전달 시각",
+    },
+    importErrors: {
+      rowNumber: "행 번호",
+      phoneMasked: "전화번호(마스킹)",
+      reason: "사유",
+      detail: "상세",
+    },
+    contacts: {
+      phone: "전화번호",
+      phoneMasked: "전화번호(마스킹)",
+      firstName: "이름",
+      lastName: "성",
+      consentSource: "수신 동의 경로",
+      consentDate: "수신 동의 날짜",
+      createdAt: "등록 시각",
+    },
+    optOuts: {
+      phoneMasked: "전화번호(마스킹)",
+      reason: "사유",
+      source: "등록 경로",
+      recordedAt: "등록 시각",
+    },
+    adminCampaigns: {
+      created: "생성 시각",
+      organization: "고객사",
+      campaign: "캠페인",
+      status: "상태",
+      purpose: "목적",
+      recipients: "수신자 수",
+      accepted: "접수됨",
+      delivered: "전달됨",
+      notDelivered: "전달 실패",
+      charged: "차감된 금액",
+      maxAuthorized: "승인된 최대 비용",
+    },
+    rejectionReasons: {
+      INVALID: "유효한 필리핀 휴대폰 번호가 아닙니다",
+      DUPLICATE: "이 파일에 두 번 이상 나오는 번호입니다",
+      SUPPRESSED: "수신 거부한 번호입니다",
+      BLANK: "이 행에 번호가 없습니다",
+      OVER_CEILING: "한 번에 올릴 수 있는 셀프서비스 한도를 넘었습니다",
+      CONSENT_MISSING: "광고성 메시지 수신 동의 기록이 없습니다",
+    },
+    errorTitle: "파일을 내려받을 수 없습니다",
+    errorBack: "돌아가기",
+    missingCampaign: "캠페인이 선택되지 않았습니다.",
+    missingImport: "업로드 파일이 선택되지 않았습니다.",
+    notFound: "파일을 찾을 수 없습니다. 다른 계정의 파일이거나 더 이상 없는 파일일 수 있습니다.",
+    unknownKind: "이 주소에는 내려받을 파일이 없습니다.",
+  },
+
   supportPage: {
     helpTitle: "자주 묻는 질문",
     q1: "어떤 번호로 보낼 수 있나요?",
@@ -1034,7 +1224,7 @@ export const ko: Dictionary = {
       "일별·월별 할당량, 지출 한도, 회당 발송 한도가 조직 단위로 적용됩니다. 잔액은 애플리케이션이 아니라 데이터베이스에서 정산되므로, 동시에 진행되는 두 발송이 한 지갑을 초과 사용할 수 없습니다.",
     notYetTitle: "이번 빌드에 포함되지 않은 기능",
     notYetBody:
-      "개인화 변수, 프로모션 자가 발송, 공개 요금표는 의도적으로 범위에서 제외되었습니다. 대량 및 프로모션 발송은 담당팀과 협의해 진행합니다.",
+      "실제 SMS 전달, 결제, 승인된 공개 요금은 파트너 설정이 필요합니다. 개인화 메시지는 계정 한도 내에서 보낼 수 있으며, 대량 및 광고성 발송은 담당팀과 협의해 진행합니다.",
   },
 
   howItWorks: {
@@ -1089,7 +1279,7 @@ export const ko: Dictionary = {
       "필리핀 휴대폰 번호만 가능합니다. 09171234567, 9171234567, 639171234567, +639171234567 모두 인식되며 동일하게 저장됩니다. 유선전화와 해외 번호는 받지 않습니다.",
     csvTitle: "연락처는 어떻게 올리나요?",
     csvBody:
-      "연락처 페이지에서 phone_number 열이 있는 UTF-8 CSV 파일을 올리세요. 같은 페이지의 샘플 파일로 형식을 확인할 수 있습니다. first_name, last_name, consent_source, consent_date, custom_1~custom_5는 선택 사항이며 그 밖의 열은 무시됩니다. 미리보기에서 행마다 어떻게 읽혔는지 보여 드리며, 확인하기 전에는 아무것도 저장되지 않습니다.",
+      "연락처에서 UTF-8 CSV 파일을 올리세요. 인식되지 않은 열은 전화번호, 이름, 사용자 지정 또는 동의 항목으로 연결하거나 제외할 수 있습니다. 행별 미리보기를 확인한 후 저장하세요. 저장된 이름과 사용자 지정 항목은 개인화 메시지에 사용할 수 있습니다.",
     exportTitle: "연락처를 내려받을 수 있나요?",
     exportBody:
       "네. 연락처 페이지의 내보내기를 이용하세요. 수신 거부 목록은 그 목록의 내보내기로 받을 수 있습니다. 캠페인 결과는 각 캠페인 페이지의 내보내기로 받을 수 있습니다. 파일 속 번호는 가려진 형태입니다.",
@@ -1179,16 +1369,40 @@ export const ko: Dictionary = {
   },
 
   emails: {
-    verifySubject: "이메일 주소 인증 안내",
-    verifyBody: "계정 설정을 계속하려면 이메일 주소를 인증하세요.",
-    inviteSubject: (organization: string) => `${organization}에 초대되었습니다`,
+    templates: {
+      verify: {
+        subject: "이메일 주소 인증 안내",
+        body: "계정 설정을 계속하려면 이메일 주소를 인증하세요.",
+      },
+      invite: {
+        subject: "{{organization}}에 초대되었습니다",
+        body: "{{role}}(으)로 초대되었습니다. 링크는 7일 후 만료됩니다.",
+      },
+      supportReceived: {
+        subject: "문의 접수 [{{reference}}] {{subject}}",
+        body: "요청이 접수되었습니다. 담당자가 이 주소로 답변드리겠습니다.\n\n접수 번호: {{reference}}\n분류: {{category}}\n{{about}}\n\n보내 주신 내용:\n{{details}}",
+      },
+      inquiryCustomer: {
+        subject: "대량 SMS 문의 진행 상황: {{status}}",
+        body: "{{name}} 님, 안녕하세요.\n\n{{company}}의 문의가 현재 '{{status}}' 단계입니다. {{statusNote}}\n\n궁금한 점이 있으면 이 메일에 회신해 주세요.",
+      },
+      inquiryOperator: {
+        subject: "{{company}}의 대량 문의: {{status}}",
+        body: "{{changedBy}} 님이 {{company}}의 대량 문의를 '{{status}}' 단계로 옮겼습니다. 이 문의의 담당자로 지정되어 있습니다.",
+      },
+    },
     anOrganization: "조직",
-    inviteBody: (role: string) => `${role}(으)로 초대되었습니다. 링크는 7일 후 만료됩니다.`,
-    supportReceived: "요청이 접수되었습니다. 담당자가 이 주소로 답변드리겠습니다.",
-    supportReference: (reference: string) => `접수 번호: ${reference}`,
-    supportCategory: (category: string) => `분류: ${category}`,
     supportAbout: (about: string) => `관련 캠페인 또는 참조번호: ${about}`,
-    supportYouToldUs: "보내 주신 내용:",
+    inquiryStatusNotes: {
+      NEW: "문의를 접수했으며 곧 연락드리겠습니다.",
+      CONTACTED: "이 문의와 관련해 연락을 드렸습니다.",
+      REVIEWING: "요청하신 내용을 검토하고 있습니다.",
+      QUOTATION_SENT: "견적서를 보내 드렸습니다.",
+      CONTRACTED:
+        "계약이 체결되었습니다. 각 캠페인이 설정되고 검토되기 전에는 아무것도 발송되지 않습니다.",
+      COMPLETED: "작업이 완료되었습니다. 감사합니다.",
+      REJECTED: "죄송하지만 이 요청은 진행할 수 없습니다.",
+    },
   },
 
   invite: {
@@ -1476,6 +1690,7 @@ export const ko: Dictionary = {
         contactRetentionDays: "연락처 보관 기간(일)",
         suppressionRetentionDays: "수신 거부 보관 기간(일)",
         maxDispatchAttempts: "포기 전 발송 시도 횟수",
+        providerMessagesPerSecond: "공급업체 초당 발송 요청 수 (전체 조직 공유)",
       },
       beforeLiveDescription: "문서로 정리된 내용이며 애플리케이션이 검증하지는 않습니다.",
       editableTitle: "편집 가능한 한도",
@@ -1644,9 +1859,11 @@ export const ko: Dictionary = {
     notUpdated: "변경하지 못했습니다",
     pipelineStatus: "진행 상태",
     internalNote: "내부 메모",
+    assignedTo: "담당자",
+    unassigned: "지정 안 함",
     update: "변경",
     crmOnlyBody:
-      "문의의 진행 단계를 바꿔도 SMS가 대기열에 들어가지 않습니다. 계약된 캠페인도 승인된 발신자와 충전된 계정으로, 검토를 거치는 일반 발송 절차를 통해 제출됩니다.",
+      "문의의 진행 단계를 바꿔도 SMS가 대기열에 들어가지 않습니다. 계약된 캠페인도 승인된 발신자와 충전된 계정으로, 검토를 거치는 일반 발송 절차를 통해 제출됩니다. 진행 상태가 바뀌면 고객에게는 문의를 작성한 언어로, 담당자에게도 이메일이 발송됩니다.",
     mfaRecoveryNote:
       "각 코드는 한 번만 사용할 수 있습니다. 인증 앱과 다른 곳에 보관하세요. 기기를 잃어버렸을 때 다시 로그인할 수 있는 유일한 방법입니다.",
     mfaContinue: "관리자 콘솔로 이동",
@@ -1834,6 +2051,11 @@ export const ko: Dictionary = {
   },
 
   serverText: {
+    personalizationUnsupported: "변수는 {{first_name}}, {{last_name}}, {{custom_1}}부터 {{custom_5}}까지만 사용할 수 있으며, 각각 이중 중괄호로 감싸야 합니다.",
+    testPersonalizationMissing:
+      "테스트 메시지는 받는 사람에게 저장된 정보로 채워지는데, 메시지에 쓰인 사용자 지정 항목이 그 사람에게 저장되어 있지 않습니다. 연락처에 추가하거나 그 항목 없이 테스트하세요.",
+    personalizationMissing: "일부 수신자의 필수 연락처 정보가 없습니다. 메시지를 검토하기 전에 연락처 정보를 수정하세요.",
+    promotionalConsentRequired: "프로모션 메시지는 모든 수신자의 동의 출처가 저장되어 있어야 합니다. 먼저 연락처를 가져오거나 수정하세요.",
     none: "없음.",
     connected: "연결됨.",
     dbUnreachable: "데이터베이스에 연결할 수 없습니다.",
@@ -1961,6 +2183,19 @@ export const ko: Dictionary = {
     freezeLifted: "발송 동결이 해제되었습니다. 기록된 미지급금은 그대로입니다.",
     inquiryMoved: (status: string) =>
       `문의 상태가 '${status}'(으)로 변경되었습니다. 문자는 발송되지 않았습니다.`,
+    inquiryMovedEmailed: (status: string) =>
+      `문의 상태가 '${status}'(으)로 변경되었고 고객에게 이메일을 보냈습니다. 문자는 발송되지 않았습니다.`,
+    inquiryUpdated: "문의가 수정되었습니다. 이메일과 문자는 발송되지 않았습니다.",
+    emailTemplateSaved: "저장되었습니다. 다음에 보내는 같은 종류의 이메일부터 이 문구를 사용합니다.",
+    emailTemplateReset: "기본 문구로 되돌렸습니다.",
+    emailTemplateEmpty: "제목과 본문을 입력하세요.",
+    emailTemplateInvalidSyntax: "제목은 한 줄로 입력하고 변수는 목록의 표기와 이중 중괄호를 그대로 사용하세요.",
+    emailTemplateTooLong: (subjectMax: string, bodyMax: string) =>
+      `제목은 ${subjectMax}자, 본문은 ${bodyMax}자 이내로 입력하세요.`,
+    emailTemplateUnknownPlaceholder: (unknown: string, allowed: string) =>
+      `이 이메일은 ${unknown} 항목을 채울 수 없습니다. 사용할 수 있는 항목: ${allowed}.`,
+    emailTemplateNoPlaceholders: (unknown: string) =>
+      `이 이메일은 ${unknown} 항목을 채울 수 없습니다. 이 이메일에는 채울 항목이 없습니다.`,
     senderDecided: (status: string) => `발신자 ID 상태가 '${status}'(으)로 변경되었습니다.`,
     platformBlocked: (added: string) => `번호 ${added}건을 플랫폼 전체에서 차단했습니다.`,
     platformBlockedSomeInvalid: (added: string, invalid: string) =>
@@ -2038,10 +2273,14 @@ export const ko: Dictionary = {
     notUtf8: "파일이 올바른 UTF-8 형식이 아닙니다. CSV UTF-8로 다시 내보낸 뒤 업로드하세요.",
     repeatedColumn: (columns: string) => `첫 행(열 이름)에 같은 열이 두 번 이상 있습니다: ${columns}.`,
     brokenQuoting: "따옴표가 닫히지 않은 칸이 있어 행을 정확히 읽을 수 없습니다.",
+    quoteNotClosed: (row: string) => `${row}행: 따옴표로 시작한 값이 닫히지 않았습니다.`,
+    quoteMalformed: (row: string) => `${row}행: 닫는 따옴표 뒤에 다른 글자가 이어집니다.`,
     noHeaderRow: "파일에 열 이름이 적힌 첫 행이 없습니다.",
-    missingColumn: (columns: string) => `파일에 ${columns} 열이 있어야 합니다.`,
-    unknownColumns: (columns: string) =>
-      `이 파일에는 사용하지 않는 열이 있습니다: ${columns}. 이 열을 무시해도 되는지 확인하세요.`,
+    matchColumns:
+      "이름만으로는 맞출 수 없는 열이 있습니다. 각 열에 무엇이 들어 있는지 고른 뒤 다시 미리 보세요.",
+    choosePhoneColumn: "휴대폰 번호가 들어 있는 열을 고르세요.",
+    columnChosenTwice: (field: string) =>
+      `"${field}" 항목이 두 개 이상의 열에 지정되었습니다. 한 열에만 지정하세요.`,
     tooManyRows: (rows: string, limit: string) =>
       `파일의 데이터 행이 ${rows}개로, 한도인 ${limit}개를 넘습니다.`,
     columnPhone: "휴대폰 번호",
@@ -2058,6 +2297,9 @@ export const ko: Dictionary = {
     requestNotValid: "올바르지 않은 요청입니다.",
     confirmationNotValid: "발송 확인 요청이 올바르지 않습니다.",
     campaignNotFound: "캠페인을 찾을 수 없습니다.",
+    promotionalRouteInquiry: "저장되었습니다. 이제 광고성 메시지는 대량 발송 견적으로만 처리됩니다.",
+    promotionalRouteSelfService:
+      "저장되었습니다. 이제 고객사가 수신 동의가 기록된 저장 연락처에 광고성 메시지를 직접 보낼 수 있습니다.",
     promotionalNeedsInquiry:
       "광고성 메시지는 자가 발송이 아니라 문의로 처리합니다. 대신 대량 발송 견적을 요청하세요.",
     senderNotApproved: "이 발신자 ID는 이 조직에 승인되지 않았습니다.",

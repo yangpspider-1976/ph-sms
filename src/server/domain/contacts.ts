@@ -2,13 +2,50 @@ import "server-only";
 import { and, count, desc, eq, inArray, lt } from "drizzle-orm";
 import { db, type DbOrTx } from "@/server/db";
 import { contacts, importRows, imports } from "@/server/db/schema";
-import { MOCK_DEFAULTS, type AppConfig } from "@/server/config";
+import { MOCK_DEFAULTS, type AppConfig, type ContactField } from "@/server/config";
 import { currentKeyVersion, decrypt, encrypt, numberHash } from "@/server/security/crypto";
 import { maskNormalized } from "./phone";
-import { parseContactCsv, type CsvParseResult } from "./csv";
+import {
+  columnMeaning,
+  normalizeHeader,
+  parseContactCsv,
+  type ColumnChoice,
+  type CsvParseResult,
+} from "./csv";
 import { findSuppressedNumbers } from "./suppression";
 import { recordAudit } from "@/server/audit";
 import { enServerText } from "@/i18n/locales/en-server-text";
+import { DICTIONARIES } from "@/i18n/dictionaries";
+
+/**
+ * What each language calls the contact columns, in its downloads and in the
+ * upload preview, so a list downloaded in Korean uploads again without asking.
+ * The masked number column is not here: a masked number cannot be imported.
+ */
+const DICTIONARY_ALIASES: ReadonlyMap<string, ContactField> = new Map(
+  Object.values(DICTIONARIES).flatMap((t) => {
+    const files = t.exportFiles.contacts;
+    const words = t.serverText;
+    const pairs: Array<[string, ContactField]> = [
+      [files.phone, "phone_number"],
+      [files.firstName, "first_name"],
+      [files.lastName, "last_name"],
+      [files.consentSource, "consent_source"],
+      [files.consentDate, "consent_date"],
+      [words.columnPhone, "phone_number"],
+      [words.columnFirstName, "first_name"],
+      [words.columnLastName, "last_name"],
+      [words.columnConsentSource, "consent_source"],
+      [words.columnConsentDate, "consent_date"],
+      [words.columnCustom("1"), "custom_1"],
+      [words.columnCustom("2"), "custom_2"],
+      [words.columnCustom("3"), "custom_3"],
+      [words.columnCustom("4"), "custom_4"],
+      [words.columnCustom("5"), "custom_5"],
+    ];
+    return pairs.map(([name, field]) => [normalizeHeader(name), field] as const);
+  }),
+);
 
 /**
  * Contact imports.
@@ -39,6 +76,8 @@ export type ImportPreview = {
    * is really a middle name is not something the parser can detect.
    */
   columnMapping: Array<{ header: string; field: string; used: boolean }>;
+  /** The same columns, for changing what each is imported as. */
+  columns: ColumnChoice[];
   sample: Array<{
     sourceRowNumber: number;
     masked: string | null;
@@ -50,7 +89,7 @@ export type ImportPreview = {
 
 export type ImportOutcome =
   | { ok: true; preview: ImportPreview }
-  | { ok: false; code: string; message: string; detail?: string[] };
+  | { ok: false; code: string; message: string; detail?: string[]; columns?: ColumnChoice[] };
 
 /**
  * Parses an upload and stores the result for review.
@@ -64,17 +103,25 @@ export async function createImport(input: {
   userId: string;
   filename: string;
   bytes: Buffer;
-  acknowledgedUnknownColumns?: boolean;
+  /** What the customer chose to import each column as, by position. */
+  mapping?: Array<ContactField | null>;
   config?: AppConfig;
 }): Promise<ImportOutcome> {
   const config = input.config ?? MOCK_DEFAULTS;
 
   const parsed: CsvParseResult = parseContactCsv(input.bytes, config, {
-    acknowledgedUnknownColumns: input.acknowledgedUnknownColumns,
+    mapping: input.mapping,
+    aliases: DICTIONARY_ALIASES,
   });
 
   if (!parsed.ok) {
-    return { ok: false, code: parsed.code, message: parsed.message, detail: parsed.detail };
+    return {
+      ok: false,
+      code: parsed.code,
+      message: parsed.message,
+      detail: parsed.detail,
+      columns: parsed.columns,
+    };
   }
 
   // Opt-outs are applied to the preview so the counts the customer confirms are
@@ -189,35 +236,14 @@ export async function createImport(input: {
           overCeiling: 0,
         },
         unknownColumns: parsed.unknownColumns,
-        columnMapping: describeColumns(parsed.headers),
+        columnMapping: parsed.columns.map((column) => ({
+          header: column.header,
+          field: column.field ? columnMeaning(column.field) : enServerText.columnIgnored,
+          used: column.field !== null,
+        })),
+        columns: parsed.columns,
         sample,
       },
-    };
-  });
-}
-
-/** Human wording for each column the platform understands. */
-const COLUMN_MEANINGS: Record<string, string> = {
-  phone_number: enServerText.columnPhone,
-  first_name: enServerText.columnFirstName,
-  last_name: enServerText.columnLastName,
-  consent_source: enServerText.columnConsentSource,
-  consent_date: enServerText.columnConsentDate,
-  custom_1: enServerText.columnCustom("1"),
-  custom_2: enServerText.columnCustom("2"),
-  custom_3: enServerText.columnCustom("3"),
-  custom_4: enServerText.columnCustom("4"),
-  custom_5: enServerText.columnCustom("5"),
-};
-
-/** Maps the file's headers to what the import will do with each (REC-02). */
-function describeColumns(headers: string[]): ImportPreview["columnMapping"] {
-  return headers.map((header) => {
-    const meaning = COLUMN_MEANINGS[header];
-    return {
-      header,
-      field: meaning ?? enServerText.columnIgnored,
-      used: Boolean(meaning),
     };
   });
 }

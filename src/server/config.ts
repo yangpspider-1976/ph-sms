@@ -53,6 +53,7 @@ export const configSchema = z.object({
   /** Dispatch */
   dispatchLeaseSeconds: z.number().int().positive(),
   maxDispatchAttempts: z.number().int().positive(),
+  providerMessagesPerSecond: z.number().int().min(1).max(1000),
 });
 
 export type AppConfig = z.infer<typeof configSchema>;
@@ -92,6 +93,7 @@ export const MOCK_DEFAULTS: AppConfig = {
 
   dispatchLeaseSeconds: 60,
   maxDispatchAttempts: 5,
+  providerMessagesPerSecond: 10, // demo pacing only; partner capacity still needs confirmation
 };
 
 /** CSV columns. phone_number is the only required one. */
@@ -109,6 +111,14 @@ export const CSV_OPTIONAL_COLUMNS = [
 ] as const;
 /** Widened to string[] so a header read from a file can be tested against it. */
 export const CSV_KNOWN_COLUMNS: readonly string[] = [
+  ...CSV_REQUIRED_COLUMNS,
+  ...CSV_OPTIONAL_COLUMNS,
+];
+/** A field an uploaded column can be imported as. */
+export type ContactField =
+  | (typeof CSV_REQUIRED_COLUMNS)[number]
+  | (typeof CSV_OPTIONAL_COLUMNS)[number];
+export const CONTACT_FIELDS: readonly ContactField[] = [
   ...CSV_REQUIRED_COLUMNS,
   ...CSV_OPTIONAL_COLUMNS,
 ];

@@ -8,7 +8,7 @@ import { limitsFor, quotaUsage } from "@/server/domain/quota";
 import { listTestRecipients } from "@/server/domain/test-send";
 import { listGroups } from "@/server/domain/groups";
 import { listTemplates } from "@/server/domain/templates";
-import { MOCK_DEFAULTS } from "@/server/config";
+import { getEffectiveConfig, promotionalSelfServiceEnabled } from "@/server/domain/app-config";
 import { Card, Notice, PageHeader } from "@/components/ui";
 import { SendWizard } from "./send-wizard";
 import { getDictionary } from "@/i18n/server";
@@ -43,6 +43,12 @@ export default async function SendPage({
     );
   }
 
+  // The settings in force, not the code defaults: the live estimate must use
+  // the price the quote will use, and an admin can change it.
+  const [config, promotionalAllowed] = await Promise.all([
+    getEffectiveConfig(),
+    promotionalSelfServiceEnabled(),
+  ]);
   const [senders, savedTemplates, wallet, usage, testRecipients, groups] = await Promise.all([
     db
       .select({
@@ -57,7 +63,7 @@ export default async function SendPage({
     // The twenty most recently saved, one chip per template.
     listTemplates(orgId, 20),
     getWallet(orgId),
-    quotaUsage(db, orgId, limitsFor(MOCK_DEFAULTS)),
+    quotaUsage(db, orgId, limitsFor(config)),
     listTestRecipients({ organizationId: orgId, userId: ctx.user.id }),
     listGroups(orgId),
   ]);
@@ -71,11 +77,12 @@ export default async function SendPage({
         testRecipients={testRecipients}
         groups={groups.map((g) => ({ id: g.id, name: g.name, memberCount: g.memberCount }))}
         initialGroupId={groupId}
+        promotionalAllowed={promotionalAllowed}
         limits={{
-          ceiling: MOCK_DEFAULTS.selfServiceCeiling,
-          maxSegments: MOCK_DEFAULTS.maxSegmentsPerMessage,
-          maxScheduleDays: MOCK_DEFAULTS.maxScheduleDays,
-          unitPriceCentavos: MOCK_DEFAULTS.unitPriceCentavos,
+          ceiling: config.selfServiceCeiling,
+          maxSegments: config.maxSegmentsPerMessage,
+          maxScheduleDays: config.maxScheduleDays,
+          unitPriceCentavos: config.unitPriceCentavos,
           dailyRemaining: usage.daily.remaining,
           availableCentavos: wallet.availableCentavos,
         }}

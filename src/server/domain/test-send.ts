@@ -1,9 +1,14 @@
 import "server-only";
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/server/db";
-import { campaigns, idempotencyKeys, memberships, users } from "@/server/db/schema";
-import { decrypt } from "@/server/security/crypto";
+import { campaigns, contacts, idempotencyKeys, memberships, users } from "@/server/db/schema";
+import { decrypt, numberHashCandidates } from "@/server/security/crypto";
 import { issueQuote, QuoteError } from "./quote";
+import {
+  personalizationFields,
+  personalizeMessage,
+  validPersonalizationSyntax,
+} from "./personalization";
 import { submitCampaign, SubmitError } from "./submit";
 import type { AppConfig } from "@/server/config";
 import { enServerText } from "@/i18n/locales/en-server-text";
@@ -103,6 +108,7 @@ export async function sendTest(params: {
       encrypted: users.mobileEncrypted,
       mask: users.mobileMask,
       verifiedAt: users.mobileVerifiedAt,
+      fullName: users.fullName,
     })
     .from(memberships)
     .innerJoin(users, eq(users.id, memberships.userId))
@@ -137,14 +143,28 @@ export async function sendTest(params: {
   const prior = await priorTestSend(params.idempotencyKey, params.organizationId);
   if (prior) return { ...prior, mask: row.mask! };
 
+  const number = decrypt(row.encrypted);
+  // A personalized message is filled in for the member receiving the test, so
+  // they see it as a customer would. The member is rarely a saved contact of
+  // their own business, so their profile name stands in for one.
+  const body =
+    personalizationFields(params.body).length > 0
+      ? await fillForTester({
+          organizationId: params.organizationId,
+          number,
+          fullName: row.fullName,
+          body: params.body,
+        })
+      : params.body;
+
   try {
     const quote = await issueQuote({
       organizationId: params.organizationId,
       userId: params.userId,
       senderIdentityId: params.senderIdentityId,
       purpose: params.purpose,
-      body: params.body,
-      rawRecipients: [decrypt(row.encrypted)],
+      body,
+      rawRecipients: [number],
       isTestSend: true,
       config: params.config,
     });
@@ -172,6 +192,48 @@ export async function sendTest(params: {
       throw new TestSendError(err.message, "REFUSED");
     }
     throw err;
+  }
+}
+
+/**
+ * A personalized test message, filled in for the member receiving it: from
+ * their saved contact in this organization when there is one, otherwise their
+ * profile name for {{first_name}} and {{last_name}}. A custom field has no such
+ * stand-in, so a test that needs one the member has not saved is refused.
+ */
+async function fillForTester(input: {
+  organizationId: string;
+  number: string;
+  fullName: string;
+  body: string;
+}): Promise<string> {
+  const [contact] = await db
+    .select({
+      firstName: contacts.firstName,
+      lastName: contacts.lastName,
+      custom: contacts.custom,
+    })
+    .from(contacts)
+    .where(
+      and(
+        eq(contacts.organizationId, input.organizationId),
+        inArray(contacts.numberHash, numberHashCandidates(input.number)),
+      ),
+    )
+    .limit(1);
+
+  const [first, ...rest] = input.fullName.trim().split(/\s+/);
+  if (!validPersonalizationSyntax(input.body)) {
+    throw new TestSendError(enServerText.personalizationUnsupported, "REFUSED");
+  }
+  try {
+    return personalizeMessage(input.body, {
+      ...contact?.custom,
+      first_name: contact?.firstName || first || null,
+      last_name: contact?.lastName || rest.join(" ") || null,
+    });
+  } catch {
+    throw new TestSendError(enServerText.testPersonalizationMissing, "REFUSED");
   }
 }
 

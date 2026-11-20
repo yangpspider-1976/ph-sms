@@ -95,6 +95,7 @@ for (const viewport of VIEWPORTS) {
         "/app/dashboard",
         "/app/send",
         "/app/campaigns",
+        "/app/reports",
         "/app/contacts",
         "/app/credits",
         "/app/settings/team",
@@ -113,7 +114,7 @@ for (const viewport of VIEWPORTS) {
 
     test("admin console does not scroll sideways", async ({ page }) => {
       await login(page, "admin@phsms.test");
-      for (const path of ["/admin", "/admin/customers", "/admin/audit", "/admin/settings"]) {
+      for (const path of ["/admin", "/admin/customers", "/admin/audit", "/admin/settings", "/admin/health", "/admin/pricing", "/admin/emails"]) {
         await page.goto(path);
         await page.locator("h1").first().waitFor({ state: "visible" });
         const { overflows, by } = await bodyOverflows(page);

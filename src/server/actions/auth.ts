@@ -27,7 +27,8 @@ import {
 } from "@/server/security/rate-limit";
 import { headers } from "next/headers";
 import { enServerText } from "@/i18n/locales/en-server-text";
-import { getDictionary } from "@/i18n/server";
+import { getLocale } from "@/i18n/server";
+import { renderEmail } from "@/server/domain/email-templates";
 
 export type ActionState = { error?: string; fieldErrors?: Record<string, string> } | null;
 
@@ -129,7 +130,7 @@ export async function signupAction(_prev: ActionState, formData: FormData): Prom
 
   const passwordHash = await hashPassword(parsed.data.password);
   const { token, lookup } = newToken();
-  const t = await getDictionary();
+  const locale = await getLocale();
 
   await db.transaction(async (tx) => {
     const [org] = await tx
@@ -170,8 +171,7 @@ export async function signupAction(_prev: ActionState, formData: FormData): Prom
     await sendMail(
       {
         to: email,
-        subject: t.emails.verifySubject,
-        body: t.emails.verifyBody,
+        ...(await renderEmail("verify", locale, {}, tx)),
         link: `/verify-email?token=${token}`,
       },
       tx,

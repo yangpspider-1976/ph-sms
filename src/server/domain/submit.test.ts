@@ -15,6 +15,7 @@ import { issueQuote, QuoteError } from "./quote";
 import { submitCampaign, SubmitError } from "./submit";
 import { getWallet } from "./wallet";
 import { addSuppression } from "./suppression";
+import { setPromotionalSelfService } from "./app-config";
 
 const BODY = "Your reservation is confirmed. We look forward to seeing you tomorrow.";
 
@@ -88,11 +89,19 @@ describe("quoting", () => {
     });
   });
 
-  // Requirement 13: promotional is inquiry-only, and the endpoint enforces it.
-  it("refuses a promotional send outright", async () => {
+  // Requirement 13: promotional is inquiry-only unless an admin allows it, and
+  // the endpoint enforces that, not only the page.
+  it("refuses a promotional send while promotions go through the bulk quote", async () => {
     await expect(
       quoteFor(tenant, [NUMBERS.ok(1)], { purpose: "PROMOTIONAL" }),
     ).rejects.toMatchObject({ code: "PROMOTIONAL_INQUIRY_ONLY" });
+  });
+
+  it("refuses promotional sending without a recorded consent source, once allowed", async () => {
+    await setPromotionalSelfService({ enabled: true, actorUserId: tenant.userId });
+    await expect(
+      quoteFor(tenant, [NUMBERS.ok(1)], { purpose: "PROMOTIONAL" }),
+    ).rejects.toMatchObject({ code: "PROMOTIONAL_CONSENT_REQUIRED" });
   });
 
   // Requirement 13: the ceiling is applied before suppression, so opt-outs
@@ -131,7 +140,7 @@ describe("quoting", () => {
     ).rejects.toMatchObject({ code: "SCHEDULE_INVALID" });
   });
 
-  it("rejects a message with template variable syntax", async () => {
+  it("rejects a personalized message when a recipient has no saved name", async () => {
     await expect(
       quoteFor(tenant, [NUMBERS.ok(1)], { body: "Hi {{first_name}}" }),
     ).rejects.toMatchObject({ code: "MESSAGE_INVALID" });

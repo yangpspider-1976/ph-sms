@@ -544,6 +544,9 @@ export const quotes = pgTable(
     bodyHash: text("body_hash").notNull(),
     recipientHash: text("recipient_hash").notNull(),
     recipientSnapshot: text("recipient_snapshot").notNull(), // encrypted JSON array
+    /** Rendered recipient messages, frozen with the quote and encrypted at rest. */
+    messageSnapshot: text("message_snapshot"),
+    messageSnapshotHash: text("message_snapshot_hash"),
     encoding: smsEncoding("encoding").notNull(),
     segmentsPerMessage: integer("segments_per_message").notNull(),
     recipientCount: integer("recipient_count").notNull(),
@@ -633,6 +636,8 @@ export const messageItems = pgTable(
       .references(() => organizations.id, { onDelete: "cascade" }),
     /** Stable idempotency key handed to the provider; never regenerated. */
     stableKey: text("stable_key").notNull(),
+    /** Null on historical non-personalized messages, which use campaign.body. */
+    bodyEncrypted: text("body_encrypted"),
     numberHash: text("number_hash").notNull(),
     numberEncrypted: text("number_encrypted").notNull(),
     numberMasked: text("number_masked").notNull(),
@@ -920,10 +925,30 @@ export const inquiries = pgTable(
       onDelete: "set null",
     }),
     internalNote: text("internal_note"),
+    /** The language the inquiry was sent in: the emails about it are in it too. */
+    locale: text("locale").notNull().default("en"),
     createdAt: now(),
     updatedAt: updated(),
   },
   (t) => [index("inquiries_status_idx").on(t.status, t.createdAt)],
+);
+
+/**
+ * An admin's own wording for one email in one language. Without a row the
+ * dictionary's wording is sent, so deleting a row restores the default.
+ */
+export const emailTemplates = pgTable(
+  "email_templates",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    key: text("key").notNull(),
+    locale: text("locale").notNull(),
+    subject: text("subject").notNull(),
+    body: text("body").notNull(),
+    updatedBy: uuid("updated_by").references(() => users.id, { onDelete: "set null" }),
+    updatedAt: updated(),
+  },
+  (t) => [uniqueIndex("email_templates_key_locale_key").on(t.key, t.locale)],
 );
 
 export const notifications = pgTable(
@@ -1042,6 +1067,12 @@ export const idempotencyKeys = pgTable(
 /* -------------------------------------------------------------------------- */
 /* Relations                                                                  */
 /* -------------------------------------------------------------------------- */
+
+/** Shared admission clock: all workers using a provider consume the same pace. */
+export const providerPacing = pgTable("provider_pacing", {
+  key: text("key").primaryKey(),
+  nextAllowedAt: timestamp("next_allowed_at", { withTimezone: true }).notNull(),
+});
 
 export const organizationsRelations = relations(organizations, ({ many, one }) => ({
   memberships: many(memberships),

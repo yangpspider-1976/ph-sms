@@ -43,6 +43,13 @@
       "when": 1790232507540,
       "tag": "0005_fancy_kingpin",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794885237531,
+      "tag": "0006_woozy_millenium_guard",
+      "breakpoints": true
     }
   ]
 }

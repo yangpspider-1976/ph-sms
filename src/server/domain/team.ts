@@ -15,7 +15,8 @@ import { recordAudit } from "@/server/audit";
 import { sendMail } from "@/server/providers/mail";
 import { enServerText } from "@/i18n/locales/en-server-text";
 import { dictionaryFor } from "@/i18n/dictionaries";
-import type { Locale } from "@/i18n/config";
+import { DEFAULT_LOCALE, type Locale } from "@/i18n/config";
+import { renderEmail } from "./email-templates";
 
 /**
  * Team membership and invitations.
@@ -148,15 +149,16 @@ export async function inviteMember(input: {
     });
 
     const t = dictionaryFor(input.locale);
-    await sendMail(
+    const wording = await renderEmail(
+      "invite",
+      input.locale ?? DEFAULT_LOCALE,
       {
-        to: email,
-        subject: t.emails.inviteSubject(org?.name ?? t.emails.anOrganization),
-        body: t.emails.inviteBody(t.roles.labels[input.role]),
-        link: `/invite?token=${token}`,
+        organization: org?.name ?? t.emails.anOrganization,
+        role: t.roles.labels[input.role],
       },
       tx,
     );
+    await sendMail({ to: email, ...wording, link: `/invite?token=${token}` }, tx);
 
     await recordAudit(
       {

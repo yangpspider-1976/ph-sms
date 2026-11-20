@@ -12,6 +12,7 @@
  */
 
 import { enServerText } from "@/i18n/locales/en-server-text";
+import { validPersonalizationSyntax } from "./personalization";
 
 export type Encoding = "GSM7" | "UCS2";
 
@@ -154,8 +155,7 @@ export type MessageRejection =
   | { ok: false; code: "TOO_MANY_SEGMENTS"; message: string }
   | { ok: false; code: "UNSUPPORTED_CHARACTERS"; message: string };
 
-/** Template variable syntax is rejected outright: MVP does not interpolate. */
-const VARIABLE_SYNTAX = /\{\{\s*[\w.]+\s*\}\}|\$\{\s*[\w.]+\s*\}/;
+const VARIABLE_SYNTAX = /\{\{|\}\}|\$\{/;
 
 export function validateMessageBody(
   body: string,
@@ -163,17 +163,19 @@ export function validateMessageBody(
     maxSegments: number;
     supportsNonBmp: boolean;
     supportsUnicode: boolean;
+    /** Only composing and saving templates allow unresolved tokens. */
+    allowVariables?: boolean;
   },
 ): MessageRejection {
   if (body.trim().length === 0) {
     return { ok: false, code: "EMPTY", message: enServerText.enterMessage };
   }
-  if (VARIABLE_SYNTAX.test(body)) {
+  if (VARIABLE_SYNTAX.test(body) && (!opts.allowVariables || !validPersonalizationSyntax(body))) {
     return {
       ok: false,
       code: "TEMPLATE_VARIABLES",
       message:
-        enServerText.noVariables,
+        enServerText.personalizationUnsupported,
     };
   }
   const info = analyzeMessage(body);

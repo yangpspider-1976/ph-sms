@@ -3,7 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { authorize } from "@/server/auth/context";
-import { issueQuote, QuoteError } from "@/server/domain/quote";
+import {
+  issueQuote,
+  QuoteError,
+  samplesForReview,
+  type PricedMessage,
+} from "@/server/domain/quote";
 import { submitCampaign, SubmitError } from "@/server/domain/submit";
 import { stopCampaign } from "@/server/jobs/dispatch";
 import { dispatchAfterResponse } from "@/server/jobs/dispatch-after-response";
@@ -45,7 +50,27 @@ export type QuoteView = {
   /** Content checks will hold the campaign for an approver once confirmed. */
   requiresApproval: boolean;
   approvalReason: string | null;
+  personalized: boolean;
+  /** The first few rendered messages, and the longest one (MSG-03), marked. */
+  sampleMessages: Array<{
+    numberMasked: string;
+    body: string;
+    segments: number;
+    encoding: "GSM7" | "UCS2";
+    longest: boolean;
+  }>;
 };
+
+/** The review's samples, with numbers masked: the browser never gets them whole. */
+function reviewSamples(messages: PricedMessage[]): QuoteView["sampleMessages"] {
+  return samplesForReview(messages).map((message) => ({
+    numberMasked: maskNormalized(message.number),
+    body: message.body,
+    segments: message.segments,
+    encoding: message.encoding,
+    longest: message.longest,
+  }));
+}
 
 export type QuoteResult =
   | { ok: true; quote: QuoteView }
@@ -56,6 +81,7 @@ const quoteInput = z.object({
   body: z.string().min(1, enServerText.enterMessage),
   recipients: z.array(z.string()).min(1, enServerText.addRecipient),
   scheduledAt: z.string().optional().nullable(),
+  purpose: z.enum(["INFORMATIONAL", "PROMOTIONAL"]).default("INFORMATIONAL"),
 });
 
 export async function createQuoteAction(raw: unknown): Promise<QuoteResult> {
@@ -83,10 +109,11 @@ export async function createQuoteAction(raw: unknown): Promise<QuoteResult> {
       organizationId: auth.ctx.org.organizationId,
       userId: auth.ctx.user.id,
       senderIdentityId: parsed.data.senderIdentityId,
-      purpose: "INFORMATIONAL",
+      purpose: parsed.data.purpose,
       body: parsed.data.body,
       rawRecipients: parsed.data.recipients,
       scheduledAt: parsed.data.scheduledAt ? new Date(parsed.data.scheduledAt) : null,
+      config: await getEffectiveConfig(),
     });
 
     const wallet = await getWallet(auth.ctx.org.organizationId);
@@ -129,6 +156,8 @@ export async function createQuoteAction(raw: unknown): Promise<QuoteResult> {
         senderAcceptsReplies: sender?.supportsInboundReplies ?? false,
         requiresApproval: quote.requiresApproval,
         approvalReason: quote.approvalReason,
+        personalized: quote.personalized,
+        sampleMessages: reviewSamples(quote.messages),
       },
     };
   } catch (err) {

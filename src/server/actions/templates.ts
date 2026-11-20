@@ -21,9 +21,8 @@ const schema = z.object({
  *
  * Templates store plain text and are versioned: editing one writes a new
  * version rather than mutating the old, so a campaign sent last month can still
- * be explained. Variable syntax is rejected here for the same reason it is
- * rejected in the composer — nothing interpolates it yet, so it would be sent
- * literally.
+ * be explained. Supported variables are resolved and individually priced when
+ * a campaign quote is issued, never by the worker after confirmation.
  */
 export async function saveTemplateAction(formData: FormData): Promise<TemplateResult> {
   const auth = await authorize("templates.manage");
@@ -41,6 +40,7 @@ export async function saveTemplateAction(formData: FormData): Promise<TemplateRe
     maxSegments: (await getEffectiveConfig()).maxSegmentsPerMessage,
     supportsNonBmp: true,
     supportsUnicode: true,
+    allowVariables: true,
   });
   if (!check.ok) return { ok: false, message: check.message };
 

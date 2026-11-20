@@ -21,10 +21,15 @@ export function InquiryForm({
   inquiryId,
   status,
   note,
+  ownerUserId,
+  operators,
 }: {
   inquiryId: string;
   status: string;
   note: string | null;
+  ownerUserId: string | null;
+  /** The platform admins an inquiry can be assigned to. */
+  operators: Array<{ id: string; name: string }>;
 }) {
   const t = useT();
   const localizeServerText = useServerText();
@@ -54,6 +59,20 @@ export function InquiryForm({
             {STATUSES.map((s) => (
               <option key={s} value={s}>
                 {t.status.inquiry[s]}
+              </option>
+            ))}
+          </Select>
+        </div>
+
+        <div className="w-full max-w-[210px]">
+          <label className="field-label" htmlFor={`owner-${inquiryId}`}>
+            {t.adminExtra.assignedTo}
+          </label>
+          <Select id={`owner-${inquiryId}`} name="ownerUserId" defaultValue={ownerUserId ?? ""}>
+            <option value="">{t.adminExtra.unassigned}</option>
+            {operators.map((operator) => (
+              <option key={operator.id} value={operator.id}>
+                {operator.name}
               </option>
             ))}
           </Select>

@@ -15,12 +15,18 @@ import { submitCampaign } from "@/server/domain/submit";
 import { getWallet } from "@/server/domain/wallet";
 import { addSuppression } from "@/server/domain/suppression";
 import { quotaUsage, limitsFor } from "@/server/domain/quota";
-import { MockSmsProvider, type SmsProvider, type SubmissionOutcome } from "@/server/providers/sms";
+import {
+  MockSmsProvider,
+  setSmsProvider,
+  type SmsProvider,
+  type SubmissionOutcome,
+} from "@/server/providers/sms";
 import {
   claimJob,
   dispatchCampaign,
   drainDueJobs,
   reconcileUnknown,
+  runNextJob,
   stopCampaign,
 } from "./dispatch";
 
@@ -352,6 +358,48 @@ describe("worker job claiming", () => {
 });
 
 describe("draining without a worker process", () => {
+  it("keeps its lease when a result is unknown and cannot be queried, instead of re-running", async () => {
+    // As the partner adapter is until the partner documents a status query.
+    class LostReplyProvider extends MockSmsProvider {
+      override readonly capabilities = { ...new MockSmsProvider().capabilities, supportsQuery: false };
+      override async submitMessage(): Promise<SubmissionOutcome> {
+        return { outcome: "UNKNOWN", code: "TIMEOUT", message: "No reply", latencyMs: 1 };
+      }
+    }
+    setSmsProvider(new LostReplyProvider());
+    try {
+      const result = await submit([NUMBERS.ok(1)], "unknown-keeps-lease");
+      expect(await runNextJob("lost-reply-worker")).toBe(true);
+      expect((await itemsOf(result.campaignId))[0]!.submissionStatus).toBe("UNKNOWN");
+
+      // The UNKNOWN message is never re-sent, so nothing is due before the lease
+      // lapses. Releasing the claim after every run re-ran this campaign each second.
+      await new Promise((resolve) => setTimeout(resolve, 1_200));
+      expect(await runNextJob("lost-reply-worker")).toBe(false);
+      const [job] = await db.select().from(dispatchJobs).where(eq(dispatchJobs.campaignId, result.campaignId));
+      expect(job).toMatchObject({ status: "CLAIMED", attempts: 1 });
+    } finally {
+      setSmsProvider(null);
+    }
+  });
+
+  it("waits for the lease before retrying a temporary failure", async () => {
+    const result = await submit([NUMBERS.transient], "transient-waits");
+    expect(await runNextJob("transient-worker")).toBe(true);
+    expect((await itemsOf(result.campaignId))[0]).toMatchObject({ submissionStatus: "PENDING", attempts: 1 });
+    // Back in PENDING for a retry, but not due a second later: the lease is its backoff.
+    await new Promise((resolve) => setTimeout(resolve, 1_200));
+    expect(await runNextJob("transient-worker")).toBe(false);
+  });
+
+  it("releases a deadline-limited claim without consuming attempts or charging", async () => {
+    const result = await submit([NUMBERS.ok(1)], "paced-deadline");
+    expect(await runNextJob("paced-worker", { deadline: Date.now() - 1 })).toBe(true);
+    const [job] = await db.select().from(dispatchJobs).where(eq(dispatchJobs.campaignId, result.campaignId));
+    expect(job).toMatchObject({ status: "PENDING", leaseOwner: null, leaseExpiresAt: null, attempts: 0 });
+    expect((await itemsOf(result.campaignId))[0]).toMatchObject({ submissionStatus: "PENDING", attempts: 0, charged: false });
+    expect(await chargeCount(result.campaignId)).toBe(0);
+  });
   it("stops between messages at the deadline and leaves the rest for the next claim", async () => {
     const result = await submit([NUMBERS.ok(1), NUMBERS.ok(2)], "t1");
 

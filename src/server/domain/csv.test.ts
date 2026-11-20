@@ -74,34 +74,72 @@ describe("encoding and file shape", () => {
 });
 
 describe("headers", () => {
-  it("trims and lowercases header names", () => {
-    const csv = "  Phone_Number ,  First_Name \n09171234567,Ana\n";
+  it("matches header names whatever their case, spacing or separators", () => {
+    const csv = "  Phone_Number ,  First Name \n09171234567,Ana\n";
     const r = ok(parseContactCsv(buf(csv), cfg));
-    expect(r.headers).toEqual(["phone_number", "first_name"]);
+    expect(r.headers).toEqual(["Phone_Number", "First Name"]);
+    expect(r.columns.map((c) => c.field)).toEqual(["phone_number", "first_name"]);
     expect(r.counts.eligible).toBe(1);
   });
 
-  it("rejects a missing required column", () => {
-    const csv = "mobile,first_name\n09171234567,Ana\n";
-    expect(bad(parseContactCsv(buf(csv), cfg)).code).toBe("MISSING_REQUIRED_COLUMN");
+  it("recognises the names a column often goes by, and names passed in", () => {
+    const common = ok(parseContactCsv(buf("Mobile No.,Surname\n09171234567,Reyes\n"), cfg));
+    expect(common.columns.map((c) => c.field)).toEqual(["phone_number", "last_name"]);
+
+    const aliases = new Map([["전화번호", "phone_number" as const]]);
+    const passed = ok(parseContactCsv(buf("전화번호\n09171234567\n"), cfg, { aliases }));
+    expect(passed.columns[0]!.field).toBe("phone_number");
+  });
+
+  it("asks what each column holds when one is not recognised, masking numbers it shows", () => {
+    const result = bad(parseContactCsv(buf("numero,first_name\n09171234567,Ana\n"), cfg));
+    expect(result.code).toBe("NEEDS_MAPPING");
+    expect(result.columns).toEqual([
+      { index: 0, header: "numero", field: null, samples: ["+63 917 *** 4567"] },
+      { index: 1, header: "first_name", field: "first_name", samples: ["Ana"] },
+    ]);
+  });
+
+  it("asks as well when a recognised file has no column of numbers", () => {
+    expect(bad(parseContactCsv(buf("first_name\nAna\n"), cfg)).code).toBe("NEEDS_MAPPING");
+  });
+
+  it("imports each column as the field the customer chose for it", () => {
+    const csv = "numero,tier,first_name\n09171234567,gold,Ana\n";
+    const r = ok(
+      parseContactCsv(buf(csv), cfg, { mapping: ["phone_number", "custom_1", "first_name"] }),
+    );
+    expect(r.rows[0]).toMatchObject({
+      normalized: "+639171234567",
+      firstName: "Ana",
+      custom: { custom_1: "gold" },
+    });
+    expect(r.unknownColumns).toEqual([]);
+  });
+
+  it("leaves out a column the customer chose not to import", () => {
+    const csv = "phone_number,loyalty_tier\n09171234567,gold\n";
+    expect(bad(parseContactCsv(buf(csv), cfg)).code).toBe("NEEDS_MAPPING");
+
+    const r = ok(parseContactCsv(buf(csv), cfg, { mapping: ["phone_number", null] }));
+    expect(r.unknownColumns).toEqual(["loyalty_tier"]);
+    expect(r.rows[0]!.custom).toEqual({});
+    expect(r.counts.eligible).toBe(1);
+  });
+
+  it("refuses a choice with no column of numbers, or a field chosen twice", () => {
+    const csv = "a,b\n09171234567,Ana\n";
+    const noPhone = bad(parseContactCsv(buf(csv), cfg, { mapping: [null, "first_name"] }));
+    expect(noPhone.code).toBe("MISSING_REQUIRED_COLUMN");
+    expect(noPhone.columns).toHaveLength(2);
+    expect(
+      bad(parseContactCsv(buf(csv), cfg, { mapping: ["phone_number", "phone_number"] })).code,
+    ).toBe("COLUMN_CHOSEN_TWICE");
   });
 
   it("rejects duplicate headers", () => {
     const csv = "phone_number,phone_number\n09171234567,09181234567\n";
     expect(bad(parseContactCsv(buf(csv), cfg)).code).toBe("DUPLICATE_HEADER");
-  });
-
-  it("requires explicit confirmation before ignoring unknown columns", () => {
-    const csv = "phone_number,loyalty_tier\n09171234567,gold\n";
-    const first = bad(parseContactCsv(buf(csv), cfg));
-    expect(first.code).toBe("UNKNOWN_COLUMNS");
-    expect(first.detail).toEqual(["loyalty_tier"]);
-
-    const confirmed = ok(
-      parseContactCsv(buf(csv), cfg, { acknowledgedUnknownColumns: true }),
-    );
-    expect(confirmed.unknownColumns).toEqual(["loyalty_tier"]);
-    expect(confirmed.counts.eligible).toBe(1);
   });
 });
 

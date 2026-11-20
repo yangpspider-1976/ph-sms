@@ -15,12 +15,14 @@ import { addSuppression } from "./suppression";
 import { issueQuote } from "./quote";
 import { submitCampaign } from "./submit";
 import {
+  exportAdminCampaigns,
   exportCampaignReport,
   exportContacts,
   exportImportErrors,
   exportSuppressions,
 } from "./exports";
 import { numberHash } from "@/server/security/crypto";
+import { ko } from "@/i18n/locales/ko";
 
 /**
  * Requirement 12: deleting and re-importing a contact must not clear its
@@ -139,11 +141,12 @@ describe("importing", () => {
       organizationId: tenant.organizationId,
       userId: tenant.userId,
       filename: "bad.csv",
-      bytes: csv("mobile\n09171234567\n"),
+      bytes: csv('phone_number,first_name\n09171234567,"Ana\n'),
     });
     expect(outcome.ok).toBe(false);
     if (outcome.ok) return;
-    expect(outcome.code).toBe("MISSING_REQUIRED_COLUMN");
+    expect(outcome.code).toBe("BROKEN_QUOTING");
+    expect(outcome.detail).toEqual(["Row 2: a quoted value is never closed."]);
     expect(await db.select().from(imports)).toHaveLength(0);
   });
 });
@@ -368,18 +371,33 @@ describe("import error rows (REC-06)", () => {
 });
 
 describe("column mapping (REC-02)", () => {
+  const mappedFile = csv(
+    ["phone_number,first_name,loyalty_tier", `${NUMBERS.ok(1)},Ana,Gold`].join("\n"),
+  );
+
+  it("asks what an unrecognised column holds before previewing", async () => {
+    const outcome = await createImport({
+      organizationId: tenant.organizationId,
+      userId: tenant.userId,
+      filename: "mapped.csv",
+      bytes: mappedFile,
+    });
+    if (outcome.ok) throw new Error("expected to be asked about the columns");
+    expect(outcome.code).toBe("NEEDS_MAPPING");
+    expect(outcome.columns?.map((c) => [c.header, c.field])).toEqual([
+      ["phone_number", "phone_number"],
+      ["first_name", "first_name"],
+      ["loyalty_tier", null],
+    ]);
+  });
+
   it("says what each column was taken to mean", async () => {
     const outcome = await createImport({
       organizationId: tenant.organizationId,
       userId: tenant.userId,
       filename: "mapped.csv",
-      bytes: csv(
-        [
-          "phone_number,first_name,loyalty_tier",
-          `${NUMBERS.ok(1)},Ana,Gold`,
-        ].join("\n"),
-      ),
-      acknowledgedUnknownColumns: true,
+      bytes: mappedFile,
+      mapping: ["phone_number", "first_name", null],
     });
     if (!outcome.ok) throw new Error(outcome.code);
 
@@ -387,6 +405,47 @@ describe("column mapping (REC-02)", () => {
       { header: "phone_number", field: "Mobile number", used: true },
       { header: "first_name", field: "First name", used: true },
       { header: "loyalty_tier", field: "Ignored", used: false },
+    ]);
+  });
+
+  it("imports a column under the field the customer chose", async () => {
+    const outcome = await createImport({
+      organizationId: tenant.organizationId,
+      userId: tenant.userId,
+      filename: "mapped.csv",
+      bytes: mappedFile,
+      mapping: ["phone_number", "first_name", "custom_1"],
+    });
+    if (!outcome.ok) throw new Error(outcome.code);
+    await commitImport({
+      importId: outcome.preview.importId,
+      organizationId: tenant.organizationId,
+      userId: tenant.userId,
+    });
+
+    const [saved] = await listContacts(tenant.organizationId, 10);
+    expect(saved).toMatchObject({ firstName: "Ana", custom: { custom_1: "Gold" } });
+  });
+
+  it("reads back a contact list downloaded in Korean without asking", async () => {
+    const korean = csv(
+      ["전화번호,이름,성,수신 동의 경로,수신 동의 날짜", `${NUMBERS.ok(2)},민지,김,웹사이트,2026-01-31`].join(
+        "\n",
+      ),
+    );
+    const outcome = await createImport({
+      organizationId: tenant.organizationId,
+      userId: tenant.userId,
+      filename: "korean.csv",
+      bytes: korean,
+    });
+    if (!outcome.ok) throw new Error(outcome.code);
+    expect(outcome.preview.columns.map((c) => c.field)).toEqual([
+      "phone_number",
+      "first_name",
+      "last_name",
+      "consent_source",
+      "consent_date",
     ]);
   });
 });
@@ -481,6 +540,102 @@ describe("exports", () => {
       scope: "MASKED",
     });
     expect(file).toBeNull();
+  });
+
+  it("writes a file in the reader's language, readable by Excel", async () => {
+    await importAndCommit(
+      csv(["phone_number,first_name,consent_source,consent_date", `${NUMBERS.ok(1)},Ana,Website,2026-01-31`].join("\n")),
+    );
+
+    const file = await exportContacts({
+      organizationId: tenant.organizationId,
+      actorUserId: tenant.userId,
+      scope: "MASKED",
+      t: ko,
+      locale: "ko",
+    });
+
+    // Without a byte-order mark, Excel reads the file in the computer's code page.
+    expect(file.content.startsWith("﻿")).toBe(true);
+    const [header, row] = file.content.slice(1).trim().split("\r\n");
+    expect(header).toBe("전화번호(마스킹),이름,성,수신 동의 경로,수신 동의 날짜,등록 시각");
+    // The consent date in the form an upload reads; the rest as a Korean reader writes dates.
+    expect(row).toContain(",2026-01-31,");
+    expect(row).toMatch(/오[전후] \d{1,2}:\d{2}$/);
+  });
+
+  it("names statuses in the reader's language in a campaign's results", async () => {
+    const quote = await issueQuote({
+      organizationId: tenant.organizationId,
+      userId: tenant.userId,
+      senderIdentityId: tenant.senderIdentityId,
+      purpose: "INFORMATIONAL",
+      body: "Your order is ready for pickup.",
+      rawRecipients: [NUMBERS.ok(1), NUMBERS.ok(2)],
+    });
+    const { campaignId } = await submitCampaign({
+      quoteId: quote.id,
+      organizationId: tenant.organizationId,
+      userId: tenant.userId,
+      name: "Store opening",
+      idempotencyKey: "export-language-1",
+    });
+
+    const file = await exportCampaignReport({
+      campaignId,
+      organizationId: tenant.organizationId,
+      actorUserId: tenant.userId,
+      scope: "MASKED",
+      t: ko,
+      locale: "ko",
+    });
+    const [header, ...rows] = file!.content.slice(1).trim().split("\r\n");
+    expect(header).toBe(
+      "행,전화번호(마스킹),접수 상태,전달 상태,세그먼트,비용,차감 여부,오류 코드,제외 사유,접수 시각,전달 시각",
+    );
+    expect(rows).toHaveLength(2);
+    for (const row of rows) {
+      expect(row).toContain(ko.status.submission.PENDING);
+      expect(row).toContain(`,${ko.exportFiles.no},`);
+      expect(row).not.toMatch(/PENDING|,no,/);
+    }
+  });
+
+  it("gives an admin every organization's campaigns, with no numbers in it", async () => {
+    const other = await createTenant({ name: "Other Business" });
+    for (const [owner, name] of [
+      [tenant, "Store opening"],
+      [other, "Weekend sale"],
+    ] as const) {
+      const quote = await issueQuote({
+        organizationId: owner.organizationId,
+        userId: owner.userId,
+        senderIdentityId: owner.senderIdentityId,
+        purpose: "INFORMATIONAL",
+        body: "Your order is ready for pickup.",
+        rawRecipients: [NUMBERS.ok(1)],
+      });
+      await submitCampaign({
+        quoteId: quote.id,
+        organizationId: owner.organizationId,
+        userId: owner.userId,
+        name,
+        idempotencyKey: `admin-export-${name}`,
+      });
+    }
+
+    const file = await exportAdminCampaigns({ actorUserId: tenant.userId });
+    expect(file.filename).toMatch(/^all-campaigns-\d{4}(-\d{2}){5}\.csv$/);
+    expect(file.content).toContain("Store opening");
+    expect(file.content).toContain("Weekend sale");
+    expect(file.content).toContain("Other Business");
+    expect(file.content).not.toMatch(/\+63|639\d{9}/);
+
+    const audit = await db
+      .select()
+      .from(auditEvents)
+      .where(eq(auditEvents.action, "export.admin_campaigns"));
+    expect(audit).toHaveLength(1);
   });
 
   it("names a campaign's results file after the campaign", async () => {

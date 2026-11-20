@@ -18,6 +18,9 @@ import {
   type Tone,
 } from "@/components/ui";
 import { localizeServerText } from "@/i18n/server-text";
+import { ALERT_RULES } from "@/server/domain/monitoring";
+import { RefreshChecks } from "./refresh-checks";
+import { ButtonLink } from "@/components/ui";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getDictionary();
@@ -52,7 +55,7 @@ export default async function HealthPage() {
       <div className="mb-5 max-w-3xl">
         {report.status === "ok" ? (
           <Notice tone="success" title={t.admin.health.healthyTitle}>
-            {t.admin.health.healthyBody(formatDateTime(new Date(), locale))}
+            {t.admin.health.healthyBody(formatDateTime(report.checkedAt, locale))}
           </Notice>
         ) : report.status === "failing" ? (
           <Notice tone="danger" title={t.admin.health.failingTitle}>
@@ -64,6 +67,20 @@ export default async function HealthPage() {
           </Notice>
         )}
       </div>
+
+      <Card className="mb-5">
+        <CardHeader title={t.monitoring.alertsTitle} description={t.monitoring.alertsDescription} action={<RefreshChecks />} />
+        <div className="space-y-3 px-5 pb-5">
+          <p className="text-sm text-muted">{t.monitoring.deliveryNote}</p>
+          {report.alerts.length === 0 ? <Notice tone="success" title={t.monitoring.noAlerts} /> : report.alerts.map((alert) =>
+            <Notice key={alert.check} tone={alert.severity === "critical" ? "danger" : "warning"} title={t.monitoring.names[alert.check]}>
+              <p>{t.monitoring.triggered(typeof alert.value === "string" ? localizeServerText(alert.value, t) : String(alert.value))}</p>
+              <p className="mt-1">{t.monitoring.responses[alert.check]}</p>
+              <div className="mt-3"><ButtonLink href={alert.href} size="sm" variant="ghost">{t.monitoring.open}</ButtonLink></div>
+            </Notice>,
+          )}
+        </div>
+      </Card>
 
       <Card>
         <CardHeader
@@ -82,7 +99,7 @@ export default async function HealthPage() {
           <tbody>
             {report.checks.map((check) => (
               <tr key={check.name}>
-                <td className="font-mono text-[12.5px] text-ink">{check.name}</td>
+                <td className="text-[12.5px] text-ink">{t.monitoring.names[check.name as keyof typeof t.monitoring.names] ?? check.name}</td>
                 <td>
                   <Pill tone={toneFor(check.status)}>{statusLabel(check.status, t)}</Pill>
                 </td>
@@ -91,6 +108,18 @@ export default async function HealthPage() {
               </tr>
             ))}
           </tbody>
+        </DataTable>
+      </Card>
+
+      <Card className="mt-5">
+        <CardHeader title={t.monitoring.rulesTitle} />
+        <DataTable><thead><tr><th>{t.monitoring.rule}</th><th>{t.monitoring.severity}</th><th>{t.monitoring.threshold}</th><th>{t.monitoring.response}</th></tr></thead>
+          <tbody>{ALERT_RULES.map((rule) => <tr key={rule.check}>
+            <td>{t.monitoring.names[rule.check]}</td>
+            <td><Pill tone={rule.severity === "critical" ? "danger" : "warning"}>{t.monitoring[rule.severity]}</Pill></td>
+            <td className="cell-text max-w-sm">{t.monitoring.thresholds[rule.check]}</td>
+            <td className="cell-text max-w-md">{t.monitoring.responses[rule.check]}</td>
+          </tr>)}</tbody>
         </DataTable>
       </Card>
 

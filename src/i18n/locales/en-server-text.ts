@@ -12,6 +12,11 @@
  * and `ko.ts` still translates it under `serverText` like any other section.
  */
 export const enServerText = {
+  personalizationUnsupported: "Use only the {{first_name}}, {{last_name}} and {{custom_1}} to {{custom_5}} variables, each written in double braces.",
+  personalizationMissing: "Some recipients are missing a required contact field. Update their contact details before reviewing this message.",
+  testPersonalizationMissing:
+    "A test fills in the message from the details saved for the person receiving it, and a custom field it uses is not saved for them. Add it to their contact, or test without it.",
+  promotionalConsentRequired: "Promotional messages require a saved consent source for every recipient. Import or update your contacts first.",
   none: "None.",
   connected: "Connected.",
   dbUnreachable: "The database cannot be reached.",
@@ -148,6 +153,20 @@ export const enServerText = {
   limitsUpdated: "Limits updated.",
   freezeLifted: "Sending freeze lifted. The recorded debt is unchanged.",
   inquiryMoved: (status: string) => `Inquiry moved to ${status.toLowerCase()}. No SMS was sent.`,
+  inquiryMovedEmailed: (status: string) =>
+    `Inquiry moved to ${status.toLowerCase()}. The customer was emailed; no SMS was sent.`,
+  inquiryUpdated: "Inquiry updated. No email or SMS was sent.",
+  // Admin → Emails.
+  emailTemplateSaved: "Saved. The next email of this kind uses this wording.",
+  emailTemplateReset: "Back to the default wording.",
+  emailTemplateEmpty: "Enter a subject and a message.",
+  emailTemplateInvalidSyntax: "Keep the subject on one line and use placeholders exactly as listed, with double braces.",
+  emailTemplateTooLong: (subjectMax: string, bodyMax: string) =>
+    `Keep the subject within ${subjectMax} characters and the message within ${bodyMax}.`,
+  emailTemplateUnknownPlaceholder: (unknown: string, allowed: string) =>
+    `This email cannot fill ${unknown}. It can use: ${allowed}.`,
+  emailTemplateNoPlaceholders: (unknown: string) =>
+    `This email cannot fill ${unknown}. It has no placeholders.`,
   senderDecided: (status: string) => `Sender ${status.toLowerCase()}.`,
   platformBlocked: (added: string) => `${added} blocked platform-wide.`,
   platformBlockedSomeInvalid: (added: string, invalid: string) =>
@@ -238,10 +257,16 @@ export const enServerText = {
   repeatedColumn: (columns: string) => `The header row repeats a column: ${columns}.`,
   brokenQuoting:
     "The file has an unclosed quoted field, so the rows cannot be read reliably.",
+  // The rows a broken quote was found on, listed under that failure.
+  quoteNotClosed: (row: string) => `Row ${row}: a quoted value is never closed.`,
+  quoteMalformed: (row: string) => `Row ${row}: a closing quote is followed by more text.`,
   noHeaderRow: "The file has no header row.",
-  missingColumn: (columns: string) => `The file needs a ${columns} column.`,
-  unknownColumns: (columns: string) =>
-    `This file has columns we do not use: ${columns}. Confirm that they should be ignored.`,
+  // Matching an uploaded file's columns to what they hold (REC-02).
+  matchColumns:
+    "Some columns could not be matched by name. Choose what each one holds, then preview again.",
+  choosePhoneColumn: "Choose the column that holds the mobile numbers.",
+  columnChosenTwice: (field: string) =>
+    `"${field}" is chosen for more than one column. Choose it once.`,
   tooManyRows: (rows: string, limit: string) =>
     `The file has ${rows} data rows; the limit is ${limit}.`,
   // What the upload preview says each column of the file is used for.
@@ -260,6 +285,10 @@ export const enServerText = {
   requestNotValid: "That request was not valid.",
   confirmationNotValid: "That confirmation was not valid.",
   campaignNotFound: "That campaign was not found.",
+  // Admin → Settings → Promotional messages.
+  promotionalRouteInquiry: "Saved. Promotional messages now go through the bulk quote only.",
+  promotionalRouteSelfService:
+    "Saved. Businesses may now send promotional messages themselves, to saved contacts with recorded consent.",
   promotionalNeedsInquiry:
     "Promotional messages are handled as an inquiry, not self-service. Request a bulk quote instead.",
   senderNotApproved: "That sender identity is not approved for this organization.",

@@ -131,7 +131,7 @@ test.describe("core journey", () => {
     await page.getByRole("button", { name: "Continue to message" }).click();
 
     await page
-      .getByLabel("Message")
+      .getByLabel("Message", { exact: true })
       .fill("Your order is ready for pickup until 8pm today. Thank you!");
 
     await page.getByLabel("I am authorized to contact these recipients.").check();

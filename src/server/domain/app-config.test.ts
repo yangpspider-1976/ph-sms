@@ -133,6 +133,21 @@ describe("setConfigValue", () => {
 });
 
 describe("clearConfigValue", () => {
+  it("can save a rate again after restoring the default without reusing a revision", async () => {
+    await setConfigValue({ key: "unitPriceCentavos", value: 150, actorUserId: tenant.userId });
+    await clearConfigValue({ key: "unitPriceCentavos", actorUserId: tenant.userId });
+    await setConfigValue({ key: "unitPriceCentavos", value: 175, actorUserId: tenant.userId });
+    expect((await getEffectiveConfig()).unitPriceCentavos).toBe(175);
+    expect((await configHistory("unitPriceCentavos")).map((row) => row.version)).toEqual([2, 1]);
+  });
+
+  it("serializes simultaneous rate changes and preserves both revisions", async () => {
+    await Promise.all([150, 175].map((value) => setConfigValue({ key: "unitPriceCentavos", value, actorUserId: tenant.userId })));
+    const history = await configHistory("unitPriceCentavos");
+    expect(history.map((row) => row.version)).toEqual([2, 1]);
+    expect(history.map((row) => row.value).sort()).toEqual([150, 175]);
+  });
+
   it("restores the built-in default", async () => {
     await setConfigValue({ key: "selfServiceCeiling", value: 42, actorUserId: tenant.userId });
     await clearConfigValue({ key: "selfServiceCeiling", actorUserId: tenant.userId });

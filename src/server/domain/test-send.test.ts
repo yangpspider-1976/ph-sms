@@ -13,6 +13,7 @@ import { listTestRecipients, sendTest, TestSendError } from "./test-send";
 import { getWallet } from "./wallet";
 import { exportCampaignReport } from "./exports";
 import { dateToPlatformWallTime, formatDateTime } from "@/i18n/format";
+import { enServerText } from "@/i18n/locales/en-server-text";
 
 /**
  * MSG-04. A test send is a real send, so the questions that matter are where it
@@ -76,6 +77,38 @@ describe("sendTest", () => {
     // A test costs money like anything else: the funds are held, not free.
     const after = await getWallet(tenant.organizationId);
     expect(after.availableCentavos).toBe(before.availableCentavos - result.costCentavos);
+  });
+
+  it("fills a personalized test from the receiving member's own details", async () => {
+    await verifyMobile(tenant.userId, NUMBERS.ok(21));
+
+    const result = await sendTest({
+      organizationId: tenant.organizationId,
+      userId: tenant.userId,
+      senderIdentityId: tenant.senderIdentityId,
+      body: "Hello {{first_name}} {{last_name}}, your order is ready.",
+      purpose: "INFORMATIONAL",
+      idempotencyKey: "test-key-0021",
+    });
+
+    // The member is not a saved contact; their profile name ("Test User") stands in.
+    const [campaign] = await db.select().from(campaigns).where(eq(campaigns.id, result.campaignId));
+    expect(campaign!.body).toBe("Hello Test User, your order is ready.");
+  });
+
+  it("refuses a personalized test that needs a custom field the member has not saved", async () => {
+    await verifyMobile(tenant.userId, NUMBERS.ok(22));
+
+    await expect(
+      sendTest({
+        organizationId: tenant.organizationId,
+        userId: tenant.userId,
+        senderIdentityId: tenant.senderIdentityId,
+        body: "Your table is booked for {{custom_1}}.",
+        purpose: "INFORMATIONAL",
+        idempotencyKey: "test-key-0022",
+      }),
+    ).rejects.toMatchObject({ code: "REFUSED", message: enServerText.testPersonalizationMissing });
   });
 
   it("marks the campaign as a test", async () => {

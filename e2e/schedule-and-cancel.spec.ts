@@ -34,7 +34,7 @@ async function composeUpToSendTime(page: Page, numbers: string[], message: strin
   await page.goto("/app/send");
   await page.getByLabel("Mobile numbers").fill(numbers.join("\n"));
   await page.getByRole("button", { name: "Continue to message" }).click();
-  await page.getByLabel("Message").fill(message);
+  await page.getByLabel("Message", { exact: true }).fill(message);
 }
 
 test("a scheduled campaign waits, and stopping it reports truthfully", async ({ page }) => {

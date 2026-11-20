@@ -11,6 +11,9 @@ import {
   senderIdentities,
 } from "@/server/db/schema";
 import { MOCK_DEFAULTS, type AppConfig } from "@/server/config";
+import { getEffectiveConfig } from "@/server/domain/app-config";
+import { waitForProviderSlot } from "@/server/domain/provider-pacing";
+import { hasRecordedConsent } from "@/server/domain/consent";
 import { decrypt } from "@/server/security/crypto";
 import { captureFromReservation, releaseReservation } from "@/server/domain/wallet";
 import { consumeQuota, releaseQuota } from "@/server/domain/quota";
@@ -42,6 +45,12 @@ export type DispatchSummary = {
   excluded: number;
   paused: boolean;
   pauseReason?: string;
+  /**
+   * The run ran out of time, or waited past its deadline for a provider slot,
+   * with messages it never reached. Not set when it went through the list and
+   * some messages are PENDING again for a retry: a retry waits for the lease.
+   */
+  stoppedEarly: boolean;
 };
 
 /** Claims one due job using a lease, so two workers cannot take the same one. */
@@ -96,16 +105,41 @@ export async function runNextJob(
   workerId: string,
   options: { deadline?: number } = {},
 ): Promise<boolean> {
-  const job = await claimJob(workerId, MOCK_DEFAULTS);
+  const config = await getEffectiveConfig();
+  const job = await claimJob(workerId, config);
   if (!job) return false;
 
   try {
-    const summary = await dispatchCampaign(job.campaignId, { deadline: options.deadline });
+    const summary = await dispatchCampaign(job.campaignId, { deadline: options.deadline, config });
     console.log(
       `[worker ${workerId}] campaign=${job.campaignId} attempted=${summary.attempted} ` +
         `accepted=${summary.accepted} rejected=${summary.rejected} unknown=${summary.unknown} ` +
         `excluded=${summary.excluded}${summary.paused ? ` paused=${summary.pauseReason}` : ""}`,
     );
+    // A run that stopped early (out of time, or out of provider slots) left
+    // messages it never reached: release our own claim so they go out promptly
+    // instead of waiting for the full lease, without spending an attempt.
+    //
+    // Only then. A run that went through every message keeps its lease, as
+    // before: a message back in PENDING after a temporary failure is retried
+    // when the lease lapses, which is its backoff, and an UNKNOWN one is never
+    // re-sent, so re-running its campaign every second would only repeat the
+    // reconciliation query. Releasing after every run did exactly that.
+    // DONE/PAUSED jobs (including a concurrent cancellation) remain untouched.
+    if (summary.stoppedEarly) {
+      await db.update(dispatchJobs).set({
+        status: "PENDING",
+        leaseOwner: null,
+        leaseExpiresAt: null,
+        attempts: 0,
+        runAt: new Date(Date.now() + 1000),
+        updatedAt: new Date(),
+      }).where(and(
+        eq(dispatchJobs.id, job.id),
+        eq(dispatchJobs.status, "CLAIMED"),
+        eq(dispatchJobs.leaseOwner, workerId),
+      ));
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`[worker ${workerId}] campaign=${job.campaignId} failed: ${message}`);
@@ -114,13 +148,13 @@ export async function runNextJob(
     await db
       .update(dispatchJobs)
       .set({
-        status: job.attempts >= MOCK_DEFAULTS.maxDispatchAttempts ? "FAILED" : "PENDING",
+        status: job.attempts >= config.maxDispatchAttempts ? "FAILED" : "PENDING",
         leaseOwner: null,
         leaseExpiresAt: null,
         lastError: message.slice(0, 500),
         updatedAt: new Date(),
       })
-      .where(eq(dispatchJobs.id, job.id));
+      .where(and(eq(dispatchJobs.id, job.id), eq(dispatchJobs.status, "CLAIMED"), eq(dispatchJobs.leaseOwner, workerId)));
   }
   return true;
 }
@@ -151,7 +185,7 @@ export async function dispatchCampaign(
   campaignId: string,
   options: { provider?: SmsProvider; config?: AppConfig; deadline?: number } = {},
 ): Promise<DispatchSummary> {
-  const config = options.config ?? MOCK_DEFAULTS;
+  const config = options.config ?? await getEffectiveConfig();
   const provider = options.provider ?? getSmsProvider();
 
   const summary: DispatchSummary = {
@@ -162,6 +196,7 @@ export async function dispatchCampaign(
     unknown: 0,
     excluded: 0,
     paused: false,
+    stoppedEarly: false,
   };
 
   const campaign = (
@@ -215,7 +250,14 @@ export async function dispatchCampaign(
     // Out of time: stop between messages, never inside one. A run killed after
     // PENDING -> SUBMITTING strands that message for an operator; stopping here
     // leaves the rest PENDING, and the job is claimed again once its lease lapses.
-    if (options.deadline !== undefined && Date.now() >= options.deadline) break;
+    if (options.deadline !== undefined && Date.now() >= options.deadline) {
+      summary.stoppedEarly = true;
+      break;
+    }
+    if (!(await waitForProviderSlot(provider.capabilities.name, config.providerMessagesPerSecond, options.deadline))) {
+      summary.stoppedEarly = true;
+      break;
+    }
 
     // A stop issued while we were working takes effect from here on.
     const current = (
@@ -238,6 +280,11 @@ export async function dispatchCampaign(
       summary.excluded += 1;
       continue;
     }
+    if (campaign.purpose === "PROMOTIONAL" && !(await hasRecordedConsent(db, campaign.organizationId, [normalized]))) {
+      await excludeItem(item.id, campaignId, reservation?.id, item.costCentavos, "CONSENT_MISSING");
+      summary.excluded += 1;
+      continue;
+    }
 
     // Compare-and-set: only this worker moves PENDING -> SUBMITTING.
     const taken = await db
@@ -257,7 +304,7 @@ export async function dispatchCampaign(
         stableKey: item.stableKey,
         normalizedNumber: normalized,
         sender: campaign.senderValueSnapshot,
-        content: campaign.body,
+        content: item.bodyEncrypted ? decrypt(item.bodyEncrypted) : campaign.body,
       });
     } catch (err) {
       // A thrown transport error is indistinguishable from a timeout: the

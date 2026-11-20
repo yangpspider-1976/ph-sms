@@ -181,7 +181,7 @@ async function rotateMessageItems(): Promise<number> {
       const plain = decrypt(row.numberEncrypted);
       await db
         .update(messageItems)
-        .set({ numberHash: numberHash(plain), numberEncrypted: encrypt(plain) })
+        .set({ numberHash: numberHash(plain), numberEncrypted: encrypt(plain), bodyEncrypted: row.bodyEncrypted ? reencrypt(row.bodyEncrypted) : null })
         .where(eq(messageItems.id, row.id));
       moved += 1;
     }
@@ -234,7 +234,7 @@ async function rotateQuotes(): Promise<number> {
       const rekeyed = reencrypt(row.recipientSnapshot);
       await db
         .update(quotes)
-        .set({ recipientSnapshot: rekeyed })
+        .set({ recipientSnapshot: rekeyed, messageSnapshot: row.messageSnapshot ? reencrypt(row.messageSnapshot) : null })
         .where(eq(quotes.id, row.id));
       moved += 1;
     } catch {

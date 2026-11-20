@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { authorize } from "@/server/auth/context";
 import { commitImport, createImport, deleteContacts, type ImportPreview } from "@/server/domain/contacts";
+import type { ColumnChoice } from "@/server/domain/csv";
+import { CONTACT_FIELDS, type ContactField } from "@/server/config";
 import { addSuppression } from "@/server/domain/suppression";
 import { normalizePhone, splitPastedNumbers } from "@/server/domain/phone";
 import { db } from "@/server/db";
@@ -14,7 +16,26 @@ import { enServerText } from "@/i18n/locales/en-server-text";
 
 export type ImportActionResult =
   | { ok: true; preview: ImportPreview }
-  | { ok: false; message: string; code: string; detail?: string[] };
+  | { ok: false; message: string; code: string; detail?: string[]; columns?: ColumnChoice[] };
+
+/**
+ * The customer's column choices, sent as `column_<position>` = a field, or
+ * empty to leave the column out. Absent when they have not been asked yet.
+ * Anything that is not a field is ignored here and refused by the parser.
+ */
+function mappingFrom(formData: FormData): Array<ContactField | null> | undefined {
+  const mapping: Array<ContactField | null> = [];
+  let found = false;
+  for (const [key, value] of formData.entries()) {
+    const match = /^column_(\d{1,3})$/.exec(key);
+    if (!match || typeof value !== "string") continue;
+    found = true;
+    mapping[Number(match[1])] = CONTACT_FIELDS.includes(value as ContactField)
+      ? (value as ContactField)
+      : null;
+  }
+  return found ? Array.from(mapping, (field) => field ?? null) : undefined;
+}
 
 /** Uploads and previews a CSV. Nothing is added to the contact list yet. */
 export async function uploadContactsAction(formData: FormData): Promise<ImportActionResult> {
@@ -44,11 +65,18 @@ export async function uploadContactsAction(formData: FormData): Promise<ImportAc
     userId: auth.ctx.user.id,
     filename: file.name,
     bytes,
-    acknowledgedUnknownColumns: formData.get("acknowledgeUnknown") === "on",
+    mapping: mappingFrom(formData),
+    config,
   });
 
   if (!outcome.ok) {
-    return { ok: false, message: outcome.message, code: outcome.code, detail: outcome.detail };
+    return {
+      ok: false,
+      message: outcome.message,
+      code: outcome.code,
+      detail: outcome.detail,
+      columns: outcome.columns,
+    };
   }
 
   revalidatePath("/app/contacts");

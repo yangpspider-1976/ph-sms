@@ -112,10 +112,16 @@ describe("body validation", () => {
     expect(validateMessageBody("   ", opts)).toMatchObject({ ok: false, code: "EMPTY" });
   });
 
-  it("rejects template variable syntax with an explanation", () => {
+  it("rejects unresolved template syntax at the final-message boundary", () => {
     const r = validateMessageBody("Hi {{first_name}}, welcome", opts);
     expect(r).toMatchObject({ ok: false, code: "TEMPLATE_VARIABLES" });
-    if (!r.ok) expect(r.message).toMatch(/sent literally/i);
+    if (!r.ok) expect(r.message).toMatch(/variables/i);
+  });
+
+  it("allows supported variables in a draft and refuses unknown or malformed tokens", () => {
+    expect(validateMessageBody("Hi {{first_name}} {{custom_2}}", { ...opts, allowVariables: true })).toEqual({ ok: true });
+    expect(validateMessageBody("Hi {{password}}", { ...opts, allowVariables: true })).toMatchObject({ ok: false, code: "TEMPLATE_VARIABLES" });
+    expect(validateMessageBody("Hi {{first_name", { ...opts, allowVariables: true })).toMatchObject({ ok: false, code: "TEMPLATE_VARIABLES" });
   });
 
   it("rejects more than the configured maximum segments", () => {

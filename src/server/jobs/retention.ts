@@ -7,6 +7,7 @@ import {
   messageItems,
   notifications,
   providerEvents,
+  quotes,
   sessions,
 } from "@/server/db/schema";
 import { MOCK_DEFAULTS, type AppConfig } from "@/server/config";
@@ -58,6 +59,7 @@ export async function runRetention(
     .update(messageItems)
     .set({
       numberEncrypted: "",
+      bodyEncrypted: null,
       errorCode: null,
       updatedAt: now,
     })
@@ -68,6 +70,10 @@ export async function runRetention(
       ),
     )
     .returning({ id: messageItems.id });
+
+  // Resolved names/custom fields are personal data too; expire the priced copy.
+  await db.update(quotes).set({ messageSnapshot: null, messageSnapshotHash: null })
+    .where(and(lt(quotes.createdAt, detailCutoff), lt(quotes.expiresAt, now)));
 
   /* --- Provider events --------------------------------------------------- */
 

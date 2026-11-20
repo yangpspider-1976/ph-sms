@@ -12,6 +12,121 @@ import { enServerText } from "./en-server-text";
  * sentence rather than filling slots in an English one.
  */
 export const en = {
+  personalization: {
+    hint: "Use {{first_name}}, {{last_name}}, or {{custom_1}} through {{custom_5}} from saved contacts. Import contacts first; missing values must be corrected before review.",
+    costHint: "Personalized messages are priced individually after names and custom fields are filled in. Review shows the exact total and sample messages.",
+    samples: "Personalized message samples",
+    maxSegments: (n: number) => `Up to ${n} segments per recipient; encoding may vary`,
+    promotionalHint: "Send offers only to contacts with recorded marketing consent. Include a clear opt-out method your business monitors.",
+    /** On the send page while promotional messages go through the bulk quote (the default). */
+    promotionalViaBulk: "Sending a promotion? Promotional messages go through a bulk quote.",
+    /** Marks the longest personalized message among the review's samples (MSG-03). */
+    longest: "Longest message",
+  },
+
+  /** Admin → Settings: the route promotional campaigns take. */
+  adminPromotional: {
+    title: "Promotional messages",
+    description:
+      "How a business sends a promotional campaign. The client's request routes them to the bulk quote, where an operator reviews each one.",
+    inquiry: "Bulk quote only (default)",
+    inquiryHint: "Businesses request a bulk quote for promotions. Normal sending offers informational messages only.",
+    selfService: "Allow normal sending, with recorded consent",
+    selfServiceHint:
+      "Every recipient must be a saved contact with a consent source. Checked when the send is priced, when it is confirmed and before each message leaves.",
+    save: "Save",
+  },
+  reports: {
+    title: "Reports",
+    description: "Campaign results and charges for your organization. Dates select when a campaign was created, in Manila time.",
+    from: "From date", to: "To date", status: "Status", purpose: "Purpose", apply: "Apply filters",
+    invalidFilters: "Choose real dates in order, up to 366 days apart, and valid status and purpose filters.",
+    download: "Download filtered report", exportLimit: "A download can contain up to 10,000 campaigns. Narrow the date range if needed.",
+    tooMany: "This report exceeds 10,000 campaigns. Choose a shorter date range to download it.",
+    campaigns: "Campaigns", recipients: "Recipients", accepted: "Accepted", delivered: "Delivered",
+    notDelivered: "Not delivered", unresolved: "Unresolved", charged: "Charged", authorized: "Maximum authorized",
+    campaign: "Campaign", created: "Created (Manila)", details: "Recipient results",
+    accountingNote: "Charged means confirmed provider acceptance. Maximum authorized is the original spending ceiling, not the current hold or final charge. Accepted messages may still await delivery receipts. Test sends are included.",
+    emptyTitle: "No campaigns in this range", emptyBody: "Adjust the dates or filters to see other campaign results.",
+    results: "Campaign breakdown", previous: "Previous", next: "Next",
+    page: (page: number, pages: number, total: number) => `Page ${page} of ${pages} · ${total} campaigns`,
+    totalsNote: "Totals cover every matching campaign, including those on other pages.",
+  },
+  monitoring: {
+    alertsTitle: "Active alerts", alertsDescription: "Rules are evaluated from the current operational checks. Refreshes every 30 seconds while this page is visible.",
+    deliveryNote: "This dashboard displays alerts in the app. External paging and email delivery are not connected; choosing an alert service and testing delivery remain go-live tasks.",
+    noAlerts: "No active operational alerts.", critical: "Critical", warning: "Warning", refresh: "Refresh checks",
+    rulesTitle: "Alert rules", rule: "Signal", threshold: "Trigger", response: "Operator response", severity: "Severity",
+    open: "Open relevant page", triggered: (value: string) => `Observed: ${value}`,
+    names: {
+      database: "Database unavailable", dispatch_worker: "Dispatch stalled", unresolved_submissions: "Unresolved submissions",
+      quarantined_delivery_events: "Quarantined delivery events", paused_campaigns: "Campaigns awaiting review",
+      frozen_accounts: "Sending frozen", rejected_payment_events_24h: "Rejected payment events",
+      failed_jobs: "Dispatch retries exhausted", key_rotation: "Key rotation unfinished", live_readiness_gaps: "Live configuration incomplete",
+    },
+    thresholds: {
+      database: "Database ping fails", dispatch_worker: "At least one job overdue or lease expired by more than 120 seconds",
+      unresolved_submissions: "At least one UNKNOWN submission", quarantined_delivery_events: "At least one quarantined receipt",
+      paused_campaigns: "At least one campaign paused for review", frozen_accounts: "At least one frozen wallet",
+      rejected_payment_events_24h: "At least one rejected payment event in 24 hours", failed_jobs: "At least one failed job",
+      key_rotation: "A previous key remains configured", live_readiness_gaps: "LIVE mode has at least one readiness gap",
+    },
+    responses: {
+      database: "Check database availability and the app connection. Escalate immediately if access cannot be restored.",
+      dispatch_worker: "Check worker or scheduled dispatch execution and expired leases. Reconcile in-flight submissions before retrying.",
+      unresolved_submissions: "Query provider status and reconcile. Never resend an uncertain submission blindly.",
+      quarantined_delivery_events: "Inspect event references and signatures. Reconcile against the original message before applying an event.",
+      paused_campaigns: "Review the organization, sender and content checks. Decide whether the campaign may resume.",
+      frozen_accounts: "Review debt, disputes and wallet reconciliation before clearing the sending freeze.",
+      rejected_payment_events_24h: "Check merchant, currency, amount and reference matches against the payment provider.",
+      failed_jobs: "Inspect the last error and provider status before deciding whether a retry is safe.",
+      key_rotation: "Finish the key rotation rehearsal and verify no old-key data remains before removing the previous key.",
+      live_readiness_gaps: "Keep live sending disabled until all required inputs and approvals are verified.",
+    },
+  },
+  adminEmails: {
+    title: "Emails",
+    description: "Edit the wording sent to customers and operators in each language.",
+    linksTitle: "Account links stay secure",
+    linksNote: "Verification and invitation links are added automatically. Changes apply to future emails. In demo mode, emails stay in the local mail log.",
+    kind: "Email type",
+    language: "Email language",
+    subject: "Subject",
+    body: "Message",
+    custom: "Custom wording",
+    builtIn: "Default wording",
+    placeholders: (names: string) => `Available placeholders: ${names}. Keep the double braces.`,
+    noPlaceholders: "This email has no placeholders. Its secure link is added automatically.",
+    preview: "Preview with sample values",
+    previewNote: "This preview does not send an email. Sample values follow the interface language.",
+    kinds: {
+      verify: "Email verification",
+      invite: "Team invitation",
+      supportReceived: "Support request confirmation",
+      inquiryCustomer: "Inquiry update for the customer",
+      inquiryOperator: "Inquiry update for the operator",
+    },
+    examples: {
+      organization: "Sample business", role: "Sender", reference: "SAMPLE-123",
+      subject: "Question about a campaign", category: "Sending", about: "About: Sample campaign",
+      details: "Please help review this campaign.", name: "Alex", company: "Sample business",
+      status: "Reviewing", statusNote: "Our team is reviewing your request.", changedBy: "Sample admin",
+    },
+  },
+  adminPricing: {
+    title: "Pricing",
+    description: "Manage the segment rate and quote validity for this environment.",
+    demoTitle: "Demo pricing",
+    demoNote: "These values are for testing. Saving a rate does not approve commercial pricing or enable live payments.",
+    current: "Current rate",
+    snapshotNote: "New quotes use the updated rate. Existing quotes and submitted campaigns keep their recorded price until the quote expires or the campaign completes.",
+    history: "Rate changes",
+    historyNote: "Recent saved overrides, newest first. Restoring the default is recorded in the activity log.",
+    noHistory: "No rate changes yet",
+    noHistoryNote: "The built-in demo rate is in use until an administrator saves an override.",
+    changedAt: "Changed at",
+    revision: "Revision",
+  },
   meta: {
     tagline: "Business SMS for the Philippines",
     titleSuffix: "Business SMS for the Philippines",
@@ -389,7 +504,17 @@ export const en = {
         "Opt-outs are re-checked at this point, so a recipient who opted out while you were reviewing is still excluded.",
       summaryLine: (read: number, imported: number, excluded: number) =>
         `${read} rows read \u00b7 ${imported} will be imported \u00b7 ${excluded} excluded`,
-      ignoreUnknown: "Ignore the columns we do not recognise and import the rest.",
+      // Matching a file's columns to what they hold (REC-02).
+      matchTitle: "Match your columns",
+      matchIntro:
+        "Choose what each column of your file holds. Nothing is imported until you confirm the preview.",
+      colColumn: "Column in your file",
+      colExamples: "First values",
+      colImportAs: "Import as",
+      importAsLabel: (header: string) => `Import the column ${header} as`,
+      dontImport: "Don't import",
+      previewWithColumns: "Preview with these columns",
+      changeMatching: "Change column matching",
       upload: "Upload and preview",
       reading: "Reading…",
     },
@@ -517,6 +642,8 @@ export const en = {
     scheduleLater: "Schedule for later",
     scheduledAtLabel: "Scheduled date and time",
     scheduleHint: (days: number) => `Asia/Manila. Up to ${days} days ahead.`,
+    /** Beside the schedule field, for a computer set to another time zone. */
+    manilaNow: (when: string) => `It is now ${when} in Manila.`,
     timezoneLabel: "Timezone",
     timezoneValue: "Asia/Manila (PHT)",
     authorizedLabel: "I am authorized to contact these recipients.",
@@ -741,7 +868,7 @@ export const en = {
     counter: (characters: number, segments: number, encoding: string) =>
       `${characters} characters · ${segments} segment${segments === 1 ? "" : "s"} · ${encoding}`,
     plainTextNote:
-      "Plain text only. Personalization variables are not available yet, so write the message out in full.",
+      "Use {{first_name}}, {{last_name}}, or {{custom_1}} through {{custom_5}} from saved contacts. Each completed message is checked and priced on review.",
     saved: "Saved",
     notSaved: "Not saved",
     save: "Save template",
@@ -882,6 +1009,81 @@ export const en = {
     stopYes: "Yes, stop",
     stopping: "Stopping…",
     keepSending: "Keep sending",
+  },
+
+  /**
+   * Downloaded files. The English column names stay the identifiers they have
+   * always been: the contact columns are also what an upload reads back.
+   */
+  exportFiles: {
+    sampleConsent: "Marketing signup form",
+    yes: "yes",
+    no: "no",
+    campaign: {
+      row: "row",
+      phone: "phone_number",
+      phoneMasked: "phone_number_masked",
+      submission: "submission_status",
+      delivery: "delivery_status",
+      segments: "segments",
+      cost: "cost",
+      charged: "charged",
+      errorCode: "error_code",
+      excludedReason: "excluded_reason",
+      acceptedAt: "accepted_at",
+      deliveredAt: "delivered_at",
+    },
+    importErrors: {
+      rowNumber: "row_number",
+      phoneMasked: "phone_number_masked",
+      reason: "reason",
+      detail: "detail",
+    },
+    contacts: {
+      phone: "phone_number",
+      phoneMasked: "phone_number_masked",
+      firstName: "first_name",
+      lastName: "last_name",
+      consentSource: "consent_source",
+      consentDate: "consent_date",
+      createdAt: "created_at",
+    },
+    optOuts: {
+      phoneMasked: "phone_number_masked",
+      reason: "reason",
+      source: "source",
+      recordedAt: "recorded_at",
+    },
+    adminCampaigns: {
+      created: "created_at",
+      organization: "organization",
+      campaign: "campaign",
+      status: "status",
+      purpose: "purpose",
+      recipients: "recipients",
+      accepted: "accepted",
+      delivered: "delivered",
+      notDelivered: "not_delivered",
+      charged: "charged",
+      maxAuthorized: "max_authorized",
+    },
+    /** Why an uploaded row was left out, in the excluded-rows file. */
+    rejectionReasons: {
+      INVALID: "Not a valid Philippine mobile number",
+      DUPLICATE: "Appears more than once in this file",
+      SUPPRESSED: "This number has opted out",
+      BLANK: "No number in this row",
+      OVER_CEILING: "Above the self-service limit for one upload",
+      // Left out of a promotional campaign because consent was withdrawn before it went.
+      CONSENT_MISSING: "No recorded consent for a promotional message",
+    },
+    // The page shown instead of a file when a download is refused.
+    errorTitle: "This file could not be downloaded",
+    errorBack: "Go back",
+    missingCampaign: "No campaign was chosen.",
+    missingImport: "No upload was chosen.",
+    notFound: "That file was not found. It may belong to another account, or no longer exist.",
+    unknownKind: "There is no download at this address.",
   },
 
   supportPage: {
@@ -1052,7 +1254,7 @@ export const en = {
       "Daily and monthly quotas, a spend cap and a per-send ceiling apply per organization. Two sends racing each other cannot overspend one wallet, because the balance is settled in the database, not in the application.",
     notYetTitle: "Not in this build",
     notYetBody:
-      "Personalization variables, promotional self-service and published pricing are deliberately out of scope. High-volume and promotional sending is arranged with our team.",
+      "Live SMS delivery, real payments and approved public pricing still require partner setup. Personalized messages are available within account limits; high-volume and promotional sending is arranged with our team.",
   },
 
   howItWorks: {
@@ -1108,7 +1310,7 @@ export const en = {
       "Philippine mobile numbers only. 09171234567, 9171234567, 639171234567 and +639171234567 are all accepted and stored identically. Landlines and international numbers are refused.",
     csvTitle: "How do I upload my contacts?",
     csvBody:
-      "On the Contacts page, upload a UTF-8 CSV file with a phone_number column; the sample file there shows the layout. first_name, last_name, consent_source, consent_date and custom_1 to custom_5 are optional, and any other column is ignored. A preview shows how every row was read, and nothing is saved until you confirm it.",
+      "On Contacts, upload a UTF-8 CSV. Match any unfamiliar headers to the phone, name, custom or consent fields, or choose to ignore them. Review the row preview before saving. Saved names and custom fields can be used in personalized messages.",
     exportTitle: "Can I download my contacts?",
     exportBody:
       "Yes. Use Export on the Contacts page, and the one on the opt-out list for that list. Each campaign's page has one for its results. Numbers in these files are masked.",
@@ -1204,17 +1406,47 @@ export const en = {
   // site, in the language they have on screen: the person signing up, the
   // person asking for support, or the member sending an invitation (the
   // invitee has no account yet, so no language of their own).
+  /**
+   * The emails the platform sends. Each is a template whose {{placeholders}}
+   * are filled in when it is sent; an admin can replace any of them, per
+   * language, under Admin → Emails. These are the defaults.
+   */
   emails: {
-    verifySubject: "Verify your email address",
-    verifyBody: "Confirm your email address to continue setting up your account.",
-    inviteSubject: (organization: string) => `You have been invited to ${organization}`,
+    templates: {
+      verify: {
+        subject: "Verify your email address",
+        body: "Confirm your email address to continue setting up your account.",
+      },
+      invite: {
+        subject: "You have been invited to {{organization}}",
+        body: "You were invited as {{role}}. The link expires in 7 days.",
+      },
+      supportReceived: {
+        subject: "[{{reference}}] {{subject}}",
+        body: "We have your request and someone will reply to this address.\n\nReference: {{reference}}\nCategory: {{category}}\n{{about}}\n\nWhat you told us:\n{{details}}",
+      },
+      inquiryCustomer: {
+        subject: "Your bulk SMS inquiry: {{status}}",
+        body: "Hello {{name}},\n\nYour inquiry for {{company}} is now: {{status}}. {{statusNote}}\n\nReply to this email if you have any questions.",
+      },
+      inquiryOperator: {
+        subject: "Bulk inquiry from {{company}}: {{status}}",
+        body: "{{changedBy}} moved the bulk inquiry from {{company}} to {{status}}. It is assigned to you.",
+      },
+    },
     anOrganization: "an organization",
-    inviteBody: (role: string) => `You were invited as ${role}. The link expires in 7 days.`,
-    supportReceived: "We have your request and someone will reply to this address.",
-    supportReference: (reference: string) => `Reference: ${reference}`,
-    supportCategory: (category: string) => `Category: ${category}`,
     supportAbout: (about: string) => `About: ${about}`,
-    supportYouToldUs: "What you told us:",
+    /** The sentence after an inquiry's status in the customer's email. */
+    inquiryStatusNotes: {
+      NEW: "We have it and will be in touch.",
+      CONTACTED: "We have been in touch about it.",
+      REVIEWING: "We are reviewing what you need.",
+      QUOTATION_SENT: "We have sent you a quotation.",
+      CONTRACTED:
+        "Your agreement is in place. Nothing is sent until each campaign has been set up and reviewed.",
+      COMPLETED: "The work is complete. Thank you.",
+      REJECTED: "We are not able to take this request on.",
+    },
   },
 
   invite: {
@@ -1507,6 +1739,7 @@ export const en = {
         contactRetentionDays: "Contact retention (days)",
         suppressionRetentionDays: "Opt-out retention (days)",
         maxDispatchAttempts: "Delivery attempts before giving up",
+        providerMessagesPerSecond: "Provider submissions per second (shared across organizations)",
       },
       beforeLiveDescription: "Documented here, not verified by the application.",
       editableTitle: "Editable limits",
@@ -1679,9 +1912,11 @@ export const en = {
     notUpdated: "Not updated",
     pipelineStatus: "Pipeline status",
     internalNote: "Internal note",
+    assignedTo: "Assigned to",
+    unassigned: "Nobody",
     update: "Update",
     crmOnlyBody:
-      "Moving an inquiry through the pipeline never queues an SMS. A contracted campaign is still submitted through the normal reviewed send path, against an approved sender and a funded account.",
+      "Moving an inquiry through the pipeline never queues an SMS. A contracted campaign is still submitted through the normal reviewed send path, against an approved sender and a funded account. When the status changes, the customer is emailed in the language they wrote in, and so is the person it is assigned to.",
     mfaRecoveryNote:
       "Each code works once. Store them somewhere separate from your authenticator app — they are the only way back in if you lose the device.",
     mfaContinue: "Continue to the admin console",

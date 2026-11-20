@@ -4,13 +4,7 @@ import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/server/db";
-import {
-  inquiries,
-  notifications,
-  organizations,
-  senderIdentities,
-  wallets,
-} from "@/server/db/schema";
+import { notifications, organizations, senderIdentities, wallets } from "@/server/db/schema";
 import { requirePlatformAdmin } from "@/server/auth/context";
 import { recordAudit } from "@/server/audit";
 import { addSuppression } from "@/server/domain/suppression";
@@ -19,7 +13,9 @@ import { ensureWallet, postPurchase } from "@/server/domain/wallet";
 import { MOCK_DEFAULTS } from "@/server/config";
 import { demoFeaturesEnabled } from "@/server/env";
 import { isUuid } from "@/server/uuid";
+import { updateInquiry } from "@/server/domain/inquiries";
 import { enServerText } from "@/i18n/locales/en-server-text";
+import { getLocale } from "@/i18n/server";
 
 /**
  * Platform administration.
@@ -204,44 +200,36 @@ export async function updateInquiryAction(formData: FormData): Promise<AdminResu
       inquiryId: z.string().uuid(),
       status: z.enum(INQUIRY_STATUSES),
       note: z.string().max(2000).optional(),
+      // Empty means nobody; absent (an older form) means whoever saves it.
+      ownerUserId: z.union([z.literal(""), z.string().uuid()]).optional(),
     })
     .safeParse({
       inquiryId: formData.get("inquiryId"),
       status: formData.get("status"),
       note: String(formData.get("note") ?? ""),
+      ownerUserId: formData.get("ownerUserId") ?? undefined,
     });
 
   if (!parsed.success) return { ok: false, message: enServerText.updateNotValid };
 
-  await db.transaction(async (tx) => {
-    await tx
-      .update(inquiries)
-      .set({
-        status: parsed.data.status,
-        internalNote: parsed.data.note?.trim() || null,
-        ownerUserId: admin.id,
-        updatedAt: new Date(),
-      })
-      .where(eq(inquiries.id, parsed.data.inquiryId));
-
-    await recordAudit(
-      {
-        action: "admin.inquiry_updated",
-        actorUserId: admin.id,
-        actorKind: "PLATFORM_ADMIN",
-        objectType: "inquiry",
-        objectId: parsed.data.inquiryId,
-        metadata: { status: parsed.data.status },
-      },
-      tx,
-    );
+  const outcome = await updateInquiry({
+    inquiryId: parsed.data.inquiryId,
+    status: parsed.data.status,
+    note: parsed.data.note?.trim() || null,
+    ownerUserId:
+      parsed.data.ownerUserId === undefined ? admin.id : parsed.data.ownerUserId || null,
+    actor: { id: admin.id, fullName: admin.fullName },
+    actorLocale: await getLocale(),
   });
+  if (!outcome.ok) return { ok: false, message: enServerText.updateNotValid };
 
   revalidatePath("/admin/inquiries");
   revalidatePath("/admin");
   return {
     ok: true,
-    message: enServerText.inquiryMoved(parsed.data.status.replace("_", " ")),
+    message: outcome.statusChanged
+      ? enServerText.inquiryMovedEmailed(parsed.data.status.replace("_", " "))
+      : enServerText.inquiryUpdated,
   };
 }
 

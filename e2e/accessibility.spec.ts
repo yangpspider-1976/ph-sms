@@ -61,6 +61,7 @@ test.describe("customer portal", () => {
     "/app/dashboard",
     "/app/send",
     "/app/campaigns",
+    "/app/reports",
     "/app/contacts",
     "/app/contacts/opt-outs",
     "/app/templates",
@@ -90,6 +91,9 @@ test.describe("admin console", () => {
     "/admin/suppression",
     "/admin/audit",
     "/admin/settings",
+    "/admin/health",
+    "/admin/pricing",
+    "/admin/emails",
   ]) {
     test(`${path} has no WCAG A/AA violations`, async ({ page }) => {
       await scan(page, path);

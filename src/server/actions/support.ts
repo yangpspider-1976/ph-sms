@@ -6,7 +6,8 @@ import { recordAudit } from "@/server/audit";
 import { checkRateLimit } from "@/server/security/rate-limit";
 import { sendMail } from "@/server/providers/mail";
 import { enServerText } from "@/i18n/locales/en-server-text";
-import { getDictionary } from "@/i18n/server";
+import { getI18n } from "@/i18n/server";
+import { renderEmail } from "@/server/domain/email-templates";
 
 export type SupportResult =
   | { ok: true; reference: string; message: string }
@@ -67,7 +68,7 @@ export async function submitSupportRequestAction(
 
   // The copy goes to the person asking, in the language they asked in. The
   // category shows by the label they chose it under.
-  const t = await getDictionary();
+  const { t, locale } = await getI18n();
   const categories = {
     DELIVERY: t.supportPage.categoryDelivery,
     BILLING: t.supportPage.categoryBilling,
@@ -78,19 +79,13 @@ export async function submitSupportRequestAction(
 
   await sendMail({
     to: auth.ctx.user.email,
-    subject: `[${reference}] ${parsed.data.subject}`,
-    body: [
-      t.emails.supportReceived,
-      ``,
-      t.emails.supportReference(reference),
-      t.emails.supportCategory(categories[parsed.data.category]),
-      parsed.data.relatedRef ? t.emails.supportAbout(parsed.data.relatedRef) : null,
-      ``,
-      t.emails.supportYouToldUs,
-      parsed.data.detail,
-    ]
-      .filter((line) => line !== null)
-      .join("\n"),
+    ...(await renderEmail("supportReceived", locale, {
+      reference,
+      subject: parsed.data.subject,
+      category: categories[parsed.data.category],
+      about: parsed.data.relatedRef ? t.emails.supportAbout(parsed.data.relatedRef) : "",
+      details: parsed.data.detail,
+    })),
   });
 
   return {

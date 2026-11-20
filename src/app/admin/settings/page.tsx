@@ -2,8 +2,13 @@ import type { Metadata } from "next";
 import { requirePlatformAdmin } from "@/server/auth/context";
 import { env, liveReadinessGaps } from "@/server/env";
 import { formatCentavos, liveConfigGaps } from "@/server/config";
-import { getEffectiveConfig, listConfig } from "@/server/domain/app-config";
+import {
+  getEffectiveConfig,
+  listConfig,
+  promotionalSelfServiceEnabled,
+} from "@/server/domain/app-config";
 import { ConfigEditor } from "./config-editor";
+import { PromotionalRoute } from "./promotional-route";
 import { getSmsProvider } from "@/server/providers/sms";
 import { getPaymentProvider } from "@/server/providers/payments";
 import { Card, CardHeader, DetailRow, Notice, PageHeader, Pill } from "@/components/ui";
@@ -31,7 +36,11 @@ export default async function AdminSettingsPage() {
 
   // The effective configuration, not the code defaults: an admin who has
   // lowered a limit must see the limit that is actually in force.
-  const [config, editable] = await Promise.all([getEffectiveConfig(), listConfig()]);
+  const [config, editable, promotionalSelfService] = await Promise.all([
+    getEffectiveConfig(),
+    listConfig(),
+    promotionalSelfServiceEnabled(),
+  ]);
 
   const envGaps = liveReadinessGaps();
   const configGaps = liveConfigGaps(config);
@@ -76,6 +85,10 @@ export default async function AdminSettingsPage() {
             updatedAt: row.updatedAt ? formatDateTime(row.updatedAt, locale) : null,
           }))}
         />
+      </div>
+
+      <div className="mb-5 max-w-3xl">
+        <PromotionalRoute selfService={promotionalSelfService} />
       </div>
 
       <div className="grid gap-5 xl:grid-cols-2">

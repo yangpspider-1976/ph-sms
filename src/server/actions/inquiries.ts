@@ -7,6 +7,7 @@ import { inquiries } from "@/server/db/schema";
 import { recordAudit } from "@/server/audit";
 import { checkRateLimit } from "@/server/security/rate-limit";
 import { enServerText } from "@/i18n/locales/en-server-text";
+import { getLocale } from "@/i18n/server";
 
 /**
  * Public bulk inquiry.
@@ -88,6 +89,8 @@ export async function submitInquiryAction(formData: FormData): Promise<InquiryRe
       senderNeeds: parsed.data.senderNeeds || null,
       consentSource: parsed.data.consentSource,
       status: "NEW",
+      // The emails about this inquiry are written in the language it was sent in.
+      locale: await getLocale(),
     });
 
     await recordAudit(

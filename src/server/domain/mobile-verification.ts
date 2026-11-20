@@ -7,6 +7,8 @@ import { maskNormalized, normalizePhone } from "./phone";
 import { recordAudit } from "@/server/audit";
 import type { SmsProvider } from "@/server/providers/sms";
 import { enServerText } from "@/i18n/locales/en-server-text";
+import { getEffectiveConfig } from "./app-config";
+import { waitForProviderSlot } from "./provider-pacing";
 
 /**
  * Optional mobile verification (AUTH-02).
@@ -113,6 +115,8 @@ export async function startMobileVerification(params: {
     expiresAt,
   });
 
+  const config = await getEffectiveConfig();
+  await waitForProviderSlot(params.provider.capabilities.name, config.providerMessagesPerSecond);
   await params.provider.submitMessage({
     stableKey: `verify:${params.userId}:${expiresAt.getTime()}`,
     normalizedNumber: normalized.normalized,

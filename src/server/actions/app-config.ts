@@ -9,6 +9,7 @@ import {
   EDITABLE_KEYS,
   setConfigValue,
   setContentPolicy,
+  setPromotionalSelfService,
   type EditableKey,
 } from "@/server/domain/app-config";
 import { contentPolicySchema } from "@/server/domain/content-checks";
@@ -41,6 +42,7 @@ export async function setConfigValueAction(formData: FormData): Promise<ConfigAc
       actorUserId: admin.id,
     });
     revalidatePath("/admin/settings");
+    revalidatePath("/admin/pricing");
     return { ok: true, message: enServerText.settingSaved };
   } catch (err) {
     if (err instanceof ConfigError) return { ok: false, message: err.message };
@@ -56,6 +58,7 @@ export async function clearConfigValueAction(key: string): Promise<ConfigActionR
 
   await clearConfigValue({ key: parsed.data as EditableKey, actorUserId: admin.id });
   revalidatePath("/admin/settings");
+  revalidatePath("/admin/pricing");
   return { ok: true, message: enServerText.settingRestored };
 }
 
@@ -96,4 +99,23 @@ export async function setContentPolicyAction(raw: string): Promise<ConfigActionR
     if (err instanceof ConfigError) return { ok: false, message: err.message };
     throw err;
   }
+}
+
+/** The promotional route: bulk quote only (the default), or normal sending with consent. */
+export async function setPromotionalRouteAction(formData: FormData): Promise<ConfigActionResult> {
+  const admin = await requirePlatformAdmin();
+
+  const route = formData.get("route");
+  if (route !== "INQUIRY" && route !== "SELF_SERVICE") {
+    return { ok: false, message: enServerText.updateNotValid };
+  }
+
+  const enabled = route === "SELF_SERVICE";
+  await setPromotionalSelfService({ enabled, actorUserId: admin.id });
+  revalidatePath("/admin/settings");
+  revalidatePath("/app/send");
+  return {
+    ok: true,
+    message: enabled ? enServerText.promotionalRouteSelfService : enServerText.promotionalRouteInquiry,
+  };
 }

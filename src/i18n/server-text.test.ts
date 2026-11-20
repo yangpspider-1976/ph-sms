@@ -176,8 +176,8 @@ describe("localizeServerText", () => {
       enServerText.uploadTooLarge("4"),
       enServerText.fileTooLarge("4"),
       enServerText.repeatedColumn("phone_number"),
-      enServerText.missingColumn("phone_number"),
-      enServerText.unknownColumns("notes, tier"),
+      enServerText.columnChosenTwice(enServerText.columnFirstName),
+      enServerText.columnChosenTwice(enServerText.columnCustom("2")),
       enServerText.tooManyRows("10,001", "10,000"),
       enServerText.columnCustom("3"),
       enServerText.scheduleTooFar("30"),
@@ -237,7 +237,10 @@ describe("localizeServerText", () => {
   it("keeps the names, numbers and columns in a failure", () => {
     const shown = (text: string) => localizeServerText(text, ko);
     expect(shown(enServerText.groupNameTaken("Loyalty members"))).toContain("Loyalty members");
-    expect(shown(enServerText.unknownColumns("notes, tier"))).toContain("notes, tier");
+    // A field named in a failure is named in the reader's language too.
+    expect(shown(enServerText.columnChosenTwice(enServerText.columnFirstName))).toContain(
+      ko.serverText.columnFirstName,
+    );
     expect(shown(enServerText.tooManyRows("10,001", "10,000"))).toMatch(/10,001.*10,000/);
     expect(shown(enServerText.dailyQuota("50", "10", "500"))).toMatch(/50.*500.*10/);
     expect(shown(enServerText.alreadyApplied("TESTER01"))).toContain("TESTER01");

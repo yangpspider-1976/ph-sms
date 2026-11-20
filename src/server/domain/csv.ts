@@ -10,8 +10,8 @@
  * either.
  */
 import Papa from "papaparse";
-import { CSV_KNOWN_COLUMNS, CSV_REQUIRED_COLUMNS, type AppConfig } from "@/server/config";
-import { normalizePhone, REJECTION_TEXT, type PhoneRejection } from "./phone";
+import { CONTACT_FIELDS, type AppConfig, type ContactField } from "@/server/config";
+import { maskNormalized, normalizePhone, REJECTION_TEXT, type PhoneRejection } from "./phone";
 import { enServerText } from "@/i18n/locales/en-server-text";
 
 export type ParsedRow = {
@@ -27,6 +27,19 @@ export type ParsedRow = {
   consentDate: string | null;
 };
 
+/**
+ * One column of an uploaded file and what it will be imported as (REC-02):
+ * a field, or null when it is left out. `samples` are the first few values,
+ * with anything that reads as a mobile number masked, so the customer can see
+ * which column is which without the page showing full numbers.
+ */
+export type ColumnChoice = {
+  index: number;
+  header: string;
+  field: ContactField | null;
+  samples: string[];
+};
+
 export type CsvParseFailure = {
   ok: false;
   code:
@@ -39,16 +52,22 @@ export type CsvParseFailure = {
     | "TOO_MANY_ROWS"
     | "TOO_LARGE"
     | "UNSUPPORTED_FORMAT"
-    | "UNKNOWN_COLUMNS";
+    | "NEEDS_MAPPING"
+    | "COLUMN_CHOSEN_TWICE";
   message: string;
   detail?: string[];
+  /** The file's columns, when the customer is asked to match them. */
+  columns?: ColumnChoice[];
 };
 
 export type CsvParseSuccess = {
   ok: true;
   rows: ParsedRow[];
   headers: string[];
+  /** Columns left out of the import. */
   unknownColumns: string[];
+  /** What every column was imported as. */
+  columns: ColumnChoice[];
   counts: {
     rawRows: number;
     eligible: number;
@@ -87,10 +106,91 @@ function decodeUtf8(bytes: Buffer): string | null {
   }
 }
 
+/**
+ * A header in the form names are compared in: lower case, with spaces,
+ * underscores, dashes and dots all one space. "Phone_Number", "phone number"
+ * and "Phone-number" are the same column.
+ */
+export function normalizeHeader(header: string): string {
+  return header.trim().toLowerCase().replace(/[\s_\-.]+/g, " ").trim();
+}
+
+/** What a field holds, in the words the upload preview uses for it. */
+export function columnMeaning(field: ContactField): string {
+  switch (field) {
+    case "phone_number":
+      return enServerText.columnPhone;
+    case "first_name":
+      return enServerText.columnFirstName;
+    case "last_name":
+      return enServerText.columnLastName;
+    case "consent_source":
+      return enServerText.columnConsentSource;
+    case "consent_date":
+      return enServerText.columnConsentDate;
+    default:
+      return enServerText.columnCustom(field.slice("custom_".length));
+  }
+}
+
+/**
+ * Names a column often goes by in a business's own spreadsheet, in their
+ * normalizeHeader() form. "name" is not here: it may be a whole name, and
+ * guessing would put it in the wrong field. Other languages' names come from
+ * the dictionaries, passed in by the caller.
+ */
+const COMMON_NAMES: ReadonlyMap<string, ContactField> = new Map<string, ContactField>([
+  ...["phone", "phone no", "mobile", "mobile no", "mobile number", "mobile phone", "cellphone",
+    "cellphone no", "cellphone number", "cell", "cell no", "cell number", "cp", "cp no",
+    "cp number", "contact no", "contact number", "msisdn", "number"].map(
+    (name) => [name, "phone_number"] as const,
+  ),
+  ...["firstname", "given name"].map((name) => [name, "first_name"] as const),
+  ...["lastname", "surname", "family name"].map((name) => [name, "last_name"] as const),
+  ...["consent", "opt in source"].map((name) => [name, "consent_source"] as const),
+  ...["opt in date", "date of consent"].map((name) => [name, "consent_date"] as const),
+]);
+
+/** The field a header names, by its own name or one of its other names. */
+function detectField(
+  header: string,
+  aliases: ReadonlyMap<string, ContactField>,
+): ContactField | null {
+  const key = normalizeHeader(header);
+  return (
+    CONTACT_FIELDS.find((field) => normalizeHeader(field) === key) ??
+    aliases.get(key) ??
+    COMMON_NAMES.get(key) ??
+    null
+  );
+}
+
+/** Up to three values from a column, masked where they read as mobile numbers. */
+function samplesOf(data: string[][], index: number): string[] {
+  const samples: string[] = [];
+  for (const row of data) {
+    const value = String(row[index] ?? "").trim();
+    if (value === "") continue;
+    const phone = normalizePhone(value);
+    samples.push(phone.ok ? maskNormalized(phone.normalized) : value.slice(0, 40));
+    if (samples.length === 3) break;
+  }
+  return samples;
+}
+
 export function parseContactCsv(
   bytes: Buffer,
   config: AppConfig,
-  options: { acknowledgedUnknownColumns?: boolean } = {},
+  options: {
+    /**
+     * The customer's choice for each column, by position: a field, or null to
+     * leave the column out. Without it the columns are matched by name, and a
+     * file with a column nobody recognises comes back as NEEDS_MAPPING.
+     */
+    mapping?: Array<ContactField | null>;
+    /** Other names a column may have, keyed by their normalizeHeader() form. */
+    aliases?: ReadonlyMap<string, ContactField>;
+  } = {},
 ): CsvParseResult {
   if (bytes.length === 0) return fail("EMPTY_FILE", enServerText.fileEmpty);
   if (bytes.length > config.maxUploadBytes) {
@@ -133,10 +233,11 @@ export function parseContactCsv(
     );
   }
 
-  const parsed = Papa.parse<Record<string, string>>(text, {
-    header: true,
+  // Read as plain rows, so each column is addressed by position: the customer
+  // may import a column under a name other than its header.
+  const parsed = Papa.parse<string[]>(text, {
+    header: false,
     skipEmptyLines: "greedy",
-    transformHeader: (h) => h.trim().toLowerCase(),
     // Never coerce: a phone number must not become a float, and "007" keeps its zeros.
     dynamicTyping: false,
   });
@@ -148,40 +249,75 @@ export function parseContactCsv(
     return fail(
       "BROKEN_QUOTING",
       enServerText.brokenQuoting,
-      quoteErrors.slice(0, 5).map((e) => `row ${(e.row ?? 0) + 2}: ${e.message}`),
+      // The parser's own wording is English only; each row is said our way.
+      // Its row count includes the header, and people count from 1.
+      quoteErrors.slice(0, 5).map((e) => {
+        const row = String((e.row ?? 0) + 1);
+        return e.code === "MissingQuotes"
+          ? enServerText.quoteNotClosed(row)
+          : enServerText.quoteMalformed(row);
+      }),
     );
   }
 
-  const headers = (parsed.meta.fields ?? []).map((h) => h.trim());
-  if (headers.length === 0) {
+  const [headerRow = [], ...table] = parsed.data;
+  const headers = headerRow.map((h) => String(h).trim());
+  if (headers.length === 0 || headers.every((h) => h === "")) {
     return fail("EMPTY_FILE", enServerText.noHeaderRow);
   }
 
-  const missing = CSV_REQUIRED_COLUMNS.filter((c) => !headers.includes(c));
-  if (missing.length > 0) {
-    return fail(
-      "MISSING_REQUIRED_COLUMN",
-      enServerText.missingColumn(missing.join(", ")),
-      headers,
-    );
-  }
-
-  const unknownColumns = headers.filter((h) => !CSV_KNOWN_COLUMNS.includes(h));
-  if (unknownColumns.length > 0 && !options.acknowledgedUnknownColumns) {
-    return fail(
-      "UNKNOWN_COLUMNS",
-      enServerText.unknownColumns(unknownColumns.join(", ")),
-      unknownColumns,
-    );
-  }
-
-  const data = parsed.data;
-  if (data.length > config.maxDataRows) {
+  if (table.length > config.maxDataRows) {
     return fail(
       "TOO_MANY_ROWS",
-      enServerText.tooManyRows(data.length.toLocaleString("en-US"), config.maxDataRows.toLocaleString("en-US")),
+      enServerText.tooManyRows(table.length.toLocaleString("en-US"), config.maxDataRows.toLocaleString("en-US")),
     );
   }
+
+  const aliases = options.aliases ?? new Map<string, ContactField>();
+  const describe = (fields: Array<ContactField | null>): ColumnChoice[] =>
+    headers.map((header, index) => ({
+      index,
+      header,
+      field: fields[index] ?? null,
+      samples: samplesOf(table, index),
+    }));
+
+  let fields: Array<ContactField | null>;
+  if (options.mapping) {
+    fields = headers.map((_, index) => {
+      const chosen = options.mapping![index];
+      return chosen && CONTACT_FIELDS.includes(chosen) ? chosen : null;
+    });
+  } else {
+    // Matched by name. A column nobody recognises, or no column of numbers,
+    // is the customer's to resolve: they say what each column holds.
+    fields = headers.map((header) => detectField(header, aliases));
+    const phoneColumns = fields.filter((f) => f === "phone_number").length;
+    if (fields.includes(null) || phoneColumns !== 1) {
+      return { ...fail("NEEDS_MAPPING", enServerText.matchColumns), columns: describe(fields) };
+    }
+  }
+
+  if (!fields.includes("phone_number")) {
+    return { ...fail("MISSING_REQUIRED_COLUMN", enServerText.choosePhoneColumn), columns: describe(fields) };
+  }
+  const twice = CONTACT_FIELDS.find((field) => fields.filter((f) => f === field).length > 1);
+  if (twice) {
+    return {
+      ...fail("COLUMN_CHOSEN_TWICE", enServerText.columnChosenTwice(columnMeaning(twice))),
+      columns: describe(fields),
+    };
+  }
+
+  const columns = describe(fields);
+  const unknownColumns = columns.filter((c) => c.field === null).map((c) => c.header);
+  const data = table.map((cells) => {
+    const record: Partial<Record<ContactField, string>> = {};
+    fields.forEach((field, index) => {
+      if (field) record[field] = String(cells[index] ?? "");
+    });
+    return record;
+  });
 
   const rows: ParsedRow[] = [];
   const firstSeenAt = new Map<string, number>();
@@ -201,8 +337,9 @@ export function parseContactCsv(
 
     const custom: Record<string, string> = {};
     for (let i = 1; i <= 5; i += 1) {
-      const v = clamp(record[`custom_${i}`], config.maxFieldLength);
-      if (v) custom[`custom_${i}`] = v;
+      const key = `custom_${i}` as ContactField;
+      const v = clamp(record[key], config.maxFieldLength);
+      if (v) custom[key] = v;
     }
 
     const base = {
@@ -257,7 +394,7 @@ export function parseContactCsv(
     rows.push({ ...base, normalized: result.normalized, status: "ELIGIBLE", reasonDetail: null });
   });
 
-  return { ok: true, rows, headers, unknownColumns, counts };
+  return { ok: true, rows, headers, unknownColumns, columns, counts };
 }
 
 /* -------------------------------------------------------------------------- */

@@ -1,6 +1,6 @@
 import "server-only";
-import { and, desc, eq } from "drizzle-orm";
-import { db } from "@/server/db";
+import { and, desc, eq, sql } from "drizzle-orm";
+import { db, type DbOrTx } from "@/server/db";
 import { appConfig, appConfigVersions } from "@/server/db/schema";
 import { configSchema, MOCK_DEFAULTS, type AppConfig } from "@/server/config";
 import {
@@ -45,6 +45,7 @@ export const EDITABLE_KEYS = [
   "contactRetentionDays",
   "suppressionRetentionDays",
   "maxDispatchAttempts",
+  "providerMessagesPerSecond",
 ] as const satisfies ReadonlyArray<keyof AppConfig>;
 
 export type EditableKey = (typeof EDITABLE_KEYS)[number];
@@ -66,10 +67,101 @@ export const KEY_LABELS: Record<EditableKey, string> = {
   contactRetentionDays: "Contact retention (days)",
   suppressionRetentionDays: "Opt-out retention (days)",
   maxDispatchAttempts: "Delivery attempts before giving up",
+  providerMessagesPerSecond: "Provider submissions per second (shared across organizations)",
 };
 
 /** The separate key under which the content policy is stored. */
 const CONTENT_POLICY_KEY = "contentPolicy";
+
+/** The separate key for the promotional route: an on/off switch, not a number. */
+const PROMOTIONAL_KEY = "promotionalSelfService";
+
+/**
+ * Whether a business may send promotional messages through normal sending.
+ *
+ * Off until an admin turns it on. The client's request routes promotional
+ * campaigns to the bulk inquiry and manual review, and makes the categories
+ * that take that route an admin setting; this is that setting. When it is on,
+ * every recipient still needs a saved contact with a recorded consent source,
+ * checked at the quote, at confirmation and again before each message leaves.
+ */
+export async function promotionalSelfServiceEnabled(tx: DbOrTx = db): Promise<boolean> {
+  const [row] = await tx
+    .select({ value: appConfig.value })
+    .from(appConfig)
+    .where(and(eq(appConfig.key, PROMOTIONAL_KEY), eq(appConfig.mode, env.APP_MODE)))
+    .limit(1);
+  return row?.value === true;
+}
+
+/** Turns promotional self-service on or off, with history and an audit entry. */
+export async function setPromotionalSelfService(input: {
+  enabled: boolean;
+  actorUserId: string;
+}): Promise<void> {
+  await db.transaction(async (tx) => {
+    await lockConfigKey(tx, PROMOTIONAL_KEY);
+    const [existing] = await tx
+      .select()
+      .from(appConfig)
+      .where(and(eq(appConfig.key, PROMOTIONAL_KEY), eq(appConfig.mode, env.APP_MODE)))
+      .limit(1);
+
+    const nextVersion = await nextConfigVersion(tx, PROMOTIONAL_KEY, existing?.version);
+
+    await tx
+      .insert(appConfig)
+      .values({
+        key: PROMOTIONAL_KEY,
+        value: input.enabled,
+        version: nextVersion,
+        mode: env.APP_MODE,
+        updatedBy: input.actorUserId,
+      })
+      .onConflictDoUpdate({
+        target: appConfig.key,
+        set: {
+          value: input.enabled,
+          version: nextVersion,
+          updatedBy: input.actorUserId,
+          updatedAt: new Date(),
+        },
+      });
+
+    await tx.insert(appConfigVersions).values({
+      key: PROMOTIONAL_KEY,
+      version: nextVersion,
+      value: input.enabled,
+      mode: env.APP_MODE,
+      updatedBy: input.actorUserId,
+    });
+
+    await recordAudit(
+      {
+        action: "admin.config_changed",
+        actorUserId: input.actorUserId,
+        actorKind: "PLATFORM_ADMIN",
+        objectType: "app_config",
+        objectId: PROMOTIONAL_KEY,
+        metadata: { from: existing?.value === true, to: input.enabled, mode: env.APP_MODE },
+      },
+      tx,
+    );
+  });
+}
+
+/** Serialize changes to a setting, including its absent/default state. */
+async function lockConfigKey(tx: DbOrTx, key: string): Promise<void> {
+  await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`app-config:${key}`}, 0))`);
+}
+
+/** Restoring the default keeps history, so the next revision must continue it. */
+async function nextConfigVersion(tx: DbOrTx, key: string, currentVersion = 0): Promise<number> {
+  const [latest] = await tx.select({ version: appConfigVersions.version })
+    .from(appConfigVersions).where(eq(appConfigVersions.key, key))
+    .orderBy(desc(appConfigVersions.version)).limit(1);
+  return Math.max(currentVersion, latest?.version ?? 0) + 1;
+}
 
 /**
  * Reads the effective configuration.
@@ -180,13 +272,14 @@ export async function setConfigValue(input: {
   }
 
   await db.transaction(async (tx) => {
+    await lockConfigKey(tx, input.key);
     const [existing] = await tx
       .select()
       .from(appConfig)
       .where(and(eq(appConfig.key, input.key), eq(appConfig.mode, env.APP_MODE)))
       .limit(1);
 
-    const nextVersion = (existing?.version ?? 0) + 1;
+    const nextVersion = await nextConfigVersion(tx, input.key, existing?.version);
 
     await tx
       .insert(appConfig)
@@ -247,13 +340,14 @@ export async function setContentPolicy(input: {
   }
 
   await db.transaction(async (tx) => {
+    await lockConfigKey(tx, CONTENT_POLICY_KEY);
     const [existing] = await tx
       .select()
       .from(appConfig)
       .where(and(eq(appConfig.key, CONTENT_POLICY_KEY), eq(appConfig.mode, env.APP_MODE)))
       .limit(1);
 
-    const nextVersion = (existing?.version ?? 0) + 1;
+    const nextVersion = await nextConfigVersion(tx, CONTENT_POLICY_KEY, existing?.version);
 
     await tx
       .insert(appConfig)
@@ -304,17 +398,19 @@ export async function clearConfigValue(input: {
   key: EditableKey;
   actorUserId: string;
 }): Promise<void> {
-  await db
-    .delete(appConfig)
-    .where(and(eq(appConfig.key, input.key), eq(appConfig.mode, env.APP_MODE)));
+  await db.transaction(async (tx) => {
+    await lockConfigKey(tx, input.key);
+    await tx.delete(appConfig)
+      .where(and(eq(appConfig.key, input.key), eq(appConfig.mode, env.APP_MODE)));
 
-  await recordAudit({
-    action: "admin.config_reset",
-    actorUserId: input.actorUserId,
-    actorKind: "PLATFORM_ADMIN",
-    objectType: "app_config",
-    objectId: input.key,
-    metadata: { to: MOCK_DEFAULTS[input.key], mode: env.APP_MODE },
+    await recordAudit({
+      action: "admin.config_reset",
+      actorUserId: input.actorUserId,
+      actorKind: "PLATFORM_ADMIN",
+      objectType: "app_config",
+      objectId: input.key,
+      metadata: { to: MOCK_DEFAULTS[input.key], mode: env.APP_MODE },
+    }, tx);
   });
 }
 

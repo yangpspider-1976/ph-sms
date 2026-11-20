@@ -50,6 +50,7 @@ function sectionsFor(t: Dictionary): MenuSection[] {
       label: t.nav.campaigns,
       links: [
         { href: "/app/campaigns", label: t.nav.campaigns },
+        { href: "/app/reports", label: t.reports.title },
         { href: "/app/approvals", label: t.nav.approvals },
       ],
     },

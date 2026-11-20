@@ -8,12 +8,16 @@ import {
   type ImportActionResult,
 } from "@/server/actions/contacts";
 import type { ImportPreview } from "@/server/domain/contacts";
+import type { ColumnChoice } from "@/server/domain/csv";
+import type { ContactField } from "@/server/config";
+import type { Dictionary } from "@/i18n/dictionaries";
 import {
   Button,
   Card,
   DataTable,
   Notice,
   Pill,
+  Select,
 } from "@/components/ui";
 import { IconDocument } from "@/components/icons";
 import { FileDrop } from "@/components/file-drop";
@@ -42,7 +46,10 @@ export function ImportPanel({
   const [result, setResult] = useState<ImportActionResult | null>(null);
   const [preview, setPreview] = useState<ImportPreview | null>(null);
   const [committed, setCommitted] = useState<string | null>(null);
-  const [needsAcknowledge, setNeedsAcknowledge] = useState(false);
+  // The file's columns while the customer matches them; null when not asked.
+  const [columns, setColumns] = useState<ColumnChoice[] | null>(null);
+  // Remounts the matching table, so each showing starts from its own choices.
+  const [matchRound, setMatchRound] = useState(0);
   const [pending, startTransition] = useTransition();
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
@@ -71,9 +78,21 @@ export function ImportPanel({
       }
       setResult(outcome);
       setPreview(outcome.ok ? outcome.preview : null);
-      setNeedsAcknowledge(!outcome.ok && outcome.code === "UNKNOWN_COLUMNS");
+      setColumns(!outcome.ok && outcome.columns ? outcome.columns : null);
+      setMatchRound((round) => round + 1);
     });
   }
+
+  function changeMatching(choices: ColumnChoice[]) {
+    setColumns(choices);
+    setMatchRound((round) => round + 1);
+  }
+
+  // Shown inside the matching table, beside the choices it is about.
+  const matchError =
+    result && !result.ok && result.columns && result.code !== "NEEDS_MAPPING"
+      ? result.message
+      : null;
 
   function commit() {
     if (!preview) return;
@@ -107,18 +126,19 @@ export function ImportPanel({
           required
           title={t.contacts.importPanel.chooseFile}
           hint={t.contactsExtra.fileLimits(maxMiB, maxDataRows.toLocaleString(tag))}
+          // Choices made for one file mean nothing for the next.
+          onFile={() => setColumns(null)}
         />
 
-        {needsAcknowledge ? (
-          <label className="flex items-start gap-2 text-[13px] text-body">
-            <input type="checkbox" name="acknowledgeUnknown" className="mt-px shrink-0" />
-            <span>{t.contacts.importPanel.ignoreUnknown}</span>
-          </label>
-        ) : null}
+        {columns ? <ColumnMatcher key={matchRound} columns={columns} error={matchError} /> : null}
 
         <div className="flex flex-wrap items-center gap-3">
           <Button type="submit" disabled={pending}>
-            {pending ? t.contacts.importPanel.reading : t.contacts.importPanel.upload}
+            {pending
+              ? t.contacts.importPanel.reading
+              : columns
+                ? t.contacts.importPanel.previewWithColumns
+                : t.contacts.importPanel.upload}
           </Button>
           {/* A plain link: the router would fetch the file once before downloading it. */}
           <a
@@ -138,14 +158,14 @@ export function ImportPanel({
         </div>
       ) : null}
 
-      {result && !result.ok ? (
+      {result && !result.ok && !result.columns ? (
         <div className="mt-4">
           <Notice tone="danger" title={t.contacts.importPanel.failedTitle}>
             {localizeServerText(result.message)}
             {result.detail && result.detail.length > 0 ? (
               <ul className="mt-2 list-disc pl-4">
                 {result.detail.slice(0, 5).map((d) => (
-                  <li key={d}>{d}</li>
+                  <li key={d}>{localizeServerText(d)}</li>
                 ))}
               </ul>
             ) : null}
@@ -153,18 +173,120 @@ export function ImportPanel({
         </div>
       ) : null}
 
-      {preview ? <Preview preview={preview} onCommit={commit} pending={pending} /> : null}
+      {preview ? (
+        <Preview
+          preview={preview}
+          onCommit={commit}
+          onChangeMatching={() => changeMatching(preview.columns)}
+          pending={pending}
+        />
+      ) : null}
     </Card>
+  );
+}
+
+/** Every field a column can be imported as, in the order the choice lists them. */
+const FIELDS: ContactField[] = [
+  "phone_number",
+  "first_name",
+  "last_name",
+  "custom_1",
+  "custom_2",
+  "custom_3",
+  "custom_4",
+  "custom_5",
+  "consent_source",
+  "consent_date",
+];
+
+/** A field in the words the preview uses for it. */
+function fieldLabel(t: Dictionary, field: ContactField): string {
+  switch (field) {
+    case "phone_number":
+      return t.serverText.columnPhone;
+    case "first_name":
+      return t.serverText.columnFirstName;
+    case "last_name":
+      return t.serverText.columnLastName;
+    case "consent_source":
+      return t.serverText.columnConsentSource;
+    case "consent_date":
+      return t.serverText.columnConsentDate;
+    default:
+      return t.serverText.columnCustom(field.slice("custom_".length));
+  }
+}
+
+/**
+ * What each column of the file holds (REC-02). The choices are fields of the
+ * upload form, `column_<position>`, sent with the same file when the customer
+ * previews again.
+ */
+function ColumnMatcher({ columns, error }: { columns: ColumnChoice[]; error: string | null }) {
+  const t = useT();
+  const localizeServerText = useServerText();
+  const panel = t.contacts.importPanel;
+
+  return (
+    <div className="border border-line">
+      <div className="px-4 py-3">
+        <p className="text-[13.5px] font-bold text-ink">{panel.matchTitle}</p>
+        <p className="mt-0.5 text-[12.5px] text-muted">{panel.matchIntro}</p>
+        {error ? (
+          <p role="alert" className="mt-2 text-[12.5px] font-semibold text-danger-fg">
+            {localizeServerText(error)}
+          </p>
+        ) : null}
+      </div>
+      <DataTable>
+        <thead>
+          <tr>
+            <th>{panel.colColumn}</th>
+            <th>{panel.colExamples}</th>
+            <th>{panel.colImportAs}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {columns.map((column) => (
+            <tr key={column.index}>
+              <td className="cell-title font-mono text-[12.5px]" title={column.header}>
+                {column.header || "—"}
+              </td>
+              <td className="cell-title text-muted" title={column.samples.join(", ")}>
+                {column.samples.join(", ") || "—"}
+              </td>
+              <td>
+                <Select
+                  name={`column_${column.index}`}
+                  defaultValue={column.field ?? ""}
+                  aria-label={panel.importAsLabel(column.header)}
+                  className="min-w-44"
+                >
+                  <option value="">{panel.dontImport}</option>
+                  {FIELDS.map((field) => (
+                    <option key={field} value={field}>
+                      {fieldLabel(t, field)}
+                    </option>
+                  ))}
+                </Select>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </DataTable>
+    </div>
   );
 }
 
 function Preview({
   preview,
   onCommit,
+  onChangeMatching,
   pending,
 }: {
   preview: ImportPreview;
   onCommit: () => void;
+  onChangeMatching: () => void;
   pending: boolean;
 }) {
   const t = useT();
@@ -190,9 +312,18 @@ function Preview({
       </div>
 
       <div className="border-t border-line px-4 py-3">
-        <p className="text-[12.5px] font-semibold text-ink">
-          {t.contacts.importPanel.columnMappingTitle}
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-[12.5px] font-semibold text-ink">
+            {t.contacts.importPanel.columnMappingTitle}
+          </p>
+          <button
+            type="button"
+            onClick={onChangeMatching}
+            className="text-[12.5px] font-semibold text-brand-600 hover:underline"
+          >
+            {t.contacts.importPanel.changeMatching}
+          </button>
+        </div>
         <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5">
           {preview.columnMapping.map((column) => (
             <li

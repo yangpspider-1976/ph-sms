@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, ne } from "drizzle-orm";
+import { and, desc, eq, ne, sql } from "drizzle-orm";
 import { db } from "@/server/db";
 import {
   campaigns,
@@ -7,13 +7,19 @@ import {
   imports,
   importRows,
   messageItems,
+  organizations,
   suppressions,
 } from "@/server/db/schema";
 import { decrypt } from "@/server/security/crypto";
 import { toCsv } from "./csv";
-import { formatCentavos, formatManila } from "@/server/config";
+import { formatCentavos } from "@/server/config";
 import { recordAudit } from "@/server/audit";
-import { dateToPlatformWallTime } from "@/i18n/format";
+import { dateToPlatformWallTime, formatDateTime } from "@/i18n/format";
+import { campaignName } from "@/i18n/campaign-name";
+import { localizeServerText } from "@/i18n/server-text";
+import { en } from "@/i18n/locales/en";
+import type { Dictionary } from "@/i18n/dictionaries";
+import type { Locale } from "@/i18n/config";
 
 /**
  * Exports.
@@ -23,6 +29,11 @@ import { dateToPlatformWallTime } from "@/i18n/format";
  *     action, and every one of those is written to the audit log;
  *   - every cell goes through the formula-safe writer, so a name like
  *     "=cmd|..." cannot execute when the file is opened in a spreadsheet.
+ *
+ * A file is written in the language of the person downloading it: the column
+ * names, statuses, reasons and dates. The English column names are the
+ * identifiers they have always been, and an upload recognises the contact
+ * columns in either language.
  */
 
 export type ExportScope = "MASKED" | "FULL";
@@ -33,9 +44,29 @@ export type ExportFile = {
   contentType: string;
 };
 
+/** Who is downloading, for the file's language. English when not given. */
+type Reader = { t?: Dictionary; locale?: Locale };
+
 /** When the file was made, in Manila time like every other time a customer sees. */
 function stamp(): string {
   return dateToPlatformWallTime(new Date()).replace(/[:T]/g, "-");
+}
+
+/**
+ * A CSV file. It starts with a byte-order mark: without one, Excel on Windows
+ * reads the file in the computer's own code page, and Korean comes out garbled.
+ */
+function csvFile(filename: string, headers: string[], rows: Array<Array<unknown>>): ExportFile {
+  return {
+    filename,
+    content: `﻿${toCsv(headers, rows)}`,
+    contentType: "text/csv; charset=utf-8",
+  };
+}
+
+/** A label from a list, or the stored value itself when the list has none. */
+function label(labels: Record<string, string>, raw: string): string {
+  return labels[raw] ?? raw;
 }
 
 /**
@@ -55,12 +86,18 @@ function nameForFile(campaign: { name: string; isTestSend: boolean }): string {
 }
 
 /** Per-recipient results for one campaign. */
-export async function exportCampaignReport(input: {
-  campaignId: string;
-  organizationId: string;
-  actorUserId: string;
-  scope: ExportScope;
-}): Promise<ExportFile | null> {
+export async function exportCampaignReport(
+  input: {
+    campaignId: string;
+    organizationId: string;
+    actorUserId: string;
+    scope: ExportScope;
+  } & Reader,
+): Promise<ExportFile | null> {
+  const t = input.t ?? en;
+  const locale = input.locale ?? "en";
+  const columns = t.exportFiles.campaign;
+
   const campaign = (
     await db
       .select()
@@ -86,32 +123,32 @@ export async function exportCampaignReport(input: {
     );
 
   const headers = [
-    "row",
-    input.scope === "FULL" ? "phone_number" : "phone_number_masked",
-    "submission_status",
-    "delivery_status",
-    "segments",
-    "cost",
-    "charged",
-    "error_code",
-    "excluded_reason",
-    "accepted_at",
-    "delivered_at",
+    columns.row,
+    input.scope === "FULL" ? columns.phone : columns.phoneMasked,
+    columns.submission,
+    columns.delivery,
+    columns.segments,
+    columns.cost,
+    columns.charged,
+    columns.errorCode,
+    columns.excludedReason,
+    columns.acceptedAt,
+    columns.deliveredAt,
   ];
 
   const rows = items.map((item, index) => [
     index + 1,
     input.scope === "FULL" ? decrypt(item.numberEncrypted) : item.numberMasked,
-    item.submissionStatus,
+    label(t.status.submission, item.submissionStatus),
     // Delivery is only meaningful once the provider accepted the message.
-    item.submissionStatus === "ACCEPTED" ? item.deliveryStatus : "",
+    item.submissionStatus === "ACCEPTED" ? label(t.status.delivery, item.deliveryStatus) : "",
     item.segments,
     formatCentavos(item.costCentavos),
-    item.charged ? "yes" : "no",
+    item.charged ? t.exportFiles.yes : t.exportFiles.no,
     item.errorCode ?? "",
-    item.excludedReason ?? "",
-    item.acceptedAt ? formatManila(item.acceptedAt) : "",
-    item.deliveredAt ? formatManila(item.deliveredAt) : "",
+    item.excludedReason ? label(t.exportFiles.rejectionReasons, item.excludedReason) : "",
+    item.acceptedAt ? formatDateTime(item.acceptedAt, locale) : "",
+    item.deliveredAt ? formatDateTime(item.deliveredAt, locale) : "",
   ]);
 
   await recordAudit({
@@ -123,14 +160,9 @@ export async function exportCampaignReport(input: {
     metadata: { rows: rows.length, scope: input.scope },
   });
 
-  return {
-    filename: `campaign-${nameForFile(campaign)}${stamp()}.csv`,
-    content: toCsv(headers, rows),
-    contentType: "text/csv; charset=utf-8",
-  };
+  return csvFile(`campaign-${nameForFile(campaign)}${stamp()}.csv`, headers, rows);
 }
 
-/** The organization's contact list. */
 /**
  * Rejected rows from one import (REC-06).
  *
@@ -140,11 +172,16 @@ export async function exportCampaignReport(input: {
  * the row in the customer's own spreadsheet, which the row number does, and a
  * full number would make this a second, softer route to a data export.
  */
-export async function exportImportErrors(input: {
-  organizationId: string;
-  actorUserId: string;
-  importId: string;
-}): Promise<ExportFile | null> {
+export async function exportImportErrors(
+  input: {
+    organizationId: string;
+    actorUserId: string;
+    importId: string;
+  } & Reader,
+): Promise<ExportFile | null> {
+  const t = input.t ?? en;
+  const columns = t.exportFiles.importErrors;
+
   const [record] = await db
     .select({ id: imports.id, filename: imports.filename })
     .from(imports)
@@ -171,15 +208,15 @@ export async function exportImportErrors(input: {
     )
     .orderBy(importRows.sourceRowNumber);
 
-  const headers = ["row_number", "phone_number_masked", "reason", "detail"];
+  const headers = [columns.rowNumber, columns.phoneMasked, columns.reason, columns.detail];
 
   const data = rows.map((row) => [
     String(row.sourceRowNumber),
     // A row that failed to parse has no mask, because there was no number to
     // mask. The raw value is the customer's own text from their own file.
     row.numberMasked ?? truncateRaw(row.rawValue),
-    REJECTION_REASONS[row.status] ?? row.status,
-    row.reasonDetail ?? "",
+    label(t.exportFiles.rejectionReasons, row.status),
+    localizeServerText(row.reasonDetail, t) ?? "",
   ]);
 
   await recordAudit({
@@ -191,21 +228,8 @@ export async function exportImportErrors(input: {
     metadata: { rows: data.length },
   });
 
-  return {
-    filename: `import-errors-${stamp()}.csv`,
-    content: toCsv(headers, data),
-    contentType: "text/csv; charset=utf-8",
-  };
+  return csvFile(`import-errors-${stamp()}.csv`, headers, data);
 }
-
-/** Said in the customer's terms, not the database's. */
-const REJECTION_REASONS: Record<string, string> = {
-  INVALID: "Not a valid Philippine mobile number",
-  DUPLICATE: "Appears more than once in this file",
-  SUPPRESSED: "This number has opted out",
-  BLANK: "No number in this row",
-  OVER_CEILING: "Above the self-service limit for one upload",
-};
 
 /** Keeps an unparseable cell short enough to stay readable in a spreadsheet. */
 function truncateRaw(raw: string | null): string {
@@ -214,23 +238,35 @@ function truncateRaw(raw: string | null): string {
   return trimmed.length > 24 ? `${trimmed.slice(0, 24)}…` : trimmed;
 }
 
-export async function exportContacts(input: {
-  organizationId: string;
-  actorUserId: string;
-  scope: ExportScope;
-}): Promise<ExportFile> {
+/**
+ * The organization's contact list.
+ *
+ * The consent date is written as YYYY-MM-DD, the form an upload reads, so a
+ * downloaded list can be uploaded again.
+ */
+export async function exportContacts(
+  input: {
+    organizationId: string;
+    actorUserId: string;
+    scope: ExportScope;
+  } & Reader,
+): Promise<ExportFile> {
+  const t = input.t ?? en;
+  const locale = input.locale ?? "en";
+  const columns = t.exportFiles.contacts;
+
   const rows = await db
     .select()
     .from(contacts)
     .where(eq(contacts.organizationId, input.organizationId));
 
   const headers = [
-    input.scope === "FULL" ? "phone_number" : "phone_number_masked",
-    "first_name",
-    "last_name",
-    "consent_source",
-    "consent_date",
-    "created_at",
+    input.scope === "FULL" ? columns.phone : columns.phoneMasked,
+    columns.firstName,
+    columns.lastName,
+    columns.consentSource,
+    columns.consentDate,
+    columns.createdAt,
   ];
 
   const data = rows.map((row) => [
@@ -238,8 +274,8 @@ export async function exportContacts(input: {
     row.firstName ?? "",
     row.lastName ?? "",
     row.consentSource ?? "",
-    row.consentDate ? formatManila(row.consentDate) : "",
-    formatManila(row.createdAt),
+    row.consentDate ? dateToPlatformWallTime(row.consentDate).slice(0, 10) : "",
+    formatDateTime(row.createdAt, locale),
   ]);
 
   await recordAudit({
@@ -250,11 +286,7 @@ export async function exportContacts(input: {
     metadata: { rows: data.length, scope: input.scope },
   });
 
-  return {
-    filename: `contacts-${stamp()}.csv`,
-    content: toCsv(headers, data),
-    contentType: "text/csv; charset=utf-8",
-  };
+  return csvFile(`contacts-${stamp()}.csv`, headers, data);
 }
 
 /**
@@ -263,10 +295,16 @@ export async function exportContacts(input: {
  * Always masked: an opt-out list is a list of people who asked this business to
  * stop, and there is no reason to hand back plain numbers for it.
  */
-export async function exportSuppressions(input: {
-  organizationId: string;
-  actorUserId: string;
-}): Promise<ExportFile> {
+export async function exportSuppressions(
+  input: {
+    organizationId: string;
+    actorUserId: string;
+  } & Reader,
+): Promise<ExportFile> {
+  const t = input.t ?? en;
+  const locale = input.locale ?? "en";
+  const columns = t.exportFiles.optOuts;
+
   const rows = await db
     .select()
     .from(suppressions)
@@ -277,12 +315,12 @@ export async function exportSuppressions(input: {
       ),
     );
 
-  const headers = ["phone_number_masked", "reason", "source", "recorded_at"];
+  const headers = [columns.phoneMasked, columns.reason, columns.source, columns.recordedAt];
   const data = rows.map((row) => [
     row.numberMasked,
-    row.reason,
-    row.source,
-    formatManila(row.createdAt),
+    localizeServerText(row.reason, t) ?? "",
+    label(t.status.suppressionSource as Record<string, string>, row.source),
+    formatDateTime(row.createdAt, locale),
   ]);
 
   await recordAudit({
@@ -293,25 +331,111 @@ export async function exportSuppressions(input: {
     metadata: { rows: data.length },
   });
 
-  return {
-    filename: `opt-outs-${stamp()}.csv`,
-    content: toCsv(headers, data),
-    contentType: "text/csv; charset=utf-8",
-  };
+  return csvFile(`opt-outs-${stamp()}.csv`, headers, data);
+}
+
+/** The most campaigns one admin export holds, newest first. */
+const ADMIN_CAMPAIGN_EXPORT_LIMIT = 10_000;
+
+/**
+ * Every organization's campaigns, for the admin console's overview.
+ *
+ * Totals only: no message text and no numbers, so the file carries no
+ * customer's recipients out of the platform. Every export is audited.
+ */
+export async function exportAdminCampaigns(
+  input: { actorUserId: string } & Reader,
+): Promise<ExportFile> {
+  const t = input.t ?? en;
+  const locale = input.locale ?? "en";
+  const columns = t.exportFiles.adminCampaigns;
+
+  const rows = await db
+    .select({
+      id: campaigns.id,
+      name: campaigns.name,
+      isTestSend: campaigns.isTestSend,
+      createdAt: campaigns.createdAt,
+      status: campaigns.status,
+      purpose: campaigns.purpose,
+      includedCount: campaigns.includedCount,
+      maxAuthorized: campaigns.maxAuthorizedCostCentavos,
+      organizationName: organizations.name,
+      accepted: sql<number>`(
+        select count(*) from ${messageItems}
+        where ${messageItems.campaignId} = ${campaigns.id}
+          and ${messageItems.submissionStatus} = 'ACCEPTED')::int`,
+      delivered: sql<number>`(
+        select count(*) from ${messageItems}
+        where ${messageItems.campaignId} = ${campaigns.id}
+          and ${messageItems.deliveryStatus} = 'DELIVERED')::int`,
+      notDelivered: sql<number>`(
+        select count(*) from ${messageItems}
+        where ${messageItems.campaignId} = ${campaigns.id}
+          and (${messageItems.submissionStatus} = 'REJECTED'
+            or ${messageItems.deliveryStatus} = 'UNDELIVERED'))::int`,
+      charged: sql<number>`(
+        select coalesce(sum(${messageItems.costCentavos}), 0) from ${messageItems}
+        where ${messageItems.campaignId} = ${campaigns.id}
+          and ${messageItems.charged})::int`,
+    })
+    .from(campaigns)
+    .innerJoin(organizations, eq(organizations.id, campaigns.organizationId))
+    .orderBy(desc(campaigns.createdAt))
+    .limit(ADMIN_CAMPAIGN_EXPORT_LIMIT);
+
+  const headers = [
+    columns.created,
+    columns.organization,
+    columns.campaign,
+    columns.status,
+    columns.purpose,
+    columns.recipients,
+    columns.accepted,
+    columns.delivered,
+    columns.notDelivered,
+    columns.charged,
+    columns.maxAuthorized,
+  ];
+
+  const data = rows.map((row) => [
+    formatDateTime(row.createdAt, locale),
+    row.organizationName,
+    campaignName(row, t, locale),
+    label(t.status.campaign, row.status),
+    label(t.status.purpose, row.purpose),
+    row.includedCount,
+    row.accepted,
+    row.delivered,
+    row.notDelivered,
+    formatCentavos(row.charged),
+    formatCentavos(row.maxAuthorized),
+  ]);
+
+  await recordAudit({
+    action: "export.admin_campaigns",
+    actorUserId: input.actorUserId,
+    actorKind: "PLATFORM_ADMIN",
+    objectType: "campaigns",
+    metadata: { rows: data.length },
+  });
+
+  return csvFile(`all-campaigns-${stamp()}.csv`, headers, data);
 }
 
 /** A CSV template with the accepted columns and one example row. */
-export function contactTemplate(): ExportFile {
+export function contactTemplate(t: Dictionary = en): ExportFile {
+  const columns = t.exportFiles.contacts;
   const headers = [
-    "phone_number",
-    "first_name",
-    "last_name",
-    "consent_source",
-    "consent_date",
+    columns.phone,
+    columns.firstName,
+    columns.lastName,
+    columns.consentSource,
+    columns.consentDate,
   ];
   return {
     filename: "contacts-template.csv",
-    content: toCsv(headers, [["09171234567", "Ana", "Reyes", "Checkout form", "2026-01-31"]]),
+    content: `\uFEFF${toCsv(headers, [["09170000001", "Ana", "Reyes", t.exportFiles.sampleConsent, "2026-01-31"]])}`,
     contentType: "text/csv; charset=utf-8",
   };
 }

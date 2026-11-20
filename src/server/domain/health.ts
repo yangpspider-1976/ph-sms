@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, gt, lt, sql } from "drizzle-orm";
+import { and, eq, gt, lt, or, sql } from "drizzle-orm";
 import { db } from "@/server/db";
 import {
   campaigns,
@@ -10,8 +10,10 @@ import {
   wallets,
 } from "@/server/db/schema";
 import { env, liveReadinessGaps } from "@/server/env";
-import { MOCK_DEFAULTS, liveConfigGaps } from "@/server/config";
+import { liveConfigGaps } from "@/server/config";
 import { rotationInProgress } from "@/server/security/crypto";
+import { getEffectiveConfig } from "./app-config";
+import { operationalAlerts, type OperationalAlert } from "./monitoring";
 
 /**
  * Operational signals.
@@ -32,6 +34,8 @@ export type HealthStatus = "ok" | "degraded" | "failing";
 export type HealthReport = {
   status: HealthStatus;
   mode: string;
+  checkedAt: string;
+  alerts: OperationalAlert[];
   checks: Array<{
     name: string;
     status: HealthStatus;
@@ -55,6 +59,7 @@ const WORKER_STALL_SECONDS = 120;
 
 export async function healthReport(): Promise<HealthReport> {
   const checks: HealthReport["checks"] = [];
+  const checkedAt = new Date().toISOString();
 
   const database = await ping();
   checks.push({
@@ -65,7 +70,7 @@ export async function healthReport(): Promise<HealthReport> {
   });
 
   if (!database) {
-    return { status: "failing", mode: env.APP_MODE, checks };
+    return { status: "failing", mode: env.APP_MODE, checkedAt, checks, alerts: operationalAlerts(checks) };
   }
 
   /* --- Is the worker running? ------------------------------------------ */
@@ -75,9 +80,15 @@ export async function healthReport(): Promise<HealthReport> {
       .select({ n: sql<number>`count(*)::int` })
       .from(dispatchJobs)
       .where(
-        and(
-          eq(dispatchJobs.status, "PENDING"),
-          lt(dispatchJobs.runAt, sql`now() - make_interval(secs => ${WORKER_STALL_SECONDS})`),
+        or(
+          and(
+            eq(dispatchJobs.status, "PENDING"),
+            lt(dispatchJobs.runAt, sql`now() - make_interval(secs => ${WORKER_STALL_SECONDS})`),
+          ),
+          and(
+            eq(dispatchJobs.status, "CLAIMED"),
+            lt(dispatchJobs.leaseExpiresAt, sql`now() - make_interval(secs => ${WORKER_STALL_SECONDS})`),
+          ),
         ),
       )
   )[0]?.n ?? 0;
@@ -207,7 +218,7 @@ export async function healthReport(): Promise<HealthReport> {
     });
   }
 
-  const gaps = [...liveReadinessGaps(), ...liveConfigGaps(MOCK_DEFAULTS)];
+  const gaps = [...liveReadinessGaps(), ...liveConfigGaps(await getEffectiveConfig())];
   checks.push({
     name: "live_readiness_gaps",
     // Outstanding gaps are expected outside LIVE, and a problem inside it.
@@ -223,5 +234,5 @@ export async function healthReport(): Promise<HealthReport> {
       ? "degraded"
       : "ok";
 
-  return { status: worst, mode: env.APP_MODE, checks };
+  return { status: worst, mode: env.APP_MODE, checkedAt, checks, alerts: operationalAlerts(checks) };
 }

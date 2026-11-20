@@ -37,6 +37,8 @@ function navFor(t: Dictionary): NavItem[] {
     { href: "/admin/inquiries", label: n.inquiries, icon: <IconDocument size={18} /> },
     { href: "/admin/senders", label: n.senders, icon: <IconTag size={18} /> },
     { href: "/admin/credits", label: n.credits, icon: <IconDatabase size={18} /> },
+    { href: "/admin/pricing", label: t.adminPricing.title, icon: <IconCard size={18} /> },
+    { href: "/admin/emails", label: t.adminEmails.title, icon: <IconDocument size={18} /> },
     { href: "/admin/suppression", label: n.suppression, icon: <IconBlock size={18} /> },
     { href: "/admin/abuse", label: n.abuse, icon: <IconShield size={18} /> },
     { href: "/admin/health", label: n.health, icon: <IconSliders size={18} /> },

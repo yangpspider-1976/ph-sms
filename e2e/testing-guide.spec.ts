@@ -150,9 +150,9 @@ test.describe("Part A — core tests", () => {
     await expect(page.getByText(/\/70$/).first()).toBeVisible();
     await message.fill(text);
 
-    // Personalisation is refused with a reason.
+    // Supported personalization is available from saved contact fields.
     await message.fill(`${text} {{first_name}}`);
-    await expect(page.getByText(/personali[sz]/i).first()).toBeVisible();
+    await expect(page.getByText(/Use \{\{first_name\}\}/).first()).toBeVisible();
     await message.fill(text);
 
     await page.getByLabel("I am authorized to contact these recipients.").check();
@@ -481,7 +481,7 @@ test.describe("Part B — extra tests", () => {
     await expect(entry).toContainText(/Promotional/i);
     await entry.getByLabel("Pipeline status").selectOption("CONTRACTED");
     await entry.getByRole("button", { name: "Update" }).click();
-    await expect(entry.getByText(/No SMS was sent/).first()).toBeVisible();
+    await expect(entry.getByText(/no SMS was sent/i).first()).toBeVisible();
   });
 
   test("Test 12 — import contacts from a file", async ({ page }) => {

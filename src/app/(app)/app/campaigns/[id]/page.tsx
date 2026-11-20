@@ -210,7 +210,10 @@ export default async function CampaignDetailPage({
                     <td>{item.segments}</td>
                     <td>{item.charged ? formatCentavos(item.costCentavos) : "—"}</td>
                     <td className="text-muted">
-                      {item.excludedReason ?? item.errorCode ?? "—"}
+                      {item.excludedReason
+                        ? ((t.exportFiles.rejectionReasons as Record<string, string>)[item.excludedReason] ??
+                          item.excludedReason)
+                        : (item.errorCode ?? "—")}
                     </td>
                   </tr>
                 ))}
